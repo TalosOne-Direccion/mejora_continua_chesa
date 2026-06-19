@@ -1,5 +1,5 @@
 [build]
-  command = "NODE_ENV=development npm install --production=false && npm --workspace modo-gil-grupo-chesa-frontend run build"
+  command = "NODE_ENV=development npm install --no-workspaces --prefix frontend && npm run build --prefix frontend"
   publish = "frontend/dist"
 
 [build.environment]
