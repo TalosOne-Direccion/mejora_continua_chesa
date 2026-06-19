@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mejora Continua - Grupo Chesa</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#c3c6d1",
+            "inverse-surface": "#2a303d",
+            "on-primary-fixed-variant": "#1f477b",
+            "primary-container": "#003366",
+            "surface-container-highest": "#dde2f3",
+            "on-secondary-container": "#586377",
+            "on-primary-container": "#799dd6",
+            "secondary-fixed-dim": "#bcc7dd",
+            "on-tertiary-fixed": "#161c22",
+            "on-secondary-fixed": "#111c2c",
+            "tertiary-fixed": "#dde3eb",
+            "surface-variant": "#dde2f3",
+            "background": "#f9f9ff",
+            "surface-dim": "#d4daea",
+            "tertiary-container": "#2e343a",
+            "inverse-on-surface": "#ecf0ff",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-surface-variant": "#43474f",
+            "surface-tint": "#3a5f94",
+            "on-surface": "#161c27",
+            "secondary-container": "#d5e0f7",
+            "surface": "#f9f9ff",
+            "primary-fixed-dim": "#a7c8ff",
+            "primary-fixed": "#d5e3ff",
+            "on-primary-fixed": "#001b3c",
+            "inverse-primary": "#a7c8ff",
+            "tertiary": "#191f25",
+            "on-error": "#ffffff",
+            "secondary": "#545f72",
+            "on-tertiary": "#ffffff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#c1c7cf",
+            "surface-container": "#e8eeff",
+            "on-secondary-fixed-variant": "#3c475a",
+            "primary": "#001e40",
+            "surface-bright": "#f9f9ff",
+            "on-tertiary-fixed-variant": "#41474e",
+            "on-background": "#161c27",
+            "surface-container-high": "#e3e8f9",
+            "on-tertiary-container": "#969ca4",
+            "error": "#ba1a1a",
+            "surface-container-low": "#f1f3ff",
+            "outline": "#737780",
+            "secondary-fixed": "#d8e3fa",
+            "surface-container-lowest": "#ffffff"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "gutter": "1.5rem",
+            "stack-md": "1rem",
+            "stack-sm": "0.5rem",
+            "container-max": "1440px",
+            "edge-margin": "2rem",
+            "component-padding-x": "1rem",
+            "component-padding-y": "0.75rem",
+            "stack-lg": "2rem"
+          },
+          fontFamily: {
+            "title-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "mono-md": ["monospace"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "display-lg": ["Inter"]
+          },
+          fontSize: {
+            "title-lg": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "mono-md": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "label-md": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+            "label-sm": ["11px", { lineHeight: "14px", fontWeight: "500" }],
+            "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }]
+          },
+          keyframes: {
+            blob: {
+              "0%": { transform: "translate(0px, 0px) scale(1)" },
+              "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+              "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+              "100%": { transform: "translate(0px, 0px) scale(1)" }
+            },
+            float: {
+              "0%, 100%": { transform: "translate(-50%, -50%) rotate(0deg) scale(1)" },
+              "50%": { transform: "translate(-50%, -55%) rotate(1deg) scale(1.02)" }
+            }
+          },
+          animation: {
+            blob: "blob 20s infinite alternate",
+            float: "float 12s ease-in-out infinite"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #f9f9ff; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
+    ::-webkit-scrollbar-track { background: #f9f9ff; }
+    ::-webkit-scrollbar-thumb { background: #c3c6d1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #737780; }
+    
+    @media print {
+      body, html { height: auto !important; overflow: visible !important; display: block !important; background-color: white !important; }
+      #root { display: block !important; height: auto !important; overflow: visible !important; }
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased flex h-screen overflow-hidden">
+  <div id="root" class="w-full h-full flex"></div>
+  <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.js"></script></body>
+</html>
