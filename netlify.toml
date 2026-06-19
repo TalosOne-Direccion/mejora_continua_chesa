@@ -1,5 +1,5 @@
 [build]
-  command = "npm --workspace modo-gil-grupo-chesa-frontend run build"
+  command = "cd frontend && npm install --include=dev && npm run build"
   publish = "frontend/dist"
 
 [build.environment]
