@@ -3,4 +3,4 @@
   publish = "frontend/dist"
 
 [build.environment]
-  NPM_FLAGS = "--include=dev"
+  NODE_ENV = "development"
