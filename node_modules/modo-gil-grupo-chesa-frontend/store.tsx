@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { AppState, Modo, PhaseState, ProjectType, Solicitud, User, GlossaryTerm, ProjectKPI, Macroproceso, Proceso, PropuestaProyecto, Formato, MeetingAgenda } from './types';
 import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS } from './constants';
+import { db } from './firebase';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 interface AppContextType extends AppState {
   setCurrentUser: (user: User) => void;
@@ -117,9 +119,52 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [formatos, setFormatos] = useState<Formato[]>(() => loadState('chesa_formatos', []));
 
+  // Firebase Firestore synchronization
+  const serverDataRef = useRef<Record<string, string>>({});
+  const [hasLoadedFromServer, setHasLoadedFromServer] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
+    const syncDoc = (key: string, setter: (val: any) => void) => {
+      return onSnapshot(doc(db, 'app_state', key), (snapshot) => {
+        if (snapshot.exists()) {
+          const val = snapshot.data().data;
+          serverDataRef.current[key] = JSON.stringify(val);
+          setter(val);
+        }
+        setHasLoadedFromServer(prev => ({ ...prev, [key]: true }));
+      }, (error) => {
+        console.error(`Error syncing ${key} from Firestore:`, error);
+        setHasLoadedFromServer(prev => ({ ...prev, [key]: true }));
+      });
+    };
+
+    const unsubscribes = [
+      syncDoc('users', setUsers),
+      syncDoc('modos', setModos),
+      syncDoc('solicitudes', setSolicitudes),
+      syncDoc('glossary', setGlossary),
+      syncDoc('kpis', setKpis),
+      syncDoc('macroprocesos', setMacroprocesos),
+      syncDoc('procesos', setProcesos),
+      syncDoc('propuestas', setPropuestas),
+      syncDoc('formatos', setFormatos)
+    ];
+
+    return () => unsubscribes.forEach(unsub => unsub());
+  }, []);
+
+  useEffect(() => {
+    // 1. Save currentUser locally (keeps session local per browser)
     try {
       localStorage.setItem('chesa_currentUser', JSON.stringify(currentUser));
+    } catch (e) {
+      console.warn("Writing currentUser failed:", e);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    // 2. Save global states locally and to Firestore
+    try {
       localStorage.setItem('chesa_users', JSON.stringify(users));
       localStorage.setItem('chesa_modos', JSON.stringify(modos));
       localStorage.setItem('chesa_solicitudes', JSON.stringify(solicitudes));
@@ -130,9 +175,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('chesa_propuestas', JSON.stringify(propuestas));
       localStorage.setItem('chesa_formatos', JSON.stringify(formatos));
     } catch (e) {
-      console.warn("Storage quota exceeded or writing failed:", e);
+      console.warn("Local storage quota exceeded or writing failed:", e);
     }
-  }, [currentUser, users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, propuestas, formatos]);
+
+    const saveDoc = async (key: string, data: any) => {
+      if (!hasLoadedFromServer[key]) return; // Avoid overwriting server data with default states before loading
+      const dataStr = JSON.stringify(data);
+      if (serverDataRef.current[key] !== dataStr) {
+        serverDataRef.current[key] = dataStr;
+        try {
+          await setDoc(doc(db, 'app_state', key), { data });
+        } catch (e) {
+          console.error(`Error saving ${key} to Firestore:`, e);
+        }
+      }
+    };
+
+    saveDoc('users', users);
+    saveDoc('modos', modos);
+    saveDoc('solicitudes', solicitudes);
+    saveDoc('glossary', glossary);
+    saveDoc('kpis', kpis);
+    saveDoc('macroprocesos', macroprocesos);
+    saveDoc('procesos', procesos);
+    saveDoc('propuestas', propuestas);
+    saveDoc('formatos', formatos);
+  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, propuestas, formatos, hasLoadedFromServer]);
 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));

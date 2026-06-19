@@ -166,23 +166,30 @@ const MainLayout: React.FC = () => {
             </button>
             <div className="h-8 w-px bg-slate-200"></div>
             <div className="flex items-center gap-3 group">
-              <div className="hidden lg:flex flex-col items-end">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">View As</span>
-                <select 
-                  value={currentUser.id}
-                  onChange={(e) => {
-                    const selectedUser = users.find(u => u.id === e.target.value);
-                    if (selectedUser) {
-                      setCurrentUser(selectedUser);
-                    }
-                  }}
-                  className="bg-transparent border-none text-[13px] font-bold text-slate-700 p-0 pr-5 focus:ring-0 cursor-pointer text-right outline-none group-hover:text-primary transition-colors bg-white"
-                >
-                  {users.map(u => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
-              </div>
+              {currentUser.systemRole === 'Admin' ? (
+                <div className="hidden lg:flex flex-col items-end">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">View As</span>
+                  <select 
+                    value={currentUser.id}
+                    onChange={(e) => {
+                      const selectedUser = users.find(u => u.id === e.target.value);
+                      if (selectedUser) {
+                        setCurrentUser(selectedUser);
+                      }
+                    }}
+                    className="bg-transparent border-none text-[13px] font-bold text-slate-700 p-0 pr-5 focus:ring-0 cursor-pointer text-right outline-none group-hover:text-primary transition-colors bg-white"
+                  >
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="hidden lg:flex flex-col items-end">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{currentUser.puesto || currentUser.systemRole}</span>
+                  <span className="text-[13px] font-bold text-slate-700">{currentUser.name}</span>
+                </div>
+              )}
               <button 
                 onClick={() => setIsProfileModalOpen(true)}
                 className="w-9 h-9 rounded-full overflow-hidden border border-slate-200 hover:border-primary transition-all flex items-center justify-center bg-slate-100 cursor-pointer"
