@@ -214,8 +214,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         serverDataRef.current[key] = dataStr;
         try {
           await setDoc(doc(db, 'app_state', key), { data });
-        } catch (e) {
+        } catch (e: any) {
           console.error(`Error saving ${key} to Firestore:`, e);
+          setSyncState('error');
+          setSyncErrorMessage(`Error al guardar ${key}: ${e.message || e}`);
         }
       }
     };

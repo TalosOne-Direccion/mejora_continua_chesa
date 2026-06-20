@@ -199,6 +199,14 @@ const MainLayout: React.FC = () => {
 
       {/* Main Content Wrapper */}
       <div className={cn("flex-1 flex flex-col min-w-0 h-screen transition-all duration-300", !selectedModoId && "md:ml-[260px]")}>
+        {syncState === 'error' && (
+          <div className="bg-red-650 text-white text-[13px] font-medium py-2.5 px-6 flex items-center justify-between gap-4 shrink-0 shadow-[0_2px_10px_rgba(220,38,38,0.15)] animate-in slide-in-from-top duration-200">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+              <span><strong>Atención:</strong> Tus cambios no se están guardando en la nube. Revisa las reglas de Firebase o la consola. Detalle: <code className="bg-red-800/40 px-1.5 py-0.5 rounded font-mono text-[11px]">{syncErrorMessage}</code></span>
+            </div>
+          </div>
+        )}
         {/* TopNavBar - Glassmorphism effect */}
         <header className="flex justify-between items-center w-full px-8 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shrink-0">
           <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
