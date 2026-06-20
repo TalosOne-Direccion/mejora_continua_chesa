@@ -65,6 +65,7 @@ export type User = {
   areas: string[];
   sucursales?: string[];
   avatar?: string;
+  password?: string;
 };
 
 export type ProjectRisk = {

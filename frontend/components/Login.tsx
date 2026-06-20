@@ -17,33 +17,46 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    // Bypass temporal para probar el diseño rápido con diferentes perfiles
     const lowerEmail = email.toLowerCase().trim();
-    if (password === '1234') {
-      let matchedUser = null;
-      if (lowerEmail === 'carlos@chesa.com' || lowerEmail === 'admin' || lowerEmail === 'admin@chesa.com') {
-        matchedUser = users.find(u => u.name === 'Carlos Barrientos');
-      } else if (lowerEmail === 'ivonne@chesa.com') {
-        matchedUser = users.find(u => u.name === 'Ivonne');
-      } else if (lowerEmail === 'armando@chesa.com') {
-        matchedUser = users.find(u => u.name === 'Armando');
-      } else if (lowerEmail === 'lector@chesa.com' || lowerEmail === 'lider@chesa.com') {
-        matchedUser = users.find(u => u.name === 'Líder de Área');
-      }
 
+    // 1. Intentar validar mediante bypass (con contraseña personalizada o '1234' por defecto)
+    let matchedUser = null;
+    if (lowerEmail === 'carlos@chesa.com' || lowerEmail === 'admin' || lowerEmail === 'admin@chesa.com') {
+      matchedUser = users.find(u => u.name === 'Carlos Barrientos');
+    } else if (lowerEmail === 'ivonne@chesa.com') {
+      matchedUser = users.find(u => u.name === 'Ivonne');
+    } else if (lowerEmail === 'armando@chesa.com') {
+      matchedUser = users.find(u => u.name === 'Armando');
+    } else if (lowerEmail === 'lector@chesa.com' || lowerEmail === 'lider@chesa.com') {
+      matchedUser = users.find(u => u.name === 'Líder de Área');
+    } else {
+      // Fallback para otros usuarios agregados dinámicamente
+      const nameKey = lowerEmail.split('@')[0];
+      matchedUser = users.find(u => u.name.toLowerCase().replace(/\s+/g, '') === nameKey);
+    }
+
+    const expectedPassword = matchedUser?.password || '1234';
+
+    if (password === expectedPassword) {
       if (matchedUser) {
         setLoading(false);
         setCurrentUser(matchedUser);
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('chesa_loginEmail', lowerEmail);
         window.location.href = '/';
         return;
       }
     }
 
+    // 2. Intentar autenticación con Firebase
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const fbUser = userCredential.user;
       if (fbUser && fbUser.email) {
+        const emailKey = fbUser.email.toLowerCase().trim();
+        localStorage.setItem('chesa_loginEmail', emailKey);
+        localStorage.setItem('isAuthenticated', 'true');
+        
         const emailMap: Record<string, string> = {
           'carlos@chesa.com': 'Carlos Barrientos',
           'ivonne@chesa.com': 'Ivonne',
@@ -51,7 +64,7 @@ export default function Login() {
           'lector@chesa.com': 'Líder de Área',
           'lider@chesa.com': 'Líder de Área'
         };
-        const mappedName = emailMap[fbUser.email.toLowerCase().trim()];
+        const mappedName = emailMap[emailKey];
         if (mappedName) {
           const matched = users.find(u => u.name === mappedName);
           if (matched) {

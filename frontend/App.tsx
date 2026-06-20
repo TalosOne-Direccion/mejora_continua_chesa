@@ -5,7 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { ModoDetail } from './components/ModoDetail';
 import { DocumentosView, KPIsView, GlosarioView, AdministracionView, SolicitudesView, MacroprocesosView } from './components/GlobalViews';
 import Login from './components/Login';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, updatePassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { cn } from './utils';
 
@@ -18,15 +18,24 @@ const MainLayout: React.FC = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileName, setProfileName] = useState(currentUser.name);
   const [profileAvatar, setProfileAvatar] = useState(currentUser.avatar || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const loginEmail = localStorage.getItem('chesa_loginEmail')?.toLowerCase().trim() || '';
+  const isAdminAccount = loginEmail === 'admin' || loginEmail === 'admin@chesa.com';
 
   useEffect(() => {
     setProfileName(currentUser.name);
     setProfileAvatar(currentUser.avatar || '');
+    setNewPassword('');
+    setConfirmPassword('');
   }, [currentUser]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser && fbUser.email) {
+        const emailKey = fbUser.email.toLowerCase().trim();
+        localStorage.setItem('chesa_loginEmail', emailKey);
         const emailMap: Record<string, string> = {
           'carlos@chesa.com': 'Carlos Barrientos',
           'ivonne@chesa.com': 'Ivonne',
@@ -34,7 +43,7 @@ const MainLayout: React.FC = () => {
           'lector@chesa.com': 'Líder de Área',
           'lider@chesa.com': 'Líder de Área'
         };
-        const mappedName = emailMap[fbUser.email.toLowerCase().trim()];
+        const mappedName = emailMap[emailKey];
         if (mappedName) {
           const matched = users.find(u => u.name === mappedName);
           if (matched && currentUser.id !== matched.id) {
@@ -59,16 +68,45 @@ const MainLayout: React.FC = () => {
     }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profileName.trim()) {
       alert('El nombre no puede estar vacío');
       return;
     }
-    updateUser(currentUser.id, {
+
+    if (newPassword) {
+      if (newPassword !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      if (newPassword.length < 4) {
+        alert('La contraseña debe tener al menos 4 caracteres');
+        return;
+      }
+    }
+
+    const updates: Partial<User> = {
       name: profileName.trim(),
       avatar: profileAvatar || undefined
-    });
+    };
+
+    if (newPassword) {
+      updates.password = newPassword;
+    }
+
+    updateUser(currentUser.id, updates);
+
+    if (newPassword && auth.currentUser) {
+      try {
+        await updatePassword(auth.currentUser, newPassword);
+      } catch (fbErr: any) {
+        console.warn("No se pudo actualizar la contraseña de Firebase Auth (puede requerir inicio de sesión reciente):", fbErr);
+      }
+    }
+
+    setNewPassword('');
+    setConfirmPassword('');
     setIsProfileModalOpen(false);
   };
 
@@ -141,6 +179,21 @@ const MainLayout: React.FC = () => {
               </>
             )}
           </div>
+
+          <div className="pt-4 border-t border-slate-200 mt-auto shrink-0 pb-2">
+            <button 
+              onClick={() => {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('chesa_loginEmail');
+                signOut(auth);
+                window.location.href = '/login';
+              }} 
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-650 hover:bg-red-50 hover:text-red-700 transition-all duration-200 text-left font-semibold cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[22px]">logout</span>
+              <span className="text-[14px]">Cerrar Sesión</span>
+            </button>
+          </div>
         </nav>
       )}
 
@@ -166,7 +219,7 @@ const MainLayout: React.FC = () => {
             </button>
             <div className="h-8 w-px bg-slate-200"></div>
             <div className="flex items-center gap-3 group">
-              {currentUser.systemRole === 'Admin' ? (
+              {currentUser.systemRole === 'Admin' && isAdminAccount ? (
                 <div className="hidden lg:flex flex-col items-end">
                   <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">View As</span>
                   <select 
@@ -299,6 +352,30 @@ const MainLayout: React.FC = () => {
                     disabled
                     className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-[14px] text-slate-500 outline-none cursor-not-allowed"
                   />
+                </div>
+
+                <div className="border-t border-slate-100 pt-4 mt-2 space-y-4">
+                  <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider">Cambiar Contraseña</h4>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[12px] font-bold text-slate-500 uppercase tracking-wider">Nueva Contraseña</label>
+                    <input 
+                      type="password" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Dejar en blanco para mantener la actual"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[14px] text-slate-800 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[12px] font-bold text-slate-500 uppercase tracking-wider">Confirmar Nueva Contraseña</label>
+                    <input 
+                      type="password" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repite la nueva contraseña"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[14px] text-slate-800 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
+                    />
+                  </div>
                 </div>
               </div>
 
