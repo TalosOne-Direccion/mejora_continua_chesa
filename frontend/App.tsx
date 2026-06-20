@@ -88,7 +88,7 @@ const MainLayout: React.FC = () => {
 
     const updates: Partial<User> = {
       name: profileName.trim(),
-      avatar: profileAvatar || undefined
+      avatar: profileAvatar || null
     };
 
     if (newPassword) {

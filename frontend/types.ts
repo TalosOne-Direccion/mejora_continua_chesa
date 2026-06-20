@@ -64,7 +64,7 @@ export type User = {
   systemRole: SystemRole;
   areas: string[];
   sucursales?: string[];
-  avatar?: string;
+  avatar?: string | null;
   password?: string;
 };
 
@@ -120,7 +120,7 @@ export type Modo = {
   status: 'On Track' | 'At Risk' | 'Delayed';
   team: Record<string, string>; 
   phases: Record<number, PhaseState>;
-  expirationDate?: string; 
+  expirationDate?: string | null; 
   risks?: ProjectRisk[];
   agendas?: MeetingAgenda[];
   compromisos?: ProjectCommitment[];

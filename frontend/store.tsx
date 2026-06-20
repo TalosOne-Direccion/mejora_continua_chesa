@@ -339,7 +339,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         nextYear.setFullYear(nextYear.getFullYear() + 1);
         expirationDate = nextYear.toISOString();
       } else {
-        expirationDate = undefined;
+        expirationDate = null;
       }
 
       return {
