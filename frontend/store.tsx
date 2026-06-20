@@ -213,7 +213,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (serverDataRef.current[key] !== dataStr) {
         serverDataRef.current[key] = dataStr;
         try {
-          await setDoc(doc(db, 'app_state', key), { data });
+          // Clean undefined values by parsing the stringified JSON
+          const cleanData = JSON.parse(dataStr);
+          await setDoc(doc(db, 'app_state', key), { data: cleanData });
         } catch (e: any) {
           console.error(`Error saving ${key} to Firestore:`, e);
           setSyncState('error');
