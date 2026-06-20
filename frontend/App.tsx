@@ -12,7 +12,7 @@ import { cn } from './utils';
 type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'KPIs' | 'Glosario' | 'Administración' | 'Macroprocesos';
 
 const MainLayout: React.FC = () => {
-  const { currentUser, setCurrentUser, users, updateUser } = useAppStore();
+  const { currentUser, setCurrentUser, users, updateUser, syncState, syncErrorMessage } = useAppStore();
   const [selectedModoId, setSelectedModoId] = useState<string | null>(null);
   const [activeGlobalTab, setActiveGlobalTab] = useState<GlobalTab>('Portafolio');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -213,6 +213,22 @@ const MainLayout: React.FC = () => {
           <div className="flex-1 sm:hidden"></div>
           
           <div className="flex items-center gap-5">
+            {/* Indicador de Sincronización en la Nube */}
+            <div className="flex items-center gap-1.5" title={syncState === 'synced' ? 'Conectado a la Nube (Base de Datos Sincronizada)' : syncState === 'loading' ? 'Sincronizando con la Nube...' : `Error al sincronizar: ${syncErrorMessage}`}>
+              {syncState === 'synced' && (
+                <span className="material-symbols-outlined text-emerald-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_done</span>
+              )}
+              {syncState === 'loading' && (
+                <span className="material-symbols-outlined text-slate-400 text-[20px] animate-spin">sync</span>
+              )}
+              {syncState === 'error' && (
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-red-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_off</span>
+                  <span className="text-[10px] text-red-500 font-semibold max-w-[120px] truncate hidden lg:inline">{syncErrorMessage}</span>
+                </div>
+              )}
+            </div>
+
             <button className="text-slate-400 hover:text-primary transition-colors relative">
               <span className="material-symbols-outlined text-[24px]">notifications</span>
               <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>

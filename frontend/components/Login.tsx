@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAppStore } from '../store';
 
@@ -39,6 +39,12 @@ export default function Login() {
 
     if (password === expectedPassword) {
       if (matchedUser) {
+        // Intentar autenticación anónima para habilitar permisos de Firestore en modo bypass
+        try {
+          await signInAnonymously(auth);
+        } catch (e) {
+          console.warn("No se pudo iniciar sesión anónima en Firebase Auth:", e);
+        }
         setLoading(false);
         setCurrentUser(matchedUser);
         localStorage.setItem('isAuthenticated', 'true');

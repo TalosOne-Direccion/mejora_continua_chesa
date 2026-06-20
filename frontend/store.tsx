@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { AppState, Modo, PhaseState, ProjectType, Solicitud, User, GlossaryTerm, ProjectKPI, Macroproceso, Proceso, PropuestaProyecto, Formato, MeetingAgenda } from './types';
 import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS } from './constants';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface AppContextType extends AppState {
   setCurrentUser: (user: User) => void;
@@ -35,6 +36,8 @@ interface AppContextType extends AppState {
   deleteProceso: (id: string) => void;
   addFormato: (f: Omit<Formato, 'id'>) => void;
   deleteFormato: (id: string) => void;
+  syncState: 'loading' | 'synced' | 'error';
+  syncErrorMessage: string | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -120,10 +123,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [formatos, setFormatos] = useState<Formato[]>(() => loadState('chesa_formatos', []));
 
   // Firebase Firestore synchronization
+  const [fbUser, setFbUser] = useState<any>(null);
+  const [syncState, setSyncState] = useState<'loading' | 'synced' | 'error'>('loading');
+  const [syncErrorMessage, setSyncErrorMessage] = useState<string | null>(null);
   const serverDataRef = useRef<Record<string, string>>({});
   const [hasLoadedFromServer, setHasLoadedFromServer] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFbUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const loadedCollections = new Set<string>();
+    const collectionsToSync = [
+      'users', 'modos', 'solicitudes', 'glossary',
+      'kpis', 'macroprocesos', 'procesos', 'propuestas', 'formatos'
+    ];
+
+    setSyncState('loading');
+    setSyncErrorMessage(null);
+
     const syncDoc = (key: string, setter: (val: any) => void) => {
       return onSnapshot(doc(db, 'app_state', key), (snapshot) => {
         if (snapshot.exists()) {
@@ -131,10 +153,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           serverDataRef.current[key] = JSON.stringify(val);
           setter(val);
         }
+        loadedCollections.add(key);
+        if (loadedCollections.size === collectionsToSync.length) {
+          setSyncState('synced');
+          setSyncErrorMessage(null);
+        }
         setHasLoadedFromServer(prev => ({ ...prev, [key]: true }));
       }, (error) => {
         console.error(`Error syncing ${key} from Firestore:`, error);
-        setHasLoadedFromServer(prev => ({ ...prev, [key]: true }));
+        setSyncState('error');
+        setSyncErrorMessage(`Error al sincronizar ${key}: ${error.message || error}`);
+        // Do NOT set hasLoadedFromServer to true here to avoid overwriting clean server data with local defaults
       });
     };
 
@@ -151,7 +180,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ];
 
     return () => unsubscribes.forEach(unsub => unsub());
-  }, []);
+  }, [fbUser]);
 
   useEffect(() => {
     // 1. Save currentUser locally (keeps session local per browser)
@@ -473,6 +502,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         procesos, addProceso, updateProceso, deleteProceso,
         propuestas, addPropuesta, updatePropuesta,
         formatos, addFormato, deleteFormato,
+        syncState, syncErrorMessage,
       }}
     >
       {children}
