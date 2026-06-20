@@ -195,7 +195,7 @@ function getMockDataForPhase(phase: number, inputs: any) {
       switch (phase) {
         case 1:
           resolve({
-            nombreProyecto: inputs.objetivoGeneral || 'Optimización de Proceso',
+            nombreProyecto: 'Optimización de Proceso',
             problema: inputs.dolorOperativo || 'Retrasos en la operación actual.',
             objetivoMedible: { indicador: 'Tiempo de ciclo', meta: 'Reducir 20%', plazo: '3 meses' },
             alcance: inputs.alcance || 'Proceso principal',

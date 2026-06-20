@@ -100,6 +100,11 @@ export const ActaLeanModal: React.FC<ActaLeanModalProps> = ({ modo, onClose }) =
               <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{data.problema || '-'}</p>
             </div>
 
+            <div className="border-t border-slate-200 pt-4">
+              <h3 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-[13px]">Objetivo General</h3>
+              <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">{data.objetivoGeneral || '-'}</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-8 border-t border-slate-200 pt-4">
               <div>
                 <h3 className="font-bold text-slate-900 mb-2 uppercase tracking-wider text-[13px]">Alcance</h3>

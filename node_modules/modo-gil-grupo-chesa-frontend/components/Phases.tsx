@@ -951,7 +951,7 @@ export const Phase1: React.FC<{ modo: Modo }> = ({ modo }) => {
   const handleGenerateManual = () => {
     const data = {
       ...phaseData,
-      nombreProyecto: inputs.objetivoGeneral || modo.name, // Uso de objetivoGeneral como nombre si está lleno
+      nombreProyecto: modo.name,
       problema: inputs.dolorOperativo,
       objetivoGeneral: inputs.objetivoGeneral,
       contextoAdicional: inputs.contextoAdicional,
