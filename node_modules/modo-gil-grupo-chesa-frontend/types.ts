@@ -54,6 +54,7 @@ export type ProjectKPI = {
   tools?: KPITool[];
   macroprocesoId?: string;
   procesoId?: string;
+  procedimientoId?: string;
   fuenteInfo?: string;
 };
 
@@ -188,6 +189,9 @@ export type Procedimiento = {
   id: string;
   procesoId: string;
   name: string;
+  diagram?: string;
+  diagramImage?: string;
+  puestos?: string[];
 };
 
 export type AppState = {

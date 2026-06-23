@@ -514,13 +514,14 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
   const [newMacName, setNewMacName] = useState('');
   const [newMacType, setNewMacType] = useState<'Principal' | 'Soporte'>('Soporte');
   const [newProcName, setNewProcName] = useState('');
   const [selectedMacId, setSelectedMacId] = useState<string | null>(null);
   const [viewingProcesoId, setViewingProcesoId] = useState<string | null>(null);
+  const [viewingProcedimientoId, setViewingProcedimientoId] = useState<string | null>(null);
   const [diagramaEdit, setDiagramaEdit] = useState('');
   const [diagramImageEdit, setDiagramImageEdit] = useState('');
 
@@ -628,7 +629,7 @@ export const MacroprocesosView = () => {
                   return (
                     <div key={p.id} className="flex flex-col gap-1.5">
                       <div 
-                        onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
+                        onClick={() => { setViewingProcesoId(p.id); setViewingProcedimientoId(null); setDiagramaEdit(''); setDiagramImageEdit(''); setActiveProcessTab('diagram'); }}
                         className={cn(
                           "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
                           viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
@@ -640,7 +641,7 @@ export const MacroprocesosView = () => {
                         </div>
                         {canEdit && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
+                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } }} 
                             className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
                             title="Eliminar proceso"
                           >
@@ -655,7 +656,20 @@ export const MacroprocesosView = () => {
                           {procSub.map(proc => (
                             <div 
                               key={proc.id} 
-                              className="text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewingProcesoId(p.id);
+                                setViewingProcedimientoId(proc.id);
+                                setDiagramaEdit(proc.diagram || '');
+                                setDiagramImageEdit(proc.diagramImage || '');
+                                setActiveProcessTab('diagram');
+                              }}
+                              className={cn(
+                                "text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub cursor-pointer transition-all border",
+                                viewingProcedimientoId === proc.id
+                                  ? "bg-blue-50/60 border-blue-150 text-blue-900 font-semibold"
+                                  : "text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 border-transparent"
+                              )}
                             >
                               <div className="flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-[14px] text-slate-400">description</span>
@@ -663,7 +677,7 @@ export const MacroprocesosView = () => {
                               </div>
                               {canEdit && (
                                 <button 
-                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); }} 
+                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); if(viewingProcedimientoId===proc.id) setViewingProcedimientoId(null); }} 
                                   className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc-sub:opacity-100 transition-opacity"
                                   title="Eliminar procedimiento"
                                 >
@@ -727,7 +741,7 @@ export const MacroprocesosView = () => {
                   return (
                     <div key={p.id} className="flex flex-col gap-1.5">
                       <div 
-                        onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
+                        onClick={() => { setViewingProcesoId(p.id); setViewingProcedimientoId(null); setDiagramaEdit(''); setDiagramImageEdit(''); setActiveProcessTab('diagram'); }}
                         className={cn(
                           "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
                           viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
@@ -739,7 +753,7 @@ export const MacroprocesosView = () => {
                         </div>
                         {canEdit && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
+                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } }} 
                             className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
                           >
                             <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -753,7 +767,20 @@ export const MacroprocesosView = () => {
                           {procSub.map(proc => (
                             <div 
                               key={proc.id} 
-                              className="text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewingProcesoId(p.id);
+                                setViewingProcedimientoId(proc.id);
+                                setDiagramaEdit(proc.diagram || '');
+                                setDiagramImageEdit(proc.diagramImage || '');
+                                setActiveProcessTab('diagram');
+                              }}
+                              className={cn(
+                                "text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub cursor-pointer transition-all border",
+                                viewingProcedimientoId === proc.id
+                                  ? "bg-blue-50/60 border-blue-150 text-blue-900 font-semibold"
+                                  : "text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 border-transparent"
+                              )}
                             >
                               <div className="flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-[14px] text-slate-400">description</span>
@@ -761,7 +788,7 @@ export const MacroprocesosView = () => {
                               </div>
                               {canEdit && (
                                 <button 
-                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); }} 
+                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); if(viewingProcedimientoId===proc.id) setViewingProcedimientoId(null); }} 
                                   className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc-sub:opacity-100 transition-opacity"
                                   title="Eliminar procedimiento"
                                 >
@@ -830,370 +857,606 @@ export const MacroprocesosView = () => {
         )}
 
         {viewingProcesoId && (() => {
-        const proc = procesos.find(p => p.id === viewingProcesoId);
-        if (!proc) return null;
-        
-        const procKpis = kpis.filter(k => k.procesoId === viewingProcesoId);
-        const procPuestos = proc.puestos || [];
-        const procProcedimientos = procedimientos.filter(p => p.procesoId === viewingProcesoId);
+          const proc = procesos.find(p => p.id === viewingProcesoId);
+          if (!proc) return null;
+          
+          const procProcedimientos = procedimientos.filter(p => p.procesoId === viewingProcesoId);
+          const sub = viewingProcedimientoId ? procProcedimientos.find(p => p.id === viewingProcedimientoId) : null;
+          
+          const procKpis = kpis.filter(k => k.procesoId === viewingProcesoId);
+          const subKpis = sub ? kpis.filter(k => k.procedimientoId === sub.id) : [];
+          
+          const procPuestos = proc.puestos || [];
+          const subPuestos = sub ? sub.puestos || [] : [];
+          const compiledPuestos = Array.from(new Set([
+            ...procPuestos,
+            ...procProcedimientos.flatMap(p => p.puestos || [])
+          ]));
 
-        return (
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mt-8 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 mb-6 gap-4">
-              <div>
-                <h2 className="text-[20px] font-bold text-slate-800">
-                  Detalles del Proceso: {proc.name}
-                </h2>
-                <p className="text-[13px] text-slate-500 mt-1">
-                  Configura el diagrama, roles, KPIs y procedimientos del proceso actual.
-                </p>
-              </div>
-              <div className="flex items-center gap-4 self-stretch md:self-auto justify-between md:justify-end">
-                <div className="flex bg-slate-100 p-1 rounded-lg">
+          const activeTab = (viewingProcedimientoId && activeProcessTab === 'procedimientos') ? 'diagram' : activeProcessTab;
+
+          return (
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mt-8 animate-in fade-in slide-in-from-bottom-4 relative">
+              
+              {/* HEADER */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 mb-6 gap-4">
+                {sub ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <button 
+                        onClick={() => {
+                          setViewingProcedimientoId(null);
+                          setDiagramaEdit('');
+                          setDiagramImageEdit('');
+                          setActiveProcessTab('procedimientos');
+                        }}
+                        className="text-slate-500 hover:text-primary flex items-center gap-1 text-[13px] font-bold transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                        Proceso: {proc.name}
+                      </button>
+                      <span className="text-slate-350">/</span>
+                      <span className="text-[11px] bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        Procedimiento
+                      </span>
+                    </div>
+                    <h2 className="text-[20px] font-bold text-slate-800">
+                      {sub.name}
+                    </h2>
+                    <p className="text-[13px] text-slate-500 mt-1">
+                      Configura el diagrama, puestos e indicadores de este procedimiento.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h2 className="text-[20px] font-bold text-slate-800">
+                      Detalles del Proceso: {proc.name}
+                    </h2>
+                    <p className="text-[13px] text-slate-500 mt-1">
+                      Consolidado de diagramas, puestos, KPIs y procedimientos de este proceso.
+                    </p>
+                  </div>
+                )}
+
+                {/* TABS SELECTOR */}
+                <div className="flex items-center gap-4 self-stretch md:self-auto justify-between md:justify-end">
+                  <div className="flex bg-slate-100 p-1 rounded-lg">
+                    <button 
+                      onClick={() => setActiveProcessTab('diagram')}
+                      className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'diagram' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">account_tree</span> {sub ? 'Diagrama' : 'Diagramas'}
+                    </button>
+                    <button 
+                      onClick={() => setActiveProcessTab('puestos')}
+                      className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'puestos' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">badge</span> Puestos / Roles ({sub ? subPuestos.length : compiledPuestos.length})
+                    </button>
+                    <button 
+                      onClick={() => setActiveProcessTab('kpis')}
+                      className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'kpis' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">analytics</span> Indicadores ({sub ? subKpis.length : procKpis.length})
+                    </button>
+                    {!sub && (
+                      <button 
+                        onClick={() => setActiveProcessTab('procedimientos')}
+                        className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'procedimientos' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">description</span> Procedimientos ({procProcedimientos.length})
+                      </button>
+                    )}
+                  </div>
                   <button 
-                    onClick={() => setActiveProcessTab('diagram')}
-                    className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'diagram' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    onClick={() => {
+                      setViewingProcesoId(null);
+                      setViewingProcedimientoId(null);
+                    }} 
+                    className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-650 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[16px]">account_tree</span> Diagrama
-                  </button>
-                  <button 
-                    onClick={() => setActiveProcessTab('puestos')}
-                    className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'puestos' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">badge</span> Puestos / Roles ({procPuestos.length})
-                  </button>
-                  <button 
-                    onClick={() => setActiveProcessTab('kpis')}
-                    className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'kpis' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">analytics</span> Indicadores ({procKpis.length})
-                  </button>
-                  <button 
-                    onClick={() => setActiveProcessTab('procedimientos')}
-                    className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'procedimientos' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">description</span> Procedimientos ({procProcedimientos.length})
+                    <span className="material-symbols-outlined">close</span>
                   </button>
                 </div>
-                <button onClick={() => setViewingProcesoId(null)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-650 transition-colors">
-                  <span className="material-symbols-outlined">close</span>
-                </button>
               </div>
-            </div>
 
-            {activeProcessTab === 'diagram' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Código Mermaid (Editable)</label>
-                  <textarea 
-                    value={diagramaEdit} 
-                    onChange={e => setDiagramaEdit(e.target.value)}
-                    disabled={!canEdit}
-                    className="w-full h-[300px] p-4 border border-slate-200 rounded-xl font-mono text-[13px] bg-slate-50 focus:border-primary outline-none resize-none disabled:opacity-70"
-                    placeholder="graph TD\nA[Inicio] --> B(Paso 1)\n..."
-                  />
-                  {canEdit && (
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={() => updateProceso(viewingProcesoId, { diagram: diagramaEdit, diagramImage: diagramImageEdit })}
-                        className="bg-slate-800 text-white font-bold px-6 py-2 rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
-                      >
-                        Guardar Diagrama
-                      </button>
-                      <label className="bg-white border border-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-2 shadow-sm">
-                        <span className="material-symbols-outlined text-[18px]">upload_file</span>
-                        Subir Imagen
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setDiagramImageEdit)} />
-                      </label>
-                      {diagramImageEdit && (
-                        <button onClick={() => setDiagramImageEdit('')} className="text-red-505 text-red-500 hover:bg-red-50 font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                          Quitar
-                        </button>
+              {/* TABS CONTENT */}
+
+              {/* 1. DIAGRAMS TAB */}
+              {activeTab === 'diagram' && (
+                sub ? (
+                  // MODO B: Diagram Editor
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-wider">Código Mermaid (Editable)</label>
+                      <textarea 
+                        value={diagramaEdit} 
+                        onChange={e => setDiagramaEdit(e.target.value)}
+                        disabled={!canEdit}
+                        className="w-full h-[300px] p-4 border border-slate-200 rounded-xl font-mono text-[13px] bg-slate-50 focus:border-primary outline-none resize-none disabled:opacity-70"
+                        placeholder="graph TD\nA[Inicio] --> B(Paso 1)\n..."
+                      />
+                      {canEdit && (
+                        <div className="flex gap-4">
+                          <button 
+                            onClick={() => updateProcedimiento(sub.id, { diagram: diagramaEdit, diagramImage: diagramImageEdit })}
+                            className="bg-slate-800 text-white font-bold px-6 py-2 rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+                          >
+                            Guardar Diagrama
+                          </button>
+                          <label className="bg-white border border-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg hover:bg-slate-50 cursor-pointer flex items-center gap-2 shadow-sm">
+                            <span className="material-symbols-outlined text-[18px]">upload_file</span>
+                            Subir Imagen
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setDiagramImageEdit)} />
+                          </label>
+                          {diagramImageEdit && (
+                            <button onClick={() => setDiagramImageEdit('')} className="text-red-500 hover:bg-red-50 font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                              Quitar
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Vista Previa</label>
-                  <div className="w-full h-[300px] border border-slate-200 rounded-xl flex items-center justify-center p-4 bg-white overflow-auto relative shadow-inner">
-                    {diagramImageEdit ? (
-                      <img src={diagramImageEdit} alt="Diagrama" className="max-w-full max-h-full object-contain" />
-                    ) : diagramaEdit.trim() ? (
-                      <MermaidChart chart={diagramaEdit} />
-                    ) : (
-                      <div className="text-slate-400 text-[13px] flex items-center gap-2">
-                        <span className="material-symbols-outlined">account_tree</span>
-                        Sin diagrama
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-wider">Vista Previa del Diagrama</label>
+                      <div className="w-full h-[300px] border border-slate-200 rounded-xl flex items-center justify-center p-4 bg-white overflow-auto relative shadow-inner">
+                        {diagramImageEdit ? (
+                          <img src={diagramImageEdit} alt="Diagrama" className="max-w-full max-h-full object-contain" />
+                        ) : diagramaEdit.trim() ? (
+                          <MermaidChart chart={diagramaEdit} />
+                        ) : (
+                          <div className="text-slate-400 text-[13px] flex items-center gap-2">
+                            <span className="material-symbols-outlined">account_tree</span>
+                            Sin diagrama
+                          </div>
+                        )}
                       </div>
+                    </div>
+                  </div>
+                ) : (
+                  // MODO A: Process Diagrams (Consolidated)
+                  <div className="space-y-6">
+                    {/* Process diagram (legacy) */}
+                    {(proc.diagram || proc.diagramImage) && (
+                      <div className="p-5 border border-slate-200 rounded-xl bg-slate-50/20">
+                        <h3 className="font-bold text-slate-800 text-[14px] mb-3 flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[18px] text-primary">account_tree</span>
+                          Diagrama General del Proceso (Legacy)
+                        </h3>
+                        <div className="w-full h-[280px] border border-slate-200 rounded-lg flex items-center justify-center p-4 bg-white overflow-auto shadow-sm">
+                          {proc.diagramImage ? (
+                            <img src={proc.diagramImage} alt="Diagrama General" className="max-w-full max-h-full object-contain" />
+                          ) : (
+                            <MermaidChart chart={proc.diagram || ''} />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <h3 className="font-bold text-slate-700 text-[13px] mb-3 uppercase tracking-wider">Diagramas por Procedimiento</h3>
+                      {procProcedimientos.length === 0 ? (
+                        <div className="py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-55">account_tree</span>
+                          <p className="text-[13px] font-medium">No hay procedimientos definidos para este proceso.</p>
+                        </div>
+                      ) : procProcedimientos.filter(p => p.diagram || p.diagramImage).length === 0 ? (
+                        <div className="py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-55">account_tree</span>
+                          <p className="text-[13px] font-medium">Ninguno de los procedimientos de este proceso tiene un diagrama configurado.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {procProcedimientos.filter(p => p.diagram || p.diagramImage).map(pSub => (
+                            <div key={pSub.id} className="border border-slate-200 rounded-xl p-4 bg-slate-50/30 flex flex-col gap-2 shadow-sm">
+                              <h4 className="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                                <span className="material-symbols-outlined text-[16px] text-primary">description</span>
+                                {pSub.name}
+                              </h4>
+                              <div className="w-full h-[240px] border border-slate-150 rounded-lg flex items-center justify-center p-3 bg-white overflow-auto relative shadow-inner">
+                                {pSub.diagramImage ? (
+                                  <img src={pSub.diagramImage} alt={pSub.name} className="max-w-full max-h-full object-contain" />
+                                ) : (
+                                  <MermaidChart chart={pSub.diagram || ''} />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* 2. PUESTOS / ROLES TAB */}
+              {activeTab === 'puestos' && (
+                sub ? (
+                  // MODO B: Link puesto to procedure
+                  <div className="space-y-6">
+                    {canEdit && (
+                      <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
+                        <input 
+                          type="text"
+                          value={newPuestoName}
+                          onChange={e => setNewPuestoName(e.target.value)}
+                          placeholder="Ej. Coordinador de Operaciones, Operador de Máquina..."
+                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && newPuestoName.trim()) {
+                              const currentPuestos = sub.puestos || [];
+                              if (!currentPuestos.includes(newPuestoName.trim())) {
+                                updateProcedimiento(sub.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
+                                setNewPuestoName('');
+                              }
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => {
+                            const currentPuestos = sub.puestos || [];
+                            if (newPuestoName.trim() && !currentPuestos.includes(newPuestoName.trim())) {
+                              updateProcedimiento(sub.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
+                              setNewPuestoName('');
+                            }
+                          }}
+                          className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span> Vincular Puesto
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subPuestos.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">badge</span>
+                          <p className="text-[13px] font-medium">No hay puestos vinculados a este procedimiento.</p>
+                        </div>
+                      ) : (
+                        subPuestos.map((puesto, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
+                            <div className="flex items-center gap-2">
+                              <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[13px]">
+                                {idx + 1}
+                              </span>
+                              <span className="text-[14px] font-semibold text-slate-700">{puesto}</span>
+                            </div>
+                            {canEdit && (
+                              <button 
+                                onClick={() => {
+                                  updateProcedimiento(sub.id, { puestos: subPuestos.filter(x => x !== puesto) });
+                                }}
+                                className="text-slate-400 hover:text-red-500 transition-colors"
+                                title="Eliminar vinculación"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  // MODO A: Compiled Puestos
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-slate-700 text-[13px] uppercase tracking-wider">Consolidado de Roles en Procedimientos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {compiledPuestos.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">badge</span>
+                          <p className="text-[13px] font-medium">No hay puestos vinculados a este proceso ni a sus procedimientos.</p>
+                        </div>
+                      ) : (
+                        compiledPuestos.map((puesto, idx) => {
+                          const isLegacy = procPuestos.includes(puesto);
+                          const linkedSubs = procProcedimientos.filter(p => p.puestos?.includes(puesto)).map(p => p.name);
+                          
+                          return (
+                            <div key={idx} className="flex flex-col p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-primary/40 transition-colors">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[12px]">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-[14px] font-bold text-slate-800">{puesto}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {isLegacy && (
+                                  <span className="text-[10px] bg-slate-100 text-slate-650 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Proceso General</span>
+                                )}
+                                {linkedSubs.map(subName => (
+                                  <span key={subName} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold truncate max-w-[190px]" title={subName}>
+                                    {subName}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* 3. INDICADORES (KPIS) TAB */}
+              {activeTab === 'kpis' && (
+                sub ? (
+                  // MODO B: Edit KPI for procedure
+                  <div className="space-y-6">
+                    {canEdit && (
+                      <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
+                        <div className="flex-1 min-w-[200px]">
+                          <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del KPI</label>
+                          <input 
+                            type="text"
+                            value={newKpiNameGlobal}
+                            onChange={e => setNewKpiNameGlobal(e.target.value)}
+                            placeholder="Ej. Tiempo de Ciclo, Eficiencia general..."
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[13px] bg-white"
+                          />
+                        </div>
+                        <div className="w-full md:w-[220px]">
+                          <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Puesto / Propietario</label>
+                          <select
+                            value={newKpiPuesto}
+                            onChange={e => setNewKpiPuesto(e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-slate-200 text-[13px] outline-none bg-white"
+                          >
+                            <option value="">-- Seleccionar Puesto --</option>
+                            {subPuestos.map(p => <option key={p} value={p}>{p}</option>)}
+                            <option value="Otro">Otro puesto...</option>
+                          </select>
+                        </div>
+                        <div className="flex-1 min-w-[200px]">
+                          <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Fuente de Información</label>
+                          <input 
+                            type="text"
+                            value={newKpiFuente}
+                            onChange={e => setNewKpiFuente(e.target.value)}
+                            placeholder="Ej. Reporte mensual, Base de datos SAP..."
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[13px] bg-white"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            if (newKpiNameGlobal.trim()) {
+                              addKPI({
+                                projectId: "global",
+                                name: newKpiNameGlobal.trim(),
+                                status: 'Propuesto',
+                                puesto: newKpiPuesto,
+                                fuenteInfo: newKpiFuente,
+                                macroprocesoId: proc.macroprocesoId,
+                                procesoId: proc.id,
+                                procedimientoId: sub.id
+                              });
+                              setNewKpiNameGlobal('');
+                              setNewKpiPuesto('');
+                              setNewKpiFuente('');
+                            }
+                          }}
+                          disabled={!newKpiNameGlobal.trim()}
+                          className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm shrink-0"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span> Crear KPI
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Indicador</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Puesto</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Fuente de Info</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Estatus</th>
+                            {canEdit && <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase text-center w-12">Acción</th>}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {subKpis.length === 0 ? (
+                            <tr>
+                              <td colSpan={canEdit ? 5 : 4} className="py-12 text-center text-slate-400">
+                                <span className="material-symbols-outlined text-[36px] mb-2 opacity-50">analytics</span>
+                                <p className="text-[13px]">No hay KPIs definidos para este procedimiento.</p>
+                              </td>
+                            </tr>
+                          ) : (
+                            subKpis.map(kpi => (
+                              <tr key={kpi.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="py-4 px-6 font-semibold text-slate-800 text-[14px]">
+                                  {kpi.name}
+                                </td>
+                                <td className="py-4 px-6 text-slate-650 text-[13px]">
+                                  {kpi.puesto || <span className="text-slate-400 italic">No asignado</span>}
+                                </td>
+                                <td className="py-4 px-6 text-slate-650 text-[13px]">
+                                  {kpi.fuenteInfo || <span className="text-slate-400 italic">No especificada</span>}
+                                </td>
+                                <td className="py-4 px-6">
+                                  <span className={cn(
+                                    "px-2.5 py-1 rounded text-[11px] font-bold border",
+                                    kpi.status === 'Propuesto' ? "text-amber-600 bg-amber-50 border-amber-100" : 
+                                    kpi.status === 'Aprobado' ? "text-blue-600 bg-blue-50 border-blue-100" : 
+                                    "text-emerald-600 bg-emerald-50 border-emerald-100"
+                                  )}>
+                                    {kpi.status}
+                                  </span>
+                                </td>
+                                {canEdit && (
+                                  <td className="py-4 px-6 text-center">
+                                    <button 
+                                      onClick={() => deleteKPI(kpi.id)}
+                                      className="text-slate-400 hover:text-red-500 transition-colors"
+                                      title="Eliminar KPI"
+                                    >
+                                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                                    </button>
+                                  </td>
+                                )}
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  // MODO A: Compiled KPIs
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-slate-700 text-[13px] uppercase tracking-wider">Consolidado de Indicadores del Proceso</h3>
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Indicador</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Puesto</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Procedimiento / Nivel</th>
+                            <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Estatus</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {procKpis.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="py-12 text-center text-slate-400">
+                                <span className="material-symbols-outlined text-[36px] mb-2 opacity-50">analytics</span>
+                                <p className="text-[13px]">No hay KPIs definidos para este proceso ni para sus procedimientos.</p>
+                              </td>
+                            </tr>
+                          ) : (
+                            procKpis.map(kpi => {
+                              const kpiSub = kpi.procedimientoId ? procProcedimientos.find(p => p.id === kpi.procedimientoId) : null;
+                              return (
+                                <tr key={kpi.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="py-4 px-6 font-semibold text-slate-800 text-[14px]">
+                                    {kpi.name}
+                                  </td>
+                                  <td className="py-4 px-6 text-slate-650 text-[13px]">
+                                    {kpi.puesto || <span className="text-slate-400 italic">No asignado</span>}
+                                  </td>
+                                  <td className="py-4 px-6 text-slate-650 text-[13px]">
+                                    {kpiSub ? (
+                                      <span className="text-blue-600 font-bold bg-blue-50/50 px-2 py-0.5 rounded text-[11px]">
+                                        {kpiSub.name}
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-450 italic text-[11px]">Proceso General</span>
+                                    )}
+                                  </td>
+                                  <td className="py-4 px-6">
+                                    <span className={cn(
+                                      "px-2.5 py-1 rounded text-[11px] font-bold border",
+                                      kpi.status === 'Propuesto' ? "text-amber-600 bg-amber-50 border-amber-100" : 
+                                      kpi.status === 'Aprobado' ? "text-blue-600 bg-blue-50 border-blue-100" : 
+                                      "text-emerald-600 bg-emerald-50 border-emerald-100"
+                                    )}>
+                                      {kpi.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* 4. PROCEDIMIENTOS TAB (MODO A ONLY) */}
+              {!sub && activeTab === 'procedimientos' && (
+                <div className="space-y-6">
+                  {canEdit && (
+                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
+                      <input 
+                        type="text"
+                        value={newProcedimientoName}
+                        onChange={e => setNewProcedimientoName(e.target.value)}
+                        placeholder="Ej. Registro de Prospecto, Inspección de Vehículo..."
+                        className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && newProcedimientoName.trim()) {
+                            addProcedimiento({
+                              procesoId: proc.id,
+                              name: newProcedimientoName.trim()
+                            });
+                            setNewProcedimientoName('');
+                          }
+                        }}
+                      />
+                      <button 
+                        onClick={() => {
+                          if (newProcedimientoName.trim()) {
+                            addProcedimiento({
+                              procesoId: proc.id,
+                              name: newProcedimientoName.trim()
+                            });
+                            setNewProcedimientoName('');
+                          }
+                        }}
+                        className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">add</span> Crear Procedimiento
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {procProcedimientos.length === 0 ? (
+                      <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                        <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">description</span>
+                        <p className="text-[13px] font-medium">No hay procedimientos vinculados a este proceso.</p>
+                      </div>
+                    ) : (
+                      procProcedimientos.map((procSub, idx) => (
+                        <div key={procSub.id} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[13px]">
+                              {idx + 1}
+                            </span>
+                            <span className="text-[14px] font-semibold text-slate-700">{procSub.name}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1.5">
+                            <button 
+                              onClick={() => {
+                                setViewingProcedimientoId(procSub.id);
+                                setDiagramaEdit(procSub.diagram || '');
+                                setDiagramImageEdit(procSub.diagramImage || '');
+                                setActiveProcessTab('diagram');
+                              }}
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-[11px] font-bold text-slate-650 flex items-center gap-1 transition-colors"
+                              title="Configurar diagrama, puestos y KPIs del procedimiento"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">settings</span>
+                              Configurar
+                            </button>
+                            {canEdit && (
+                              <button 
+                                onClick={() => {
+                                  deleteProcedimiento(procSub.id);
+                                }}
+                                className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                                title="Eliminar procedimiento"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {activeProcessTab === 'puestos' && (
-              <div className="space-y-6">
-                {canEdit && (
-                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                    <input 
-                      type="text"
-                      value={newPuestoName}
-                      onChange={e => setNewPuestoName(e.target.value)}
-                      placeholder="Ej. Coordinador de Operaciones, Operador de Máquina..."
-                      className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && newPuestoName.trim()) {
-                          const currentPuestos = proc.puestos || [];
-                          if (!currentPuestos.includes(newPuestoName.trim())) {
-                            updateProceso(proc.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
-                            setNewPuestoName('');
-                          }
-                        }
-                      }}
-                    />
-                    <button 
-                      onClick={() => {
-                        const currentPuestos = proc.puestos || [];
-                        if (newPuestoName.trim() && !currentPuestos.includes(newPuestoName.trim())) {
-                          updateProceso(proc.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
-                          setNewPuestoName('');
-                        }
-                      }}
-                      className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add</span> Vincular Puesto
-                    </button>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {procPuestos.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
-                      <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">badge</span>
-                      <p className="text-[13px] font-medium">No hay puestos vinculados a este proceso.</p>
-                    </div>
-                  ) : (
-                    procPuestos.map((puesto, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
-                        <div className="flex items-center gap-2">
-                          <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[13px]">
-                            {idx + 1}
-                          </span>
-                          <span className="text-[14px] font-semibold text-slate-700">{puesto}</span>
-                        </div>
-                        {canEdit && (
-                          <button 
-                            onClick={() => {
-                              updateProceso(proc.id, { puestos: procPuestos.filter(x => x !== puesto) });
-                            }}
-                            className="text-slate-400 hover:text-red-500 transition-colors"
-                            title="Eliminar vinculación"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeProcessTab === 'kpis' && (
-              <div className="space-y-6">
-                {canEdit && (
-                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
-                    <div className="flex-1 min-w-[200px]">
-                      <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del KPI</label>
-                      <input 
-                        type="text"
-                        value={newKpiNameGlobal}
-                        onChange={e => setNewKpiNameGlobal(e.target.value)}
-                        placeholder="Ej. Tiempo de Ciclo, Eficiencia general..."
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[13px] bg-white"
-                      />
-                    </div>
-                    <div className="w-full md:w-[220px]">
-                      <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Puesto / Propietario</label>
-                      <select
-                        value={newKpiPuesto}
-                        onChange={e => setNewKpiPuesto(e.target.value)}
-                        className="w-full p-2.5 rounded-lg border border-slate-200 text-[13px] outline-none bg-white"
-                      >
-                        <option value="">-- Seleccionar Puesto --</option>
-                        {procPuestos.map(p => <option key={p} value={p}>{p}</option>)}
-                        <option value="Otro">Otro puesto...</option>
-                      </select>
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                      <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Fuente de Información</label>
-                      <input 
-                        type="text"
-                        value={newKpiFuente}
-                        onChange={e => setNewKpiFuente(e.target.value)}
-                        placeholder="Ej. Reporte mensual, Base de datos SAP..."
-                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[13px] bg-white"
-                      />
-                    </div>
-                    <button 
-                      onClick={() => {
-                        if (newKpiNameGlobal.trim()) {
-                          addKPI({
-                            projectId: "global",
-                            name: newKpiNameGlobal.trim(),
-                            status: 'Propuesto',
-                            puesto: newKpiPuesto,
-                            fuenteInfo: newKpiFuente,
-                            macroprocesoId: proc.macroprocesoId,
-                            procesoId: proc.id
-                          });
-                          setNewKpiNameGlobal('');
-                          setNewKpiPuesto('');
-                          setNewKpiFuente('');
-                        }
-                      }}
-                      disabled={!newKpiNameGlobal.trim()}
-                      className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm shrink-0"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add</span> Crear KPI
-                    </button>
-                  </div>
-                )}
-
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                      <tr>
-                        <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Indicador</th>
-                        <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Puesto</th>
-                        <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Fuente de Info</th>
-                        <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase">Estatus</th>
-                        {canEdit && <th className="py-3.5 px-6 font-bold text-[12px] text-slate-500 uppercase text-center w-12">Acción</th>}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {procKpis.length === 0 ? (
-                        <tr>
-                          <td colSpan={canEdit ? 5 : 4} className="py-12 text-center text-slate-400">
-                            <span className="material-symbols-outlined text-[36px] mb-2 opacity-50">analytics</span>
-                            <p className="text-[13px]">No hay KPIs definidos para este proceso.</p>
-                          </td>
-                        </tr>
-                      ) : (
-                        procKpis.map(kpi => (
-                          <tr key={kpi.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-4 px-6 font-semibold text-slate-800 text-[14px]">
-                              {kpi.name}
-                            </td>
-                            <td className="py-4 px-6 text-slate-650 text-[13px]">
-                              {kpi.puesto || <span className="text-slate-400 italic">No asignado</span>}
-                            </td>
-                            <td className="py-4 px-6 text-slate-650 text-[13px]">
-                              {kpi.fuenteInfo || <span className="text-slate-400 italic">No especificada</span>}
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className={cn(
-                                "px-2.5 py-1 rounded text-[11px] font-bold border",
-                                kpi.status === 'Propuesto' ? "text-amber-600 bg-amber-50 border-amber-100" : 
-                                kpi.status === 'Aprobado' ? "text-blue-600 bg-blue-50 border-blue-100" : 
-                                "text-emerald-600 bg-emerald-50 border-emerald-100"
-                              )}>
-                                {kpi.status}
-                              </span>
-                            </td>
-                            {canEdit && (
-                              <td className="py-4 px-6 text-center">
-                                <button 
-                                  onClick={() => deleteKPI(kpi.id)}
-                                  className="text-slate-400 hover:text-red-500 transition-colors"
-                                  title="Eliminar KPI"
-                                >
-                                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                                </button>
-                              </td>
-                            )}
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                 </div>
-              </div>
-            )}
-
-            {activeProcessTab === 'procedimientos' && (
-              <div className="space-y-6">
-                {canEdit && (
-                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                    <input 
-                      type="text"
-                      value={newProcedimientoName}
-                      onChange={e => setNewProcedimientoName(e.target.value)}
-                      placeholder="Ej. Registro de Prospecto, Inspección de Vehículo..."
-                      className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && newProcedimientoName.trim()) {
-                          addProcedimiento({
-                            procesoId: proc.id,
-                            name: newProcedimientoName.trim()
-                          });
-                          setNewProcedimientoName('');
-                        }
-                      }}
-                    />
-                    <button 
-                      onClick={() => {
-                        if (newProcedimientoName.trim()) {
-                          addProcedimiento({
-                            procesoId: proc.id,
-                            name: newProcedimientoName.trim()
-                          });
-                          setNewProcedimientoName('');
-                        }
-                      }}
-                      className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add</span> Crear Procedimiento
-                    </button>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {procProcedimientos.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
-                      <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">description</span>
-                      <p className="text-[13px] font-medium">No hay procedimientos vinculados a este proceso.</p>
-                    </div>
-                  ) : (
-                    procProcedimientos.map((procSub, idx) => (
-                      <div key={procSub.id} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
-                        <div className="flex items-center gap-2">
-                          <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[13px]">
-                            {idx + 1}
-                          </span>
-                          <span className="text-[14px] font-semibold text-slate-700">{procSub.name}</span>
-                        </div>
-                        {canEdit && (
-                          <button 
-                            onClick={() => {
-                              deleteProcedimiento(procSub.id);
-                            }}
-                            className="text-slate-400 hover:text-red-500 transition-colors"
-                            title="Eliminar procedimiento"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

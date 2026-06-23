@@ -244,20 +244,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const deleteMacroproceso = (id: string) => {
     setMacroprocesos(prev => prev.filter(m => m.id !== id));
     const procIdsToDelete = procesos.filter(p => p.macroprocesoId === id).map(p => p.id);
+    const procSubIdsToDelete = procedimientos.filter(proc => procIdsToDelete.includes(proc.procesoId)).map(p => p.id);
     setProcesos(prev => prev.filter(p => p.macroprocesoId !== id));
     setProcedimientos(prev => prev.filter(proc => !procIdsToDelete.includes(proc.procesoId)));
+    setKpis(prev => prev.filter(k => !procIdsToDelete.includes(k.procesoId || '') && (!k.procedimientoId || !procSubIdsToDelete.includes(k.procedimientoId))));
     setFormatos(prev => prev.filter(f => f.macroprocesoId !== id));
   };
   const addProceso = (p: Omit<Proceso, 'id'>) => setProcesos(prev => [...prev, { ...p, id: `proc${Date.now()}` }]);
   const updateProceso = (id: string, updates: Partial<Proceso>) => setProcesos(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   const deleteProceso = (id: string) => {
+    const procSubIds = procedimientos.filter(proc => proc.procesoId === id).map(p => p.id);
     setProcesos(prev => prev.filter(p => p.id !== id));
     setProcedimientos(prev => prev.filter(proc => proc.procesoId !== id));
+    setKpis(prev => prev.filter(k => k.procesoId !== id && (!k.procedimientoId || !procSubIds.includes(k.procedimientoId))));
     setFormatos(prev => prev.filter(f => f.procesoId !== id));
   };
   const addProcedimiento = (p: Omit<Procedimiento, 'id'>) => setProcedimientos(prev => [...prev, { ...p, id: `procsub${Date.now()}` }]);
   const updateProcedimiento = (id: string, updates: Partial<Procedimiento>) => setProcedimientos(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-  const deleteProcedimiento = (id: string) => setProcedimientos(prev => prev.filter(p => p.id !== id));
+  const deleteProcedimiento = (id: string) => {
+    setProcedimientos(prev => prev.filter(p => p.id !== id));
+    setKpis(prev => prev.filter(k => k.procedimientoId !== id));
+  };
   const addPropuesta = (p: Omit<PropuestaProyecto, 'id'>) => setPropuestas(prev => [...prev, { ...p, id: `prop${Date.now()}` }]);
   const updatePropuesta = (id: string, updates: Partial<PropuestaProyecto>) => setPropuestas(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   
