@@ -514,7 +514,7 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
   const [newMacName, setNewMacName] = useState('');
   const [newMacType, setNewMacType] = useState<'Principal' | 'Soporte'>('Soporte');
@@ -525,11 +525,12 @@ export const MacroprocesosView = () => {
   const [diagramImageEdit, setDiagramImageEdit] = useState('');
 
   // Process sub-tabs and creation states
-  const [activeProcessTab, setActiveProcessTab] = useState<'diagram' | 'puestos' | 'kpis'>('diagram');
+  const [activeProcessTab, setActiveProcessTab] = useState<'diagram' | 'puestos' | 'kpis' | 'procedimientos'>('diagram');
   const [newPuestoName, setNewPuestoName] = useState('');
   const [newKpiNameGlobal, setNewKpiNameGlobal] = useState('');
   const [newKpiPuesto, setNewKpiPuesto] = useState('');
   const [newKpiFuente, setNewKpiFuente] = useState('');
+  const [newProcedimientoName, setNewProcedimientoName] = useState('');
 
   const mainMacros = macroprocesos.filter(m => m.type === 'Principal').sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
   const supportMacros = macroprocesos.filter(m => m.type === 'Soporte').sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
@@ -615,37 +616,67 @@ export const MacroprocesosView = () => {
                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                    </button>
                    <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                   <button onClick={() => deleteMacroproceso(mac.id)} className="text-slate-400 hover:text-red-500" title="Eliminar macroproceso">
-                     <span className="material-symbols-outlined text-[18px]">delete</span>
-                   </button>
-                 </div>
-               )}
-             </div>
-             <div className="p-4 flex-1 flex flex-col gap-2">
-                {procesos.filter(p => p.macroprocesoId === mac.id).map(p => (
-                  <div 
-                    key={p.id} 
-                    onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
-                    className={cn(
-                      "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
-                      viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-0.5 shrink-0"></span>
-                      {p.name}
-                    </div>
-                    {canEdit && (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
-                        className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
-                        title="Eliminar proceso"
+                   <button onClick={() => deleteMacroproceso(mac.id)} className="text-slate-400 hover:text-red-500">
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="p-4 flex-1 flex flex-col gap-3">
+                {procesos.filter(p => p.macroprocesoId === mac.id).map(p => {
+                  const procSub = procedimientos.filter(proc => proc.procesoId === p.id);
+                  return (
+                    <div key={p.id} className="flex flex-col gap-1.5">
+                      <div 
+                        onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
+                        className={cn(
+                          "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
+                          viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
+                        )}
                       >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5 shrink-0"></span>
+                          {p.name}
+                        </div>
+                        {canEdit && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
+                            className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
+                            title="Eliminar proceso"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* PROCEDIMIENTOS ANIDADOS */}
+                      {procSub.length > 0 && (
+                        <div className="pl-4 flex flex-col gap-1 border-l border-slate-100 ml-2.5">
+                          {procSub.map(proc => (
+                            <div 
+                              key={proc.id} 
+                              className="text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-[14px] text-slate-400">description</span>
+                                <span>{proc.name}</span>
+                              </div>
+                              {canEdit && (
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); }} 
+                                  className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc-sub:opacity-100 transition-opacity"
+                                  title="Eliminar procedimiento"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">delete</span>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 {canEdit && (selectedMacId === mac.id ? (
                   <div className="mt-2 flex gap-2">
                     <input 
@@ -690,28 +721,60 @@ export const MacroprocesosView = () => {
                  </button>
                </div>
              </div>
-             <div className="p-4 flex-1 flex flex-col gap-2">
-               {procesos.filter(p => p.macroprocesoId === mac.id).map(p => (
-                 <div 
-                   key={p.id} 
-                   onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
-                   className={cn(
-                     "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
-                     viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
-                   )}
-                 >
-                   <div className="flex items-center gap-2">
-                     <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-0.5 shrink-0"></span>
-                     {p.name}
-                   </div>
-                   <button 
-                     onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
-                     className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
-                   >
-                     <span className="material-symbols-outlined text-[16px]">delete</span>
-                   </button>
-                 </div>
-               ))}
+             <div className="p-4 flex-1 flex flex-col gap-3">
+               {procesos.filter(p => p.macroprocesoId === mac.id).map(p => {
+                  const procSub = procedimientos.filter(proc => proc.procesoId === p.id);
+                  return (
+                    <div key={p.id} className="flex flex-col gap-1.5">
+                      <div 
+                        onClick={() => { setViewingProcesoId(p.id); setDiagramaEdit(p.diagram || ''); setDiagramImageEdit(p.diagramImage || ''); setActiveProcessTab('diagram'); }}
+                        className={cn(
+                          "text-[13px] p-2 rounded-lg flex items-center justify-between group/proc cursor-pointer transition-colors border",
+                          viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5 shrink-0"></span>
+                          {p.name}
+                        </div>
+                        {canEdit && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) setViewingProcesoId(null); }} 
+                            className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* PROCEDIMIENTOS ANIDADOS */}
+                      {procSub.length > 0 && (
+                        <div className="pl-4 flex flex-col gap-1 border-l border-slate-100 ml-2.5">
+                          {procSub.map(proc => (
+                            <div 
+                              key={proc.id} 
+                              className="text-[12px] p-1.5 rounded flex items-center justify-between group/proc-sub text-slate-600 hover:text-slate-900 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-[14px] text-slate-400">description</span>
+                                <span>{proc.name}</span>
+                              </div>
+                              {canEdit && (
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); deleteProcedimiento(proc.id); }} 
+                                  className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc-sub:opacity-100 transition-opacity"
+                                  title="Eliminar procedimiento"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">delete</span>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+               })}
                {selectedMacId === mac.id ? (
                  <div className="mt-2 flex gap-2">
                    <input 
@@ -772,6 +835,7 @@ export const MacroprocesosView = () => {
         
         const procKpis = kpis.filter(k => k.procesoId === viewingProcesoId);
         const procPuestos = proc.puestos || [];
+        const procProcedimientos = procedimientos.filter(p => p.procesoId === viewingProcesoId);
 
         return (
           <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mt-8 animate-in fade-in slide-in-from-bottom-4">
@@ -781,7 +845,7 @@ export const MacroprocesosView = () => {
                   Detalles del Proceso: {proc.name}
                 </h2>
                 <p className="text-[13px] text-slate-500 mt-1">
-                  Configura el diagrama, roles y KPIs del proceso actual.
+                  Configura el diagrama, roles, KPIs y procedimientos del proceso actual.
                 </p>
               </div>
               <div className="flex items-center gap-4 self-stretch md:self-auto justify-between md:justify-end">
@@ -803,6 +867,12 @@ export const MacroprocesosView = () => {
                     className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'kpis' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
                   >
                     <span className="material-symbols-outlined text-[16px]">analytics</span> Indicadores ({procKpis.length})
+                  </button>
+                  <button 
+                    onClick={() => setActiveProcessTab('procedimientos')}
+                    className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeProcessTab === 'procedimientos' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">description</span> Procedimientos ({procProcedimientos.length})
                   </button>
                 </div>
                 <button onClick={() => setViewingProcesoId(null)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-650 transition-colors">
@@ -1048,6 +1118,76 @@ export const MacroprocesosView = () => {
                       )}
                     </tbody>
                   </table>
+                 </div>
+              </div>
+            )}
+
+            {activeProcessTab === 'procedimientos' && (
+              <div className="space-y-6">
+                {canEdit && (
+                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
+                    <input 
+                      type="text"
+                      value={newProcedimientoName}
+                      onChange={e => setNewProcedimientoName(e.target.value)}
+                      placeholder="Ej. Registro de Prospecto, Inspección de Vehículo..."
+                      className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && newProcedimientoName.trim()) {
+                          addProcedimiento({
+                            procesoId: proc.id,
+                            name: newProcedimientoName.trim()
+                          });
+                          setNewProcedimientoName('');
+                        }
+                      }}
+                    />
+                    <button 
+                      onClick={() => {
+                        if (newProcedimientoName.trim()) {
+                          addProcedimiento({
+                            procesoId: proc.id,
+                            name: newProcedimientoName.trim()
+                          });
+                          setNewProcedimientoName('');
+                        }
+                      }}
+                      className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">add</span> Crear Procedimiento
+                    </button>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {procProcedimientos.length === 0 ? (
+                    <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                      <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">description</span>
+                      <p className="text-[13px] font-medium">No hay procedimientos vinculados a este proceso.</p>
+                    </div>
+                  ) : (
+                    procProcedimientos.map((procSub, idx) => (
+                      <div key={procSub.id} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
+                        <div className="flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[13px]">
+                            {idx + 1}
+                          </span>
+                          <span className="text-[14px] font-semibold text-slate-700">{procSub.name}</span>
+                        </div>
+                        {canEdit && (
+                          <button 
+                            onClick={() => {
+                              deleteProcedimiento(procSub.id);
+                            }}
+                            className="text-slate-400 hover:text-red-500 transition-colors"
+                            title="Eliminar procedimiento"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

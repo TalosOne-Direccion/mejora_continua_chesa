@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { AppState, Modo, PhaseState, ProjectType, Solicitud, User, GlossaryTerm, ProjectKPI, Macroproceso, Proceso, PropuestaProyecto, Formato, MeetingAgenda } from './types';
-import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS } from './constants';
+import { AppState, Modo, PhaseState, ProjectType, Solicitud, User, GlossaryTerm, ProjectKPI, Macroproceso, Proceso, Procedimiento, PropuestaProyecto, Formato, MeetingAgenda } from './types';
+import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS, INITIAL_PROCEDIMIENTOS } from './constants';
 import { db, auth } from './firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -90,6 +90,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [kpis, setKpis] = useState<ProjectKPI[]>(() => loadState('chesa_kpis', []));
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => loadState('chesa_macroprocesos', INITIAL_MACROPROCESOS));
   const [procesos, setProcesos] = useState<Proceso[]>(() => loadState('chesa_procesos', INITIAL_PROCESOS));
+  const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => loadState('chesa_procedimientos', INITIAL_PROCEDIMIENTOS));
   const [propuestas, setPropuestas] = useState<PropuestaProyecto[]>(() => {
     const saved = localStorage.getItem('chesa_propuestas');
     if (saved) {
@@ -140,7 +141,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const loadedCollections = new Set<string>();
     const collectionsToSync = [
       'users', 'modos', 'solicitudes', 'glossary',
-      'kpis', 'macroprocesos', 'procesos', 'propuestas', 'formatos'
+      'kpis', 'macroprocesos', 'procesos', 'procedimientos', 'propuestas', 'formatos'
     ];
 
     setSyncState('loading');
@@ -175,6 +176,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       syncDoc('kpis', setKpis),
       syncDoc('macroprocesos', setMacroprocesos),
       syncDoc('procesos', setProcesos),
+      syncDoc('procedimientos', setProcedimientos),
       syncDoc('propuestas', setPropuestas),
       syncDoc('formatos', setFormatos)
     ];
@@ -201,6 +203,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('chesa_kpis', JSON.stringify(kpis));
       localStorage.setItem('chesa_macroprocesos', JSON.stringify(macroprocesos));
       localStorage.setItem('chesa_procesos', JSON.stringify(procesos));
+      localStorage.setItem('chesa_procedimientos', JSON.stringify(procedimientos));
       localStorage.setItem('chesa_propuestas', JSON.stringify(propuestas));
       localStorage.setItem('chesa_formatos', JSON.stringify(formatos));
     } catch (e) {
@@ -231,23 +234,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     saveDoc('kpis', kpis);
     saveDoc('macroprocesos', macroprocesos);
     saveDoc('procesos', procesos);
+    saveDoc('procedimientos', procedimientos);
     saveDoc('propuestas', propuestas);
     saveDoc('formatos', formatos);
-  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, propuestas, formatos, hasLoadedFromServer]);
+  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, procedimientos, propuestas, formatos, hasLoadedFromServer]);
 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
   const deleteMacroproceso = (id: string) => {
     setMacroprocesos(prev => prev.filter(m => m.id !== id));
+    const procIdsToDelete = procesos.filter(p => p.macroprocesoId === id).map(p => p.id);
     setProcesos(prev => prev.filter(p => p.macroprocesoId !== id));
+    setProcedimientos(prev => prev.filter(proc => !procIdsToDelete.includes(proc.procesoId)));
     setFormatos(prev => prev.filter(f => f.macroprocesoId !== id));
   };
   const addProceso = (p: Omit<Proceso, 'id'>) => setProcesos(prev => [...prev, { ...p, id: `proc${Date.now()}` }]);
   const updateProceso = (id: string, updates: Partial<Proceso>) => setProcesos(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   const deleteProceso = (id: string) => {
     setProcesos(prev => prev.filter(p => p.id !== id));
+    setProcedimientos(prev => prev.filter(proc => proc.procesoId !== id));
     setFormatos(prev => prev.filter(f => f.procesoId !== id));
   };
+  const addProcedimiento = (p: Omit<Procedimiento, 'id'>) => setProcedimientos(prev => [...prev, { ...p, id: `procsub${Date.now()}` }]);
+  const updateProcedimiento = (id: string, updates: Partial<Procedimiento>) => setProcedimientos(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const deleteProcedimiento = (id: string) => setProcedimientos(prev => prev.filter(p => p.id !== id));
   const addPropuesta = (p: Omit<PropuestaProyecto, 'id'>) => setPropuestas(prev => [...prev, { ...p, id: `prop${Date.now()}` }]);
   const updatePropuesta = (id: string, updates: Partial<PropuestaProyecto>) => setPropuestas(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   
@@ -504,6 +514,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         areas: AREAS,
         macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso,
         procesos, addProceso, updateProceso, deleteProceso,
+        procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
         propuestas, addPropuesta, updatePropuesta,
         formatos, addFormato, deleteFormato,
         syncState, syncErrorMessage,

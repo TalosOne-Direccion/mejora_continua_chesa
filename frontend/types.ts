@@ -184,6 +184,12 @@ export type Formato = {
   uploadedAt: string;
 };
 
+export type Procedimiento = {
+  id: string;
+  procesoId: string;
+  name: string;
+};
+
 export type AppState = {
   currentUser: User;
   users: User[];
@@ -193,6 +199,10 @@ export type AppState = {
   kpis: ProjectKPI[];
   macroprocesos: Macroproceso[];
   procesos: Proceso[];
+  procedimientos: Procedimiento[];
+  addProcedimiento: (p: Omit<Procedimiento, 'id'>) => void;
+  updateProcedimiento: (id: string, updates: Partial<Procedimiento>) => void;
+  deleteProcedimiento: (id: string) => void;
   propuestas: PropuestaProyecto[];
   addPropuesta: (p: Omit<PropuestaProyecto, 'id'>) => void;
   updatePropuesta: (id: string, updates: Partial<PropuestaProyecto>) => void;

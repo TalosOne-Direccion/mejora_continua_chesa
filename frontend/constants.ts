@@ -250,3 +250,16 @@ export const INITIAL_SOLICITUDES: Record<string, Solicitud> = {
     status: 'En Revisión'
   }
 };
+
+export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
+  { id: 'procsub1', procesoId: 'p3', name: 'Definición de Presupuesto Mensual de Atracción' },
+  { id: 'procsub2', procesoId: 'p3', name: 'Configuración de Campañas en Facebook & Google Ads' },
+  { id: 'procsub3', procesoId: 'p3', name: 'Diseño de Creativos y Redacción de Copys' },
+  { id: 'procsub4', procesoId: 'p4', name: 'Monitoreo Diario de Lead Inbox en CRM' },
+  { id: 'procsub5', procesoId: 'p4', name: 'Calificación Inicial y Asignación de Leads' },
+  { id: 'procsub6', procesoId: 'p7', name: 'Recepción Telefónica / WhatsApp del Cliente' },
+  { id: 'procsub7', procesoId: 'p7', name: 'Validación de Capacidad y Asignación de Bahía' },
+  { id: 'procsub8', procesoId: 'p8', name: 'Inspección Visual 28 Puntos en Elevador' },
+  { id: 'procsub9', procesoId: 'p8', name: 'Apertura y Firma de Orden de Servicio' },
+  { id: 'procsub10', procesoId: 'p8', name: 'Ejecución de Mantenimiento / Reparación Mecánica' }
+];
