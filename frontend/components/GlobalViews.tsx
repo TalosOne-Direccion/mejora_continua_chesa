@@ -526,12 +526,14 @@ export const MacroprocesosView = () => {
   const [diagramImageEdit, setDiagramImageEdit] = useState('');
 
   // Process sub-tabs and creation states
-  const [activeProcessTab, setActiveProcessTab] = useState<'diagram' | 'puestos' | 'kpis' | 'procedimientos'>('diagram');
+  const [activeProcessTab, setActiveProcessTab] = useState<'diagram' | 'puestos' | 'kpis' | 'procedimientos' | 'sistemas' | 'herramientas'>('diagram');
   const [newPuestoName, setNewPuestoName] = useState('');
   const [newKpiNameGlobal, setNewKpiNameGlobal] = useState('');
   const [newKpiPuesto, setNewKpiPuesto] = useState('');
   const [newKpiFuente, setNewKpiFuente] = useState('');
   const [newProcedimientoName, setNewProcedimientoName] = useState('');
+  const [newSistemaName, setNewSistemaName] = useState('');
+  const [newHerramientaName, setNewHerramientaName] = useState('');
 
   const mainMacros = macroprocesos.filter(m => m.type === 'Principal').sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
   const supportMacros = macroprocesos.filter(m => m.type === 'Soporte').sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
@@ -873,6 +875,16 @@ export const MacroprocesosView = () => {
             ...procProcedimientos.flatMap(p => p.puestos || [])
           ]));
 
+          const subSistemas = sub ? sub.sistemas || [] : [];
+          const compiledSistemas = Array.from(new Set([
+            ...procProcedimientos.flatMap(p => p.sistemas || [])
+          ]));
+
+          const subHerramientas = sub ? sub.herramientas || [] : [];
+          const compiledHerramientas = Array.from(new Set([
+            ...procProcedimientos.flatMap(p => p.herramientas || [])
+          ]));
+
           const activeTab = (viewingProcedimientoId && activeProcessTab === 'procedimientos') ? 'diagram' : activeProcessTab;
 
           return (
@@ -904,7 +916,7 @@ export const MacroprocesosView = () => {
                       {sub.name}
                     </h2>
                     <p className="text-[13px] text-slate-500 mt-1">
-                      Configura el diagrama, puestos e indicadores de este procedimiento.
+                      Configura el diagrama, puestos, indicadores, sistemas y herramientas de este procedimiento.
                     </p>
                   </div>
                 ) : (
@@ -913,7 +925,7 @@ export const MacroprocesosView = () => {
                       Detalles del Proceso: {proc.name}
                     </h2>
                     <p className="text-[13px] text-slate-500 mt-1">
-                      Consolidado de diagramas, puestos, KPIs y procedimientos de este proceso.
+                      Consolidado de diagramas, puestos, KPIs, sistemas, herramientas y procedimientos de este proceso.
                     </p>
                   </div>
                 )}
@@ -938,6 +950,18 @@ export const MacroprocesosView = () => {
                       className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'kpis' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
                     >
                       <span className="material-symbols-outlined text-[16px]">analytics</span> Indicadores ({sub ? subKpis.length : procKpis.length})
+                    </button>
+                    <button 
+                      onClick={() => setActiveProcessTab('sistemas')}
+                      className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'sistemas' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">dns</span> Sistemas ({sub ? subSistemas.length : compiledSistemas.length})
+                    </button>
+                    <button 
+                      onClick={() => setActiveProcessTab('herramientas')}
+                      className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors flex items-center gap-1.5", activeTab === 'herramientas' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">build</span> Herramientas ({sub ? subHerramientas.length : compiledHerramientas.length})
                     </button>
                     {!sub && (
                       <button 
@@ -1166,6 +1190,220 @@ export const MacroprocesosView = () => {
                                 {isLegacy && (
                                   <span className="text-[10px] bg-slate-100 text-slate-650 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Proceso General</span>
                                 )}
+                                {linkedSubs.map(subName => (
+                                  <span key={subName} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold truncate max-w-[190px]" title={subName}>
+                                    {subName}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* SISTEMAS TAB */}
+              {activeTab === 'sistemas' && (
+                sub ? (
+                  // MODO B: Link sistema to procedure
+                  <div className="space-y-6">
+                    {canEdit && (
+                      <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
+                        <input 
+                          type="text"
+                          value={newSistemaName}
+                          onChange={e => setNewSistemaName(e.target.value)}
+                          placeholder="Ej. SAP, CRM, Portal del Proveedor..."
+                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && newSistemaName.trim()) {
+                              const currentSistemas = sub.sistemas || [];
+                              if (!currentSistemas.includes(newSistemaName.trim())) {
+                                updateProcedimiento(sub.id, { sistemas: [...currentSistemas, newSistemaName.trim()] });
+                                setNewSistemaName('');
+                              }
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => {
+                            const currentSistemas = sub.sistemas || [];
+                            if (newSistemaName.trim() && !currentSistemas.includes(newSistemaName.trim())) {
+                              updateProcedimiento(sub.id, { sistemas: [...currentSistemas, newSistemaName.trim()] });
+                              setNewSistemaName('');
+                            }
+                          }}
+                          className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span> Vincular Sistema
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subSistemas.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">dns</span>
+                          <p className="text-[13px] font-medium">No hay sistemas vinculados a este procedimiento.</p>
+                        </div>
+                      ) : (
+                        subSistemas.map((sistema, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
+                            <div className="flex items-center gap-2">
+                              <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center font-bold text-[13px]">
+                                {idx + 1}
+                              </span>
+                              <span className="text-[14px] font-semibold text-slate-700">{sistema}</span>
+                            </div>
+                            {canEdit && (
+                              <button 
+                                onClick={() => {
+                                  updateProcedimiento(sub.id, { sistemas: subSistemas.filter(x => x !== sistema) });
+                                }}
+                                className="text-slate-400 hover:text-red-500 transition-colors"
+                                title="Eliminar vinculación"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  // MODO A: Compiled Sistemas
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-slate-700 text-[13px] uppercase tracking-wider">Consolidado de Sistemas en Procedimientos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {compiledSistemas.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">dns</span>
+                          <p className="text-[13px] font-medium">No hay sistemas vinculados a los procedimientos de este proceso.</p>
+                        </div>
+                      ) : (
+                        compiledSistemas.map((sistema, idx) => {
+                          const linkedSubs = procProcedimientos.filter(p => p.sistemas?.includes(sistema)).map(p => p.name);
+                          
+                          return (
+                            <div key={idx} className="flex flex-col p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-primary/40 transition-colors">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-500 flex items-center justify-center font-bold text-[12px]">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-[14px] font-bold text-slate-800">{sistema}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {linkedSubs.map(subName => (
+                                  <span key={subName} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold truncate max-w-[190px]" title={subName}>
+                                    {subName}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* HERRAMIENTAS TAB */}
+              {activeTab === 'herramientas' && (
+                sub ? (
+                  // MODO B: Link herramienta to procedure
+                  <div className="space-y-6">
+                    {canEdit && (
+                      <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
+                        <input 
+                          type="text"
+                          value={newHerramientaName}
+                          onChange={e => setNewHerramientaName(e.target.value)}
+                          placeholder="Ej. Checkpoint de calidad, Plantilla Excel, Tacómetro..."
+                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && newHerramientaName.trim()) {
+                              const currentHerramientas = sub.herramientas || [];
+                              if (!currentHerramientas.includes(newHerramientaName.trim())) {
+                                updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, newHerramientaName.trim()] });
+                                setNewHerramientaName('');
+                              }
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => {
+                            const currentHerramientas = sub.herramientas || [];
+                            if (newHerramientaName.trim() && !currentHerramientas.includes(newHerramientaName.trim())) {
+                              updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, newHerramientaName.trim()] });
+                              setNewHerramientaName('');
+                            }
+                          }}
+                          className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/95 transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span> Vincular Herramienta
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subHerramientas.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">build</span>
+                          <p className="text-[13px] font-medium">No hay herramientas vinculadas a este procedimiento.</p>
+                        </div>
+                      ) : (
+                        subHerramientas.map((herramienta, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-xl hover:border-primary/50 transition-colors shadow-sm group">
+                            <div className="flex items-center gap-2">
+                              <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center font-bold text-[13px]">
+                                {idx + 1}
+                              </span>
+                              <span className="text-[14px] font-semibold text-slate-700">{herramienta}</span>
+                            </div>
+                            {canEdit && (
+                              <button 
+                                onClick={() => {
+                                  updateProcedimiento(sub.id, { herramientas: subHerramientas.filter(x => x !== herramienta) });
+                                }}
+                                className="text-slate-400 hover:text-red-500 transition-colors"
+                                title="Eliminar vinculación"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  // MODO A: Compiled Herramientas
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-slate-700 text-[13px] uppercase tracking-wider">Consolidado de Herramientas en Procedimientos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {compiledHerramientas.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl">
+                          <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">build</span>
+                          <p className="text-[13px] font-medium">No hay herramientas vinculadas a los procedimientos de este proceso.</p>
+                        </div>
+                      ) : (
+                        compiledHerramientas.map((herramienta, idx) => {
+                          const linkedSubs = procProcedimientos.filter(p => p.herramientas?.includes(herramienta)).map(p => p.name);
+                          
+                          return (
+                            <div key={idx} className="flex flex-col p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-primary/40 transition-colors">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center font-bold text-[12px]">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-[14px] font-bold text-slate-800">{herramienta}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
                                 {linkedSubs.map(subName => (
                                   <span key={subName} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold truncate max-w-[190px]" title={subName}>
                                     {subName}

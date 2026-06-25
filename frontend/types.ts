@@ -192,6 +192,8 @@ export type Procedimiento = {
   diagram?: string;
   diagramImage?: string;
   puestos?: string[];
+  sistemas?: string[];
+  herramientas?: string[];
 };
 
 export type AppState = {
