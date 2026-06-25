@@ -577,7 +577,7 @@ export const MacroprocesosView = () => {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-64px)] -mx-8 -mt-8 p-8 overflow-hidden bg-slate-50">
+    <div className="relative min-h-[calc(100vh-56px)] -mx-6 -mt-6 p-6 overflow-hidden bg-slate-50">
       {/* Animated Background Layers */}
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob pointer-events-none"></div>
       <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob pointer-events-none" style={{ animationDelay: '2s' }}></div>

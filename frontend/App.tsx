@@ -127,60 +127,60 @@ const MainLayout: React.FC = () => {
     <div className="flex-1 flex min-w-0 w-full bg-[#F8FAFC]">
       {/* SideNavBar - Diseño más limpio y moderno */}
       {!selectedModoId && (
-        <nav className="hidden md:flex flex-col h-screen w-[260px] fixed left-0 top-0 bg-white border-r border-slate-200 z-40 py-6 px-4 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-          <div className="flex flex-col items-center w-full mb-10 mt-4">
-            <div className="w-48 flex items-center justify-center shrink-0 px-2">
+        <nav className="hidden md:flex flex-col h-screen w-[220px] fixed left-0 top-0 bg-white border-r border-slate-200 z-40 py-5 px-3.5 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+          <div className="flex flex-col items-center w-full mb-6 mt-2">
+            <div className="w-40 flex items-center justify-center shrink-0 px-1">
               <img src="/logo_chesa.png" alt="Logo Grupo Chesa" className="w-full h-auto object-contain" />
             </div>
             
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-1.5"></div>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-1"></div>
             
-            <h1 className="text-[12px] font-light text-slate-500 tracking-[0.25em] uppercase text-center ml-1">
+            <h1 className="text-[11px] font-light text-slate-500 tracking-[0.2em] uppercase text-center ml-0.5">
               Mejora Continua
             </h1>
           </div>
           
-          <div className="flex-1 overflow-y-auto space-y-1.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-3 mt-4">Menú Principal</p>
+          <div className="flex-1 overflow-y-auto space-y-1">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1.5 mt-2">Menú Principal</p>
             
-            <button onClick={() => { setActiveGlobalTab('Portafolio'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Portafolio' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Portafolio' && !selectedModoId && "filled")}>grid_view</span>
-              <span className="text-[14px]">Portafolio</span>
+            <button onClick={() => { setActiveGlobalTab('Portafolio'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Portafolio' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Portafolio' && !selectedModoId && "filled")}>grid_view</span>
+              <span className="text-[13px]">Portafolio</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('Solicitudes'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Solicitudes' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Solicitudes' && !selectedModoId && "filled")}>inbox</span>
-              <span className="text-[14px]">Solicitudes</span>
+            <button onClick={() => { setActiveGlobalTab('Solicitudes'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Solicitudes' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Solicitudes' && !selectedModoId && "filled")}>inbox</span>
+              <span className="text-[13px]">Solicitudes</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('Documentos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Documentos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Documentos' && !selectedModoId && "filled")}>folder_open</span>
-              <span className="text-[14px]">Documentos</span>
+            <button onClick={() => { setActiveGlobalTab('Documentos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Documentos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Documentos' && !selectedModoId && "filled")}>folder_open</span>
+              <span className="text-[13px]">Documentos</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('KPIs'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'KPIs' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'KPIs' && !selectedModoId && "filled")}>assessment</span>
-              <span className="text-[14px]">KPIs</span>
+            <button onClick={() => { setActiveGlobalTab('KPIs'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'KPIs' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'KPIs' && !selectedModoId && "filled")}>assessment</span>
+              <span className="text-[13px]">KPIs</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('Glosario'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Glosario' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Glosario' && !selectedModoId && "filled")}>menu_book</span>
-              <span className="text-[14px]">Glosario</span>
+            <button onClick={() => { setActiveGlobalTab('Glosario'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Glosario' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Glosario' && !selectedModoId && "filled")}>menu_book</span>
+              <span className="text-[13px]">Glosario</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('Macroprocesos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Macroprocesos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Macroprocesos' && !selectedModoId && "filled")}>account_tree</span>
-              <span className="text-[14px]">Macroprocesos</span>
+            <button onClick={() => { setActiveGlobalTab('Macroprocesos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Macroprocesos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Macroprocesos' && !selectedModoId && "filled")}>account_tree</span>
+              <span className="text-[13px]">Macroprocesos</span>
             </button>
             
             {canEdit && (
               <>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-3 mt-8">Configuración</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1.5 mt-5">Configuración</p>
                 
-                <button onClick={() => { setActiveGlobalTab('Administración'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200", activeGlobalTab === 'Administración' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-                  <span className={cn("material-symbols-outlined text-[22px]", activeGlobalTab === 'Administración' && !selectedModoId && "filled")}>settings</span>
-                  <span className="text-[14px]">Administración</span>
+                <button onClick={() => { setActiveGlobalTab('Administración'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Administración' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+                  <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Administración' && !selectedModoId && "filled")}>settings</span>
+                  <span className="text-[13px]">Administración</span>
                 </button>
               </>
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-200 mt-auto shrink-0 pb-2">
+          <div className="pt-3 border-t border-slate-200 mt-auto shrink-0 pb-1">
             <button 
               onClick={() => {
                 localStorage.removeItem('isAuthenticated');
@@ -188,17 +188,17 @@ const MainLayout: React.FC = () => {
                 signOut(auth);
                 window.location.href = '/login';
               }} 
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-650 hover:bg-red-50 hover:text-red-700 transition-all duration-200 text-left font-semibold cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-red-650 hover:bg-red-50 hover:text-red-700 transition-all duration-200 text-left font-semibold cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[22px]">logout</span>
-              <span className="text-[14px]">Cerrar Sesión</span>
+              <span className="material-symbols-outlined text-[20px]">logout</span>
+              <span className="text-[13px]">Cerrar Sesión</span>
             </button>
           </div>
         </nav>
       )}
 
       {/* Main Content Wrapper */}
-      <div className={cn("flex-1 flex flex-col min-w-0 h-screen transition-all duration-300", !selectedModoId && "md:ml-[260px]")}>
+      <div className={cn("flex-1 flex flex-col min-w-0 h-screen transition-all duration-300", !selectedModoId && "md:ml-[220px]")}>
         {syncState === 'error' && (
           <div className="bg-red-650 text-white text-[13px] font-medium py-2.5 px-6 flex items-center justify-between gap-4 shrink-0 shadow-[0_2px_10px_rgba(220,38,38,0.15)] animate-in slide-in-from-top duration-200">
             <div className="flex items-center gap-2">
@@ -208,7 +208,7 @@ const MainLayout: React.FC = () => {
           </div>
         )}
         {/* TopNavBar - Glassmorphism effect */}
-        <header className="flex justify-between items-center w-full px-8 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shrink-0">
+        <header className="flex justify-between items-center w-full px-6 h-14 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shrink-0">
           <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
             <span className="material-symbols-outlined">menu</span>
           </button>
@@ -294,7 +294,7 @@ const MainLayout: React.FC = () => {
         </header>
 
         {/* Main Canvas */}
-        <main className="flex-1 overflow-y-auto p-8 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-6 flex flex-col">
           <div className="flex-1">
             {selectedModoId ? (
               <ModoDetail modoId={selectedModoId} onBack={() => setSelectedModoId(null)} />

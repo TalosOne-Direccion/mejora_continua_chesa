@@ -71,7 +71,7 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
   return (
     <div className="max-w-[1400px] mx-auto pb-12">
       {/* Hero Section with Industrial Background */}
-      <div className="-mt-8 -mx-8 mb-10 relative bg-[#0a1118] overflow-hidden shadow-2xl border-b-[4px] border-orange-500">
+      <div className="-mt-6 -mx-6 mb-10 relative bg-[#0a1118] overflow-hidden shadow-2xl border-b-[4px] border-orange-500">
         <img src="/hero_bg.png" alt="Industrial Factory" className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity grayscale-[30%]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#001e40]/95 via-[#001e40]/70 to-transparent"></div>
         <div className="relative z-10 px-8 py-14 md:px-16 md:py-20 flex flex-col items-start justify-center text-left max-w-4xl">

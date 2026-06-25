@@ -243,10 +243,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
   const updateMacroprocesosOrder = (updates: { id: string; order: number }[]) => {
-    setMacroprocesos(prev => prev.map(m => {
-      const u = updates.find(x => x.id === m.id);
-      return u ? { ...m, order: u.order } : m;
-    }));
+    setMacroprocesos(prev => {
+      const updated = prev.map(m => {
+        const u = updates.find(x => x.id === m.id);
+        return u ? { ...m, order: u.order } : m;
+      });
+      try {
+        localStorage.setItem('chesa_macroprocesos', JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Writing macroprocesos order failed locally:", e);
+      }
+      if (fbUser && hasLoadedFromServer['macroprocesos']) {
+        const dataStr = JSON.stringify(updated);
+        serverDataRef.current['macroprocesos'] = dataStr;
+        setDoc(doc(db, 'app_state', 'macroprocesos'), { data: updated }).catch(e => {
+          console.error("Error saving macroprocesos order to Firestore:", e);
+        });
+      }
+      return updated;
+    });
   };
   const deleteMacroproceso = (id: string) => {
     setMacroprocesos(prev => prev.filter(m => m.id !== id));
