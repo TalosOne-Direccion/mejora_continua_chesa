@@ -599,9 +599,9 @@ export const MacroprocesosView = () => {
         </div>
 
       <h2 className="font-title-md text-title-md text-slate-800 font-bold mb-4">Macroprocesos Principales (Flujo de Valor)</h2>
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4">
         {mainMacros.map((mac, idx) => (
-          <div key={mac.id} className="min-w-[300px] flex-1 bg-white border border-blue-100 rounded-2xl shadow-sm overflow-hidden flex flex-col relative group">
+          <div key={mac.id} className="bg-white border border-blue-100 rounded-2xl shadow-sm overflow-hidden flex flex-col relative group">
              <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500"></div>
              <div className="p-5 border-b border-slate-100 bg-blue-50/30 flex items-center justify-between gap-3">
                <div className="flex items-center gap-3">
