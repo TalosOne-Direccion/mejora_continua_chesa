@@ -29,6 +29,7 @@ interface AppContextType extends AppState {
   deleteKPI: (id: string) => void;
   addMacroproceso: (m: Omit<Macroproceso, 'id'>) => void;
   updateMacroproceso: (id: string, m: Partial<Macroproceso>) => void;
+  updateMacroprocesosOrder: (updates: { id: string; order: number }[]) => void;
   addProceso: (p: Omit<Proceso, 'id'>) => void;
   updateProceso: (id: string, p: Partial<Proceso>) => void;
 
@@ -241,6 +242,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  const updateMacroprocesosOrder = (updates: { id: string; order: number }[]) => {
+    setMacroprocesos(prev => prev.map(m => {
+      const u = updates.find(x => x.id === m.id);
+      return u ? { ...m, order: u.order } : m;
+    }));
+  };
   const deleteMacroproceso = (id: string) => {
     setMacroprocesos(prev => prev.filter(m => m.id !== id));
     const procIdsToDelete = procesos.filter(p => p.macroprocesoId === id).map(p => p.id);
@@ -519,7 +526,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         modos, updateModoPhase, updateModoTeam, addModo, deleteModo, updateModoRisks, updateModoCompromisos, addPhaseLog, addAgenda, deleteAgenda,
         solicitudes, addSolicitud, updateSolicitudStatus, deleteSolicitud,
         areas: AREAS,
-        macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso,
+        macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso, updateMacroprocesosOrder,
         procesos, addProceso, updateProceso, deleteProceso,
         procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
         propuestas, addPropuesta, updatePropuesta,

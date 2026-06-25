@@ -514,7 +514,7 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
   const [newMacName, setNewMacName] = useState('');
   const [newMacType, setNewMacType] = useState<'Principal' | 'Soporte'>('Soporte');
@@ -545,7 +545,7 @@ export const MacroprocesosView = () => {
     } else if (direction === 'right' && idx < newOrder.length - 1) {
       [newOrder[idx], newOrder[idx + 1]] = [newOrder[idx + 1], newOrder[idx]];
     } else return;
-    newOrder.forEach((m, i) => updateMacroproceso(m.id, { order: i }));
+    updateMacroprocesosOrder(newOrder.map((m, i) => ({ id: m.id, order: i })));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
