@@ -1526,6 +1526,7 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
   const phaseData = modo.phases[2]?.data || {};
   const isApproved = modo.phases[2]?.status === 'Aprobado';
   const [notas, setNotas] = useState(phaseData.notas || '');
+  const [viewMode, setViewMode] = useState<'executive' | 'edit'>('executive');
 
   const [sipocMode, setSipocMode] = useState<'image' | 'mermaid'>(
     (phaseData.sipocImage || phaseData.asIsImage) ? 'image' : ((phaseData.mermaidSipoc || phaseData.mermaidASIS) ? 'mermaid' : 'image')
@@ -1919,14 +1920,32 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
         isApproved={isApproved} 
       />
 
-      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 p-8">
-        <h3 className="text-[16px] font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">schema</span>
-          Mapeo y Vinculación del Proceso (AS-IS)
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col gap-2 md:col-span-2 lg:col-span-1">
+      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-[20px]">schema</span>
+            <h3 className="text-[16px] font-bold text-slate-900">Mapeo y Vinculación del Proceso (AS-IS)</h3>
+          </div>
+          {mappingInputs.macroproceso && mappingInputs.macroproceso !== 'Otro' && (
+            <div className="flex bg-slate-100 p-1 rounded-lg self-start md:self-auto shrink-0">
+              <button 
+                onClick={() => setViewMode('executive')}
+                className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'executive' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+              >
+                <span className="material-symbols-outlined text-[16px]">visibility</span> Vista Ejecutiva
+              </button>
+              <button 
+                onClick={() => setViewMode('edit')}
+                className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'edit' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+              >
+                <span className="material-symbols-outlined text-[16px]">edit</span> Vista Tags / Editar
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="p-8">
+          <div className="flex flex-col gap-2 max-w-md mb-6">
             <label className="text-[13px] font-bold text-slate-600">Macroproceso Asociado</label>
             <select 
               className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-[14px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
@@ -1941,51 +1960,63 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
               <option value="Otro">Otro (No registrado)</option>
             </select>
           </div>
-          
-          <MultiTagInput 
-            label="Procedimientos Involucrados"
-            placeholder="Ej. Recepción de piezas, Diagnóstico... (Presiona Enter)"
-            tags={mappingInputs.procedimientos}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, procedimientos: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
 
-          <MultiTagInput 
-            label="Puestos / Roles Necesarios"
-            placeholder="Ej. Técnico, Asesor, Almacenista... (Presiona Enter)"
-            tags={mappingInputs.puestos}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, puestos: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+          {viewMode === 'executive' && mappingInputs.macroproceso && mappingInputs.macroproceso !== 'Otro' ? (
+            <ExecutiveMappingTable 
+              macroprocesoName={mappingInputs.macroproceso}
+              macroprocesos={macroprocesos}
+              procesos={procesos}
+              procedimientos={procedimientos}
+              kpis={kpis}
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <MultiTagInput 
+                label="Procedimientos Involucrados"
+                placeholder="Ej. Recepción de piezas, Diagnóstico... (Presiona Enter)"
+                tags={mappingInputs.procedimientos}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, procedimientos: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Indicadores (KPIs)"
-            placeholder="Ej. Tiempo de ciclo, % Defectos... (Presiona Enter)"
-            tags={mappingInputs.indicadores}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, indicadores: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Puestos / Roles Necesarios"
+                placeholder="Ej. Técnico, Asesor, Almacenista... (Presiona Enter)"
+                tags={mappingInputs.puestos}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, puestos: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Herramientas"
-            placeholder="Ej. Scanner OBD2, Multímetro... (Presiona Enter)"
-            tags={mappingInputs.herramientas}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, herramientas: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Indicadores (KPIs)"
+                placeholder="Ej. Tiempo de ciclo, % Defectos... (Presiona Enter)"
+                tags={mappingInputs.indicadores}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, indicadores: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Sistemas Informáticos"
-            placeholder="Ej. ERP, CRM, Portal de citas... (Presiona Enter)"
-            tags={mappingInputs.sistemas}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, sistemas: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Herramientas"
+                placeholder="Ej. Scanner OBD2, Multímetro... (Presiona Enter)"
+                tags={mappingInputs.herramientas}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, herramientas: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
+
+              <MultiTagInput 
+                label="Sistemas Informáticos"
+                placeholder="Ej. ERP, CRM, Portal de citas... (Presiona Enter)"
+                tags={mappingInputs.sistemas}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, sistemas: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -2743,6 +2774,105 @@ const DiagramSection: React.FC<DiagramSectionProps> = ({
   );
 };
 
+interface ExecutiveMappingTableProps {
+  macroprocesoName: string;
+  macroprocesos: Macroproceso[];
+  procesos: Proceso[];
+  procedimientos: Procedimiento[];
+  kpis: ProjectKPI[];
+}
+
+const ExecutiveMappingTable: React.FC<ExecutiveMappingTableProps> = ({
+  macroprocesoName,
+  macroprocesos,
+  procesos,
+  procedimientos,
+  kpis
+}) => {
+  const mac = macroprocesos.find(m => m.name === macroprocesoName);
+  if (!mac) return null;
+
+  const filteredProcesos = procesos.filter(p => p.macroprocesoId === mac.id);
+  if (filteredProcesos.length === 0) {
+    return (
+      <div className="p-6 text-center text-slate-400 border border-slate-200 border-dashed rounded-xl bg-slate-50/50 mt-4 text-[13px]">
+        No hay procesos registrados para el macroproceso "{macroprocesoName}" en la base de datos de estructura de procesos.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 border border-slate-200/80 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-slate-50/80 p-4 border-b border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden md:grid">
+        <div>Proceso</div>
+        <div>Procedimientos</div>
+        <div>Puestos / Roles</div>
+        <div>Indicadores (KPIs)</div>
+        <div>Sistemas y Herramientas</div>
+      </div>
+      <div className="divide-y divide-slate-100 bg-white">
+        {filteredProcesos.map(proc => {
+          const procProcs = procedimientos.filter(p => p.procesoId === proc.id);
+          const procPuestos = Array.from(new Set([
+            ...(proc.puestos || []),
+            ...procProcs.flatMap(p => p.puestos || [])
+          ])).filter(Boolean);
+          const procKPIs = kpis.filter(k => k.procesoId === proc.id).map(k => k.name);
+          const procTools = Array.from(new Set(procProcs.flatMap(p => p.herramientas || []))).filter(Boolean);
+          const procSystems = Array.from(new Set(procProcs.flatMap(p => p.sistemas || []))).filter(Boolean);
+
+          return (
+            <div key={proc.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-5 md:p-4 items-start text-[13px] hover:bg-slate-50/40 transition-colors">
+              <div className="font-bold text-slate-900 border-b border-slate-100 pb-1 md:border-none md:pb-0">
+                <span className="md:hidden text-[10px] font-bold text-slate-400 block uppercase mb-1">Proceso</span>
+                {proc.name}
+              </div>
+              <div>
+                <span className="md:hidden text-[10px] font-bold text-slate-400 block uppercase mb-1.5">Procedimientos</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {procProcs.length > 0 ? procProcs.map(p => (
+                    <span key={p.id} className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[11px] rounded-md font-medium border border-slate-200/40">{p.name}</span>
+                  )) : <span className="text-slate-400 italic text-[12px]">-</span>}
+                </div>
+              </div>
+              <div>
+                <span className="md:hidden text-[10px] font-bold text-slate-400 block uppercase mb-1.5">Puestos / Roles</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {procPuestos.length > 0 ? procPuestos.map((p, idx) => (
+                    <span key={idx} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] rounded-md font-medium">{p}</span>
+                  )) : <span className="text-slate-400 italic text-[12px]">-</span>}
+                </div>
+              </div>
+              <div>
+                <span className="md:hidden text-[10px] font-bold text-slate-400 block uppercase mb-1.5">Indicadores (KPIs)</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {procKPIs.length > 0 ? procKPIs.map((k, idx) => (
+                    <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 text-[11px] rounded-md font-medium">{k}</span>
+                  )) : <span className="text-slate-400 italic text-[12px]">-</span>}
+                </div>
+              </div>
+              <div>
+                <span className="md:hidden text-[10px] font-bold text-slate-400 block uppercase mb-1.5">Sistemas y Herramientas</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {procSystems.map((s, idx) => (
+                    <span key={`s-${idx}`} className="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 text-[11px] rounded-md font-medium" title="Sistema">{s}</span>
+                  ))}
+                  {procTools.map((t, idx) => (
+                    <span key={`t-${idx}`} className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 text-[11px] rounded-md font-medium" title="Herramienta">{t}</span>
+                  ))}
+                  {procSystems.length === 0 && procTools.length === 0 && (
+                    <span className="text-slate-400 italic text-[12px]">-</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 // --- Phase 3 ---
 export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
   if (modo.projectType === 'Reingeniería') {
@@ -2754,6 +2884,7 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
   const phaseData = modo.phases[3]?.data || {};
   const isApproved = modo.phases[3]?.status === 'Aprobado';
   const [notas, setNotas] = useState(phaseData.notas || '');
+  const [viewMode, setViewMode] = useState<'executive' | 'edit'>('executive');
 
   const [sipocMode, setSipocMode] = useState<'image' | 'mermaid'>(
     (phaseData.sipocImage || phaseData.asIsImage) ? 'image' : ((phaseData.mermaidSipoc || phaseData.mermaidASIS) ? 'mermaid' : 'image')
@@ -3052,14 +3183,32 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
         placeholderText="Sube una imagen de tu VSM usando el botón de arriba o pega el enlace externo."
       />
 
-      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 p-8">
-        <h3 className="text-[16px] font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">schema</span>
-          Mapeo y Vinculación del Proceso (AS-IS)
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col gap-2 md:col-span-2 lg:col-span-1">
+      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-[20px]">schema</span>
+            <h3 className="text-[16px] font-bold text-slate-900">Mapeo y Vinculación del Proceso (AS-IS)</h3>
+          </div>
+          {mappingInputs.macroproceso && mappingInputs.macroproceso !== 'Otro' && (
+            <div className="flex bg-slate-100 p-1 rounded-lg self-start md:self-auto shrink-0">
+              <button 
+                onClick={() => setViewMode('executive')}
+                className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'executive' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+              >
+                <span className="material-symbols-outlined text-[16px]">visibility</span> Vista Ejecutiva
+              </button>
+              <button 
+                onClick={() => setViewMode('edit')}
+                className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'edit' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+              >
+                <span className="material-symbols-outlined text-[16px]">edit</span> Vista Tags / Editar
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="p-8">
+          <div className="flex flex-col gap-2 max-w-md mb-6">
             <label className="text-[13px] font-bold text-slate-600">Macroproceso Asociado</label>
             <select 
               className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-[14px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
@@ -3074,51 +3223,63 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
               <option value="Otro">Otro (No registrado)</option>
             </select>
           </div>
-          
-          <MultiTagInput 
-            label="Procedimientos Involucrados"
-            placeholder="Ej. Recepción de piezas, Diagnóstico... (Presiona Enter)"
-            tags={mappingInputs.procedimientos}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, procedimientos: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
 
-          <MultiTagInput 
-            label="Puestos / Roles Necesarios"
-            placeholder="Ej. Técnico, Asesor, Almacenista... (Presiona Enter)"
-            tags={mappingInputs.puestos}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, puestos: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+          {viewMode === 'executive' && mappingInputs.macroproceso && mappingInputs.macroproceso !== 'Otro' ? (
+            <ExecutiveMappingTable 
+              macroprocesoName={mappingInputs.macroproceso}
+              macroprocesos={macroprocesos}
+              procesos={procesos}
+              procedimientos={procedimientos}
+              kpis={kpis}
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <MultiTagInput 
+                label="Procedimientos Involucrados"
+                placeholder="Ej. Recepción de piezas, Diagnóstico... (Presiona Enter)"
+                tags={mappingInputs.procedimientos}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, procedimientos: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Indicadores (KPIs)"
-            placeholder="Ej. Tiempo de ciclo, % Defectos... (Presiona Enter)"
-            tags={mappingInputs.indicadores}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, indicadores: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Puestos / Roles Necesarios"
+                placeholder="Ej. Técnico, Asesor, Almacenista... (Presiona Enter)"
+                tags={mappingInputs.puestos}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, puestos: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Herramientas"
-            placeholder="Ej. Scanner OBD2, Multímetro... (Presiona Enter)"
-            tags={mappingInputs.herramientas}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, herramientas: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Indicadores (KPIs)"
+                placeholder="Ej. Tiempo de ciclo, % Defectos... (Presiona Enter)"
+                tags={mappingInputs.indicadores}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, indicadores: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
 
-          <MultiTagInput 
-            label="Sistemas Informáticos"
-            placeholder="Ej. ERP, CRM, Portal de citas... (Presiona Enter)"
-            tags={mappingInputs.sistemas}
-            onChange={tags => setMappingInputs(prev => ({ ...prev, sistemas: tags }))}
-            onBlur={handleBlur}
-            disabled={isApproved || !canEdit}
-          />
+              <MultiTagInput 
+                label="Herramientas"
+                placeholder="Ej. Scanner OBD2, Multímetro... (Presiona Enter)"
+                tags={mappingInputs.herramientas}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, herramientas: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
+
+              <MultiTagInput 
+                label="Sistemas Informáticos"
+                placeholder="Ej. ERP, CRM, Portal de citas... (Presiona Enter)"
+                tags={mappingInputs.sistemas}
+                onChange={tags => setMappingInputs(prev => ({ ...prev, sistemas: tags }))}
+                onBlur={handleBlur}
+                disabled={isApproved || !canEdit}
+              />
+            </div>
+          )}
         </div>
       </div>
 
