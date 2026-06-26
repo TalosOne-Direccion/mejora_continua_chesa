@@ -218,7 +218,7 @@ export const GestorPropuestas: React.FC<{ modoId: string, phaseName: 'Análisis'
 
 // --- Taller de Herramientas Phase ---
 export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: string }> = ({ modo, phaseNumber, title }) => {
-  const { updateModoPhase, currentUser } = useAppStore();
+  const { updateModoPhase, macroprocesos, procesos, procedimientos: allProcedimientos, kpis, currentUser } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const phaseData = modo.phases[phaseNumber]?.data || {};
@@ -251,6 +251,61 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
   const [vsmMermaid, setVsmMermaid] = useState('');
   const [vsmMode, setVsmMode] = useState<'image' | 'mermaid'>('image');
   const [vsmImage, setVsmImage] = useState<string | null>(null);
+
+  const [viewMode, setViewMode] = useState<'executive' | 'edit'>('executive');
+
+  const handleMacroprocesoChange = (macroprocesoName: string) => {
+    if (isApproved || !canEdit) return;
+    
+    if (!macroprocesoName) {
+      setMacroproceso('');
+      setProcedimientos('');
+      setPuestos('');
+      setSistemas('');
+      updateStore({
+        macroproceso: '',
+        procedimientos: '',
+        puestos: '',
+        sistemas: ''
+      });
+      return;
+    }
+
+    setMacroproceso(macroprocesoName);
+
+    const mac = macroprocesos.find(m => m.name === macroprocesoName);
+    if (!mac) {
+      updateStore({ macroproceso: macroprocesoName });
+      return;
+    }
+
+    const macProcesos = procesos.filter(p => p.macroprocesoId === mac.id);
+    const processIds = macProcesos.map(p => p.id);
+    const macProcedimientos = allProcedimientos.filter(proc => processIds.includes(proc.procesoId));
+
+    const linkedProcedures = macProcedimientos.map(proc => proc.name).join(', ');
+
+    const linkedPuestosSet = new Set<string>();
+    macProcesos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    macProcedimientos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    const linkedPuestos = Array.from(linkedPuestosSet).join(', ');
+
+    const linkedToolsSet = new Set<string>();
+    macProcedimientos.forEach(p => p.herramientas?.forEach(tool => { if (tool) linkedToolsSet.add(tool); }));
+    macProcedimientos.forEach(p => p.sistemas?.forEach(sys => { if (sys) linkedToolsSet.add(sys); }));
+    const linkedSistemas = Array.from(linkedToolsSet).join(', ');
+
+    setProcedimientos(linkedProcedures);
+    setPuestos(linkedPuestos);
+    setSistemas(linkedSistemas);
+
+    updateStore({
+      macroproceso: macroprocesoName,
+      procedimientos: linkedProcedures,
+      puestos: linkedPuestos,
+      sistemas: linkedSistemas
+    });
+  };
 
   // Phase 3: Roles
   const [roles, setRoles] = useState<any[]>([]);
@@ -335,35 +390,6 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
       case 2:
         return (
           <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[20px]">account_tree</span>
-                Mapeo de la Arquitectura de Procesos
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Macroproceso</label>
-                  <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Postventa, Ventas" value={macroproceso} onChange={e => setMacroproceso(e.target.value)} onBlur={() => updateStore({ macroproceso })} disabled={isApproved || !canEdit} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Procedimientos Involucrados</label>
-                  <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Recepción de unidad, Lavado" value={procedimientos} onChange={e => setProcedimientos(e.target.value)} onBlur={() => updateStore({ procedimientos })} disabled={isApproved || !canEdit} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Sistemas y Herramientas</label>
-                  <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Intelisis CRM, Excel" value={sistemas} onChange={e => setSistemas(e.target.value)} onBlur={() => updateStore({ sistemas })} disabled={isApproved || !canEdit} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Puestos y Roles Clave</label>
-                  <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Técnico Lavador, Asesor de Servicio" value={puestos} onChange={e => setPuestos(e.target.value)} onBlur={() => updateStore({ puestos })} disabled={isApproved || !canEdit} />
-                </div>
-                <div className="flex flex-col gap-1.5 md:col-span-2">
-                  <label className="text-[12px] font-bold text-slate-500 uppercase">Límites del Proceso (Entradas y Salidas)</label>
-                  <textarea className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60 resize-none animate-none" rows={2} placeholder="Entrada: Unidad sucia; Salida: Unidad limpia y checklist lleno" value={entradasSalidas} onChange={e => setEntradasSalidas(e.target.value)} onBlur={() => updateStore({ entradasSalidas })} disabled={isApproved || !canEdit} />
-                </div>
-              </div>
-            </div>
-
             <DiagramSection
               title="Diagrama SIPOC"
               description="Sube el diagrama SIPOC o escribe su código Mermaid."
@@ -421,6 +447,78 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
               isApproved={isApproved}
               placeholderText="Sube una imagen de tu VSM usando el botón de arriba o pega el enlace externo."
             />
+
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]">account_tree</span>
+                  <h3 className="font-bold text-slate-800">Mapeo de la Arquitectura de Procesos</h3>
+                </div>
+                {macroproceso && macroproceso !== 'Otro' && (
+                  <div className="flex bg-slate-100 p-1 rounded-lg self-start md:self-auto shrink-0">
+                    <button 
+                      onClick={() => setViewMode('executive')}
+                      className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'executive' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">visibility</span> Vista Ejecutiva
+                    </button>
+                    <button 
+                      onClick={() => setViewMode('edit')}
+                      className={cn("px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-1.5", viewMode === 'edit' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span> Vista Manual / Editar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6">
+                <div className="flex flex-col gap-1.5 max-w-md mb-6">
+                  <label className="text-[12px] font-bold text-slate-500 uppercase">Macroproceso</label>
+                  <select 
+                    className="w-full p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                    value={macroproceso}
+                    onChange={e => handleMacroprocesoChange(e.target.value)}
+                    disabled={isApproved || !canEdit}
+                  >
+                    <option value="">-- Seleccionar Macroproceso --</option>
+                    {macroprocesos?.map(m => (
+                      <option key={m.id} value={m.name}>{m.name}</option>
+                    ))}
+                    <option value="Otro">Otro (No registrado)</option>
+                  </select>
+                </div>
+
+                {viewMode === 'executive' && macroproceso && macroproceso !== 'Otro' ? (
+                  <ExecutiveMappingTable 
+                    macroprocesoName={macroproceso}
+                    macroprocesos={macroprocesos}
+                    procesos={procesos}
+                    procedimientos={allProcedimientos}
+                    kpis={kpis}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase">Procedimientos Involucrados</label>
+                      <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Recepción de unidad, Lavado" value={procedimientos} onChange={e => setProcedimientos(e.target.value)} onBlur={() => updateStore({ procedimientos })} disabled={isApproved || !canEdit} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase">Sistemas y Herramientas</label>
+                      <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Intelisis CRM, Excel" value={sistemas} onChange={e => setSistemas(e.target.value)} onBlur={() => updateStore({ sistemas })} disabled={isApproved || !canEdit} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase">Puestos y Roles Clave</label>
+                      <input type="text" className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" placeholder="Ej. Técnico Lavador, Asesor de Servicio" value={puestos} onChange={e => setPuestos(e.target.value)} onBlur={() => updateStore({ puestos })} disabled={isApproved || !canEdit} />
+                    </div>
+                    <div className="flex flex-col gap-1.5 md:col-span-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase">Límites del Proceso (Entradas y Salidas)</label>
+                      <textarea className="p-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60 resize-none animate-none" rows={2} placeholder="Entrada: Unidad sucia; Salida: Unidad limpia y checklist lleno" value={entradasSalidas} onChange={e => setEntradasSalidas(e.target.value)} onBlur={() => updateStore({ entradasSalidas })} disabled={isApproved || !canEdit} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         );
       case 3:
