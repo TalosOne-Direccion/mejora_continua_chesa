@@ -524,6 +524,15 @@ export const MacroprocesosView = () => {
   const [viewingProcedimientoId, setViewingProcedimientoId] = useState<string | null>(null);
   const [diagramaEdit, setDiagramaEdit] = useState('');
   const [diagramImageEdit, setDiagramImageEdit] = useState('');
+  const [collapsedProcesos, setCollapsedProcesos] = useState<Record<string, boolean>>({});
+
+  const toggleProcessCollapse = (processId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCollapsedProcesos(prev => ({
+      ...prev,
+      [processId]: !prev[processId]
+    }));
+  };
 
   // Process sub-tabs and creation states
   const [activeProcessTab, setActiveProcessTab] = useState<'diagram' | 'puestos' | 'kpis' | 'procedimientos' | 'sistemas' | 'herramientas'>('diagram');
@@ -577,7 +586,7 @@ export const MacroprocesosView = () => {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-56px)] -mx-6 -mt-6 p-6 overflow-hidden bg-slate-50">
+    <div className="relative min-h-[calc(111.11vh-56px)] -mx-6 -my-6 p-6 overflow-hidden bg-slate-50">
       {/* Animated Background Layers */}
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob pointer-events-none"></div>
       <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob pointer-events-none" style={{ animationDelay: '2s' }}></div>
@@ -637,9 +646,21 @@ export const MacroprocesosView = () => {
                           viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
                         )}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5 shrink-0"></span>
-                          {p.name}
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {procSub.length > 0 ? (
+                            <button
+                              onClick={(e) => toggleProcessCollapse(p.id, e)}
+                              className="w-5 h-5 flex items-center justify-center text-slate-450 hover:text-slate-700 hover:bg-slate-200/50 rounded shrink-0 transition-transform"
+                              title={collapsedProcesos[p.id] ? "Expandir procedimientos" : "Contraer procedimientos"}
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                {collapsedProcesos[p.id] ? 'chevron_right' : 'expand_more'}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mx-[7px]"></span>
+                          )}
+                          <span className="truncate">{p.name}</span>
                         </div>
                         {canEdit && (
                           <button 
@@ -653,7 +674,7 @@ export const MacroprocesosView = () => {
                       </div>
                       
                       {/* PROCEDIMIENTOS ANIDADOS */}
-                      {procSub.length > 0 && (
+                      {!collapsedProcesos[p.id] && procSub.length > 0 && (
                         <div className="pl-4 flex flex-col gap-1 border-l border-slate-100 ml-2.5">
                           {procSub.map(proc => (
                             <div 
@@ -749,9 +770,21 @@ export const MacroprocesosView = () => {
                           viewingProcesoId === p.id ? "bg-blue-50 border-blue-200" : "hover:bg-slate-50 border-transparent"
                         )}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5 shrink-0"></span>
-                          {p.name}
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {procSub.length > 0 ? (
+                            <button
+                              onClick={(e) => toggleProcessCollapse(p.id, e)}
+                              className="w-5 h-5 flex items-center justify-center text-slate-450 hover:text-slate-700 hover:bg-slate-200/50 rounded shrink-0 transition-transform"
+                              title={collapsedProcesos[p.id] ? "Expandir procedimientos" : "Contraer procedimientos"}
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                {collapsedProcesos[p.id] ? 'chevron_right' : 'expand_more'}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mx-[7px]"></span>
+                          )}
+                          <span className="truncate">{p.name}</span>
                         </div>
                         {canEdit && (
                           <button 
@@ -764,7 +797,7 @@ export const MacroprocesosView = () => {
                       </div>
                       
                       {/* PROCEDIMIENTOS ANIDADOS */}
-                      {procSub.length > 0 && (
+                      {!collapsedProcesos[p.id] && procSub.length > 0 && (
                         <div className="pl-4 flex flex-col gap-1 border-l border-slate-100 ml-2.5">
                           {procSub.map(proc => (
                             <div 
