@@ -289,6 +289,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
   const addPropuesta = (p: Omit<PropuestaProyecto, 'id'>) => setPropuestas(prev => [...prev, { ...p, id: `prop${Date.now()}` }]);
   const updatePropuesta = (id: string, updates: Partial<PropuestaProyecto>) => setPropuestas(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const deletePropuesta = (id: string) => setPropuestas(prev => prev.filter(p => p.id !== id));
   
   const addFormato = (f: Omit<Formato, 'id'>) => setFormatos(prev => [...prev, { ...f, id: `fmt${Date.now()}` }]);
   const deleteFormato = (id: string) => setFormatos(prev => prev.filter(f => f.id !== id));
@@ -544,7 +545,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso, updateMacroprocesosOrder,
         procesos, addProceso, updateProceso, deleteProceso,
         procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
-        propuestas, addPropuesta, updatePropuesta,
+        propuestas, addPropuesta, updatePropuesta, deletePropuesta,
         formatos, addFormato, deleteFormato,
         syncState, syncErrorMessage,
       }}

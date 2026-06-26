@@ -83,7 +83,7 @@ const EditableInventory: React.FC<{ title: string, subtitle: string, data: Recor
 };
 
 export const GestorPropuestas: React.FC<{ modoId: string, phaseName: 'Análisis' | 'Diseño' }> = ({ modoId, phaseName }) => {
-  const { propuestas, addPropuesta, updatePropuesta, macroprocesos, procesos, currentUser } = useAppStore();
+  const { propuestas, addPropuesta, updatePropuesta, deletePropuesta, macroprocesos, procesos, currentUser } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
   const [newPuestoName, setNewPuestoName] = useState('');
   const [newPropType, setNewPropType] = useState<'Puesto' | 'Proceso' | 'Indicador' | 'Herramienta' | 'Sistema'>('Puesto');
@@ -186,6 +186,15 @@ export const GestorPropuestas: React.FC<{ modoId: string, phaseName: 'Análisis'
                 )}>
                   {p.status}
                 </span>
+                {canEdit && p.status === 'Propuesto' && (
+                  <button 
+                    onClick={() => deletePropuesta(p.id)} 
+                    className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-slate-100 flex items-center"
+                    title="Eliminar propuesta"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                )}
                 {canEdit && phaseName === 'Diseño' && p.status === 'Propuesto' && (
                   <button onClick={() => updatePropuesta(p.id, { status: 'Confirmado' })} className="text-[12px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">check_circle</span> Confirmar
@@ -232,6 +241,17 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
   const [diagramTab, setDiagramTab] = useState<'image' | 'mermaid'>('mermaid');
   const [asIsImage, setAsIsImage] = useState<string | null>(null);
 
+  // SIPOC & VSM diagram states
+  const [sipocLink, setSipocLink] = useState('');
+  const [sipocMermaid, setSipocMermaid] = useState('');
+  const [sipocMode, setSipocMode] = useState<'image' | 'mermaid'>('image');
+  const [sipocImage, setSipocImage] = useState<string | null>(null);
+
+  const [vsmLink, setVsmLink] = useState('');
+  const [vsmMermaid, setVsmMermaid] = useState('');
+  const [vsmMode, setVsmMode] = useState<'image' | 'mermaid'>('image');
+  const [vsmImage, setVsmImage] = useState<string | null>(null);
+
   // Phase 3: Roles
   const [roles, setRoles] = useState<any[]>([]);
   // Phase 4: Documental
@@ -259,6 +279,22 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
       setMermaidCode(phaseData.mermaidASIS || '');
       setAsIsImage(phaseData.asIsImage || null);
       setDiagramTab(phaseData.asIsImage ? 'image' : 'mermaid');
+
+      const sLink = phaseData.sipocLink || phaseData.asIsLink || '';
+      const sImg = phaseData.sipocImage || phaseData.asIsImage || null;
+      const sCode = phaseData.mermaidSipoc || phaseData.mermaidASIS || '';
+      setSipocLink(sLink);
+      setSipocImage(sImg);
+      setSipocMermaid(sCode);
+      setSipocMode(sImg ? 'image' : (sCode ? 'mermaid' : 'image'));
+
+      const vLink = phaseData.vsmLink || '';
+      const vImg = phaseData.vsmImage || null;
+      const vCode = phaseData.mermaidVsm || '';
+      setVsmLink(vLink);
+      setVsmImage(vImg);
+      setVsmMermaid(vCode);
+      setVsmMode(vImg ? 'image' : (vCode ? 'mermaid' : 'image'));
     } else if (phaseNumber === 3) {
       setRoles(phaseData.rolesList || []);
     } else if (phaseNumber === 4) {
@@ -328,63 +364,63 @@ export const TallerPhase: React.FC<{ modo: Modo, phaseNumber: number, title: str
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <div>
-                  <h3 className="text-[16px] font-bold text-slate-800">Diagrama de Flujo del Proceso</h3>
-                  <p className="text-[12px] text-slate-500 mt-0.5">Elige entre escribir código Mermaid o subir una imagen de tu diagrama.</p>
-                </div>
-                <div className="flex bg-slate-100 p-1 rounded-lg">
-                  <button onClick={() => setDiagramTab('image')} className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramTab === 'image' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>Imagen / Enlace</button>
-                  <button onClick={() => setDiagramTab('mermaid')} className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramTab === 'mermaid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}>Código Mermaid</button>
-                </div>
-              </div>
+            <DiagramSection
+              title="Diagrama SIPOC"
+              description="Sube el diagrama SIPOC o escribe su código Mermaid."
+              externalLink={sipocLink}
+              image={sipocImage}
+              mermaidCode={sipocMermaid}
+              mode={sipocMode}
+              setMode={setSipocMode}
+              onLinkChange={(val) => {
+                setSipocLink(val);
+                updateStore({ sipocLink: val, asIsLink: val });
+              }}
+              onImageUpload={(base64) => {
+                setSipocImage(base64);
+                updateStore({ sipocImage: base64, asIsImage: base64 });
+              }}
+              onImageRemove={() => {
+                setSipocImage(null);
+                updateStore({ sipocImage: null, asIsImage: null });
+              }}
+              onMermaidChange={(code) => {
+                setSipocMermaid(code);
+                updateStore({ mermaidSipoc: code, mermaidASIS: code });
+              }}
+              canEdit={canEdit}
+              isApproved={isApproved}
+              placeholderText="Sube una imagen de tu SIPOC usando el botón de arriba o pega el enlace externo."
+            />
 
-              {diagramTab === 'image' ? (
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-slate-400 text-[20px]">link</span>
-                    <input type="text" placeholder="Enlace externo a Lucidchart o draw.io (opcional)" className="flex-1 p-2.5 border border-slate-200 rounded-lg text-[13px] outline-none bg-slate-50 disabled:opacity-60" value={externalLink} onChange={e => setExternalLink(e.target.value)} onBlur={() => updateStore({ asIsLink: externalLink })} disabled={isApproved || !canEdit} />
-                    {externalLink && <a href={externalLink} target="_blank" rel="noopener noreferrer" className="text-primary font-bold text-[13px] hover:underline">Abrir enlace</a>}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <label className={cn("cursor-pointer bg-white border border-slate-200 text-slate-700 font-bold text-[13px] px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-primary transition-colors flex items-center gap-2 shadow-sm", (isApproved || !canEdit) && "opacity-50 cursor-not-allowed pointer-events-none")}>
-                      <span className="material-symbols-outlined text-[18px]">upload</span> Subir Imagen
-                      <input type="file" accept="image/*" className="hidden" onChange={e => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const r = new FileReader();
-                          r.onloadend = () => {
-                            setAsIsImage(r.result as string);
-                            updateStore({ asIsImage: r.result as string });
-                          };
-                          r.readAsDataURL(file);
-                        }
-                      }} disabled={isApproved || !canEdit} />
-                    </label>
-                    {asIsImage && (
-                      <button onClick={() => { setAsIsImage(null); updateStore({ asIsImage: null }); }} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center" disabled={isApproved || !canEdit}>
-                        <span className="material-symbols-outlined text-[18px]">delete</span> Eliminar
-                      </button>
-                    )}
-                  </div>
-                  {asIsImage ? (
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-center"><img src={asIsImage} className="max-w-full max-h-[300px] rounded-lg border border-slate-200" alt="Diagrama" /></div>
-                  ) : (
-                    <div className="p-8 text-center text-slate-400 border border-slate-200 border-dashed rounded-xl bg-slate-50/50">Aún no hay una imagen cargada</div>
-                  )}
-                </div>
-              ) : (
-                <div className="p-6 space-y-4">
-                  <textarea className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[12px] text-slate-700 outline-none focus:ring-1 focus:ring-primary disabled:opacity-60" rows={6} value={mermaidCode} onChange={e => setMermaidCode(e.target.value)} onBlur={() => updateStore({ mermaidASIS: mermaidCode })} disabled={isApproved || !canEdit} placeholder="graph TD..." />
-                  {mermaidCode ? (
-                    <div className="p-6 bg-slate-50 border border-slate-100 rounded-xl flex justify-center min-h-[150px] overflow-auto"><MermaidChart chart={mermaidCode} /></div>
-                  ) : (
-                    <div className="p-8 text-center text-slate-400 border border-slate-200 border-dashed rounded-xl bg-slate-50/50">Escribe código Mermaid arriba para ver el diagrama en vivo.</div>
-                  )}
-                </div>
-              )}
-            </div>
+            <DiagramSection
+              title="Diagrama VSM"
+              description="Sube el diagrama de cadena de valor (VSM) o escribe su código Mermaid."
+              externalLink={vsmLink}
+              image={vsmImage}
+              mermaidCode={vsmMermaid}
+              mode={vsmMode}
+              setMode={setVsmMode}
+              onLinkChange={(val) => {
+                setVsmLink(val);
+                updateStore({ vsmLink: val });
+              }}
+              onImageUpload={(base64) => {
+                setVsmImage(base64);
+                updateStore({ vsmImage: base64 });
+              }}
+              onImageRemove={() => {
+                setVsmImage(null);
+                updateStore({ vsmImage: null });
+              }}
+              onMermaidChange={(code) => {
+                setVsmMermaid(code);
+                updateStore({ mermaidVsm: code });
+              }}
+              canEdit={canEdit}
+              isApproved={isApproved}
+              placeholderText="Sube una imagen de tu VSM usando el botón de arriba o pega el enlace externo."
+            />
           </div>
         );
       case 3:
@@ -1484,14 +1520,18 @@ const ObjetivosMediblesSection: React.FC<{
 };
 
 const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
-  const { updateModoPhase, macroprocesos, currentUser } = useAppStore();
+  const { updateModoPhase, macroprocesos, procesos, procedimientos, kpis, currentUser } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const phaseData = modo.phases[2]?.data || {};
   const isApproved = modo.phases[2]?.status === 'Aprobado';
   const [notas, setNotas] = useState(phaseData.notas || '');
-  const [diagramMode, setDiagramMode] = useState<'image' | 'mermaid'>(
-    phaseData.asIsImage ? 'image' : (phaseData.mermaidASIS ? 'mermaid' : 'image')
+
+  const [sipocMode, setSipocMode] = useState<'image' | 'mermaid'>(
+    (phaseData.sipocImage || phaseData.asIsImage) ? 'image' : ((phaseData.mermaidSipoc || phaseData.mermaidASIS) ? 'mermaid' : 'image')
+  );
+  const [vsmMode, setVsmMode] = useState<'image' | 'mermaid'>(
+    phaseData.vsmImage ? 'image' : (phaseData.mermaidVsm ? 'mermaid' : 'image')
   );
 
   const toArray = (val: any) => Array.isArray(val) ? val : (typeof val === 'string' && val ? val.split(',').map(s=>s.trim()) : []);
@@ -1503,7 +1543,8 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
     herramientas: toArray(phaseData.asIsMapping?.herramientas),
     sistemas: toArray(phaseData.asIsMapping?.sistemas),
     puestos: toArray(phaseData.asIsMapping?.puestos),
-    externalLink: phaseData.asIsLink || ''
+    sipocLink: phaseData.sipocLink || phaseData.asIsLink || '',
+    vsmLink: phaseData.vsmLink || ''
   });
 
   const [lineaBaseMetrics, setLineaBaseMetrics] = useState({
@@ -1525,9 +1566,10 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
       herramientas: toArray(phaseData.asIsMapping?.herramientas),
       sistemas: toArray(phaseData.asIsMapping?.sistemas),
       puestos: toArray(phaseData.asIsMapping?.puestos),
-      externalLink: phaseData.asIsLink || ''
+      sipocLink: phaseData.sipocLink || phaseData.asIsLink || '',
+      vsmLink: phaseData.vsmLink || ''
     });
-  }, [phaseData.asIsMapping, phaseData.asIsLink]);
+  }, [phaseData.asIsMapping, phaseData.sipocLink, phaseData.asIsLink, phaseData.vsmLink]);
 
   useEffect(() => {
     setLineaBaseMetrics({
@@ -1548,6 +1590,102 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
     });
   };
 
+  const handleMacroprocesoChange = (macroprocesoName: string) => {
+    if (isApproved || !canEdit) return;
+    
+    if (!macroprocesoName) {
+      const updatedMapping = {
+        macroproceso: '',
+        procedimientos: [],
+        puestos: [],
+        indicadores: [],
+        herramientas: [],
+        sistemas: []
+      };
+      setMappingInputs(prev => ({
+        ...prev,
+        ...updatedMapping
+      }));
+      const currentPhaseData = modo.phases[2]?.data || {};
+      updateModoPhase(modo.id, 2, {
+        data: {
+          ...currentPhaseData,
+          asIsMapping: updatedMapping
+        }
+      });
+      return;
+    }
+
+    const mac = macroprocesos.find(m => m.name === macroprocesoName);
+    if (!mac) {
+      const updatedMapping = {
+        macroproceso: macroprocesoName,
+        procedimientos: [],
+        puestos: [],
+        indicadores: [],
+        herramientas: [],
+        sistemas: []
+      };
+      setMappingInputs(prev => ({
+        ...prev,
+        ...updatedMapping
+      }));
+      const currentPhaseData = modo.phases[2]?.data || {};
+      updateModoPhase(modo.id, 2, {
+        data: {
+          ...currentPhaseData,
+          asIsMapping: updatedMapping
+        }
+      });
+      return;
+    }
+
+    const macProcesos = procesos.filter(p => p.macroprocesoId === mac.id);
+    const processIds = macProcesos.map(p => p.id);
+    const macProcedimientos = procedimientos.filter(proc => processIds.includes(proc.procesoId));
+
+    const linkedProcedures = macProcedimientos.map(proc => proc.name);
+
+    const linkedPuestosSet = new Set<string>();
+    macProcesos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    macProcedimientos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    const linkedPuestos = Array.from(linkedPuestosSet);
+
+    const linkedKPIs = kpis
+      .filter(k => k.macroprocesoId === mac.id || (k.procesoId && processIds.includes(k.procesoId)))
+      .map(k => k.name);
+
+    const linkedToolsSet = new Set<string>();
+    macProcedimientos.forEach(p => p.herramientas?.forEach(tool => { if (tool) linkedToolsSet.add(tool); }));
+    const linkedTools = Array.from(linkedToolsSet);
+
+    const linkedSystemsSet = new Set<string>();
+    macProcedimientos.forEach(p => p.sistemas?.forEach(sys => { if (sys) linkedSystemsSet.add(sys); }));
+    const linkedSystems = Array.from(linkedSystemsSet);
+
+    const updatedMapping = {
+      macroproceso: macroprocesoName,
+      procedimientos: linkedProcedures,
+      puestos: linkedPuestos,
+      indicadores: linkedKPIs,
+      herramientas: linkedTools,
+      sistemas: linkedSystems
+    };
+
+    setMappingInputs(prev => ({
+      ...prev,
+      ...updatedMapping
+    }));
+
+    const currentPhaseData = modo.phases[2]?.data || {};
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...currentPhaseData,
+        asIsMapping: updatedMapping
+      }
+    });
+  };
+
   const handleBlur = () => {
     if (isApproved || !canEdit) return;
     const currentPhaseData = modo.phases[2]?.data || {};
@@ -1562,22 +1700,69 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
           sistemas: mappingInputs.sistemas,
           puestos: mappingInputs.puestos
         },
-        asIsLink: mappingInputs.externalLink,
+        asIsLink: mappingInputs.sipocLink,
+        sipocLink: mappingInputs.sipocLink,
+        vsmLink: mappingInputs.vsmLink,
         lineaBaseMetrics
       } 
     });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isApproved || !canEdit) return;
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateModoPhase(modo.id, 2, { data: { ...phaseData, asIsImage: reader.result } });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleSipocImageUpload = (base64: string) => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        sipocImage: base64,
+        asIsImage: base64
+      }
+    });
+  };
+
+  const handleSipocImageRemove = () => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        sipocImage: null,
+        asIsImage: null
+      }
+    });
+  };
+
+  const handleSipocMermaidChange = (code: string) => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        mermaidSipoc: code,
+        mermaidASIS: code
+      }
+    });
+  };
+
+  const handleVsmImageUpload = (base64: string) => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        vsmImage: base64
+      }
+    });
+  };
+
+  const handleVsmImageRemove = () => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        vsmImage: null
+      }
+    });
+  };
+
+  const handleVsmMermaidChange = (code: string) => {
+    updateModoPhase(modo.id, 2, {
+      data: {
+        ...phaseData,
+        mermaidVsm: code
+      }
+    });
   };
 
   const handleGenerate = async () => {
@@ -1616,127 +1801,45 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
         />
       </div>
 
-      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden mt-6">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div>
-            <h3 className="text-[18px] font-bold text-slate-900">Diagrama AS-IS (SIPOC con VSM)</h3>
-            <p className="text-[13px] text-slate-500 mt-1">Elige entre escribir código Mermaid o subir una imagen de tu diagrama.</p>
-          </div>
-          
-          <div className="flex bg-slate-100 p-1 rounded-lg">
-            <button 
-              onClick={() => setDiagramMode('image')}
-              className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramMode === 'image' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-            >
-              Imagen / Enlace
-            </button>
-            <button 
-              onClick={() => setDiagramMode('mermaid')}
-              className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramMode === 'mermaid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-            >
-              Código Mermaid
-            </button>
-          </div>
-        </div>
+      <DiagramSection
+        title="Diagrama SIPOC (AS-IS)"
+        description="Sube el diagrama SIPOC o escribe su código Mermaid."
+        externalLink={mappingInputs.sipocLink}
+        image={phaseData.sipocImage || phaseData.asIsImage || null}
+        mermaidCode={phaseData.mermaidSipoc || phaseData.mermaidASIS || ''}
+        mode={sipocMode}
+        setMode={setSipocMode}
+        onLinkChange={(val) => {
+          setMappingInputs(prev => ({ ...prev, sipocLink: val }));
+          updateModoPhase(modo.id, 2, { data: { ...phaseData, sipocLink: val, asIsLink: val } });
+        }}
+        onImageUpload={handleSipocImageUpload}
+        onImageRemove={handleSipocImageRemove}
+        onMermaidChange={handleSipocMermaidChange}
+        canEdit={canEdit}
+        isApproved={isApproved}
+        placeholderText="Sube una imagen de tu SIPOC usando el botón de arriba o pega el enlace externo."
+      />
 
-        {diagramMode === 'image' ? (
-          <>
-            <div className="p-6 bg-white border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3 max-w-2xl flex-1">
-                <span className="material-symbols-outlined text-slate-400 text-[20px]">link</span>
-                <input 
-                  type="text" 
-                  placeholder="Enlace externo a Lucidchart o draw.io (opcional)" 
-                  className="flex-1 p-2 border border-slate-200 rounded-lg text-[13px] focus:ring-1 focus:ring-primary focus:border-primary outline-none disabled:opacity-60"
-                  value={mappingInputs.externalLink}
-                  onChange={e => setMappingInputs(prev => ({ ...prev, externalLink: e.target.value }))}
-                  onBlur={handleBlur}
-                  disabled={isApproved || !canEdit}
-                />
-                {mappingInputs.externalLink && (
-                  <a href={mappingInputs.externalLink} target="_blank" rel="noopener noreferrer" className="text-primary font-bold text-[13px] hover:underline whitespace-nowrap">
-                    Abrir enlace
-                  </a>
-                )}
-              </div>
-              <div className="flex items-center gap-3 justify-end">
-                <label className={cn(
-                  "cursor-pointer bg-white border border-slate-200 text-slate-700 font-bold text-[13px] px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-primary hover:border-primary/50 transition-colors flex items-center gap-2 shadow-sm",
-                  (isApproved || !canEdit) && "opacity-50 cursor-not-allowed pointer-events-none"
-                )}>
-                  <span className="material-symbols-outlined text-[18px]">upload</span> Subir Imagen
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isApproved || !canEdit} />
-                </label>
-                {phaseData.asIsImage && !isApproved && canEdit && (
-                  <button onClick={() => updateModoPhase(modo.id, 2, { data: { ...phaseData, asIsImage: null } })} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center" title="Eliminar imagen">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {phaseData.asIsImage ? (
-              <div className="p-8 bg-slate-50 flex justify-center items-center">
-                <img src={phaseData.asIsImage as string} alt="Diagrama AS-IS" className="max-w-full rounded-lg shadow-sm border border-slate-200" />
-              </div>
-            ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-slate-400 border-dashed bg-slate-50/50">
-                <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">image</span>
-                <p className="text-[14px] font-medium">Aún no hay una imagen de diagrama cargada</p>
-                <p className="text-[12px] mt-1 text-center max-w-md">Sube una imagen de tu SIPOC/VSM usando el botón de arriba o pega el enlace externo.</p>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="p-6 bg-white flex flex-col gap-5">
-            {phaseData.mermaidASIS ? (
-              <div className="p-8 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center min-h-[220px] overflow-auto">
-                <MermaidChart chart={phaseData.mermaidASIS} />
-              </div>
-            ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-slate-400 border border-slate-200 border-dashed bg-slate-50/50 rounded-xl">
-                <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">code</span>
-                <p className="text-[14px] font-medium">No hay código Mermaid ingresado</p>
-                <button 
-                  onClick={() => {
-                    updateModoPhase(modo.id, 2, { 
-                      data: { 
-                        ...phaseData, 
-                        mermaidASIS: 'graph TD\n    A[Inicio] --> B[Paso 1]\n    B --> C[Fin]' 
-                      } 
-                    });
-                  }}
-                  className="mt-4 px-4 py-2 bg-slate-900 text-white text-[12px] font-bold rounded-lg hover:bg-slate-800 transition-colors"
-                  disabled={isApproved || !canEdit}
-                >
-                  Generar plantilla de inicio
-                </button>
-              </div>
-            )}
-
-            {phaseData.mermaidASIS && (
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase">Código Mermaid (Editable)</label>
-                <textarea 
-                  className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[12px] text-slate-700 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-60"
-                  rows={8}
-                  value={phaseData.mermaidASIS}
-                  onChange={(e) => {
-                    updateModoPhase(modo.id, 2, { 
-                      data: { 
-                        ...phaseData, 
-                        mermaidASIS: e.target.value 
-                      } 
-                    });
-                  }}
-                  disabled={isApproved || !canEdit}
-                  placeholder="Escribe tu código Mermaid aquí..."
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <DiagramSection
+        title="Diagrama VSM (AS-IS)"
+        description="Sube el diagrama de cadena de valor (VSM) o escribe su código Mermaid."
+        externalLink={mappingInputs.vsmLink}
+        image={phaseData.vsmImage || null}
+        mermaidCode={phaseData.mermaidVsm || ''}
+        mode={vsmMode}
+        setMode={setVsmMode}
+        onLinkChange={(val) => {
+          setMappingInputs(prev => ({ ...prev, vsmLink: val }));
+          updateModoPhase(modo.id, 2, { data: { ...phaseData, vsmLink: val } });
+        }}
+        onImageUpload={handleVsmImageUpload}
+        onImageRemove={handleVsmImageRemove}
+        onMermaidChange={handleVsmMermaidChange}
+        canEdit={canEdit}
+        isApproved={isApproved}
+        placeholderText="Sube una imagen de tu VSM usando el botón de arriba o pega el enlace externo."
+      />
 
       {/* Línea Base Metrics Card */}
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 p-8">
@@ -1828,8 +1931,7 @@ const Phase2Reengineering: React.FC<{ modo: Modo }> = ({ modo }) => {
             <select 
               className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-[14px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               value={mappingInputs.macroproceso}
-              onChange={e => setMappingInputs(prev => ({ ...prev, macroproceso: e.target.value }))}
-              onBlur={handleBlur}
+              onChange={e => handleMacroprocesoChange(e.target.value)}
               disabled={isApproved || !canEdit}
             >
               <option value="">-- Seleccionar Macroproceso --</option>
@@ -2482,19 +2584,182 @@ const MultiTagInput: React.FC<{
   );
 };
 
+interface DiagramSectionProps {
+  title: string;
+  description: string;
+  externalLink: string;
+  image: string | null;
+  mermaidCode: string;
+  mode: 'image' | 'mermaid';
+  setMode: (mode: 'image' | 'mermaid') => void;
+  onLinkChange: (val: string) => void;
+  onImageUpload: (base64: string) => void;
+  onImageRemove: () => void;
+  onMermaidChange: (code: string) => void;
+  canEdit: boolean;
+  isApproved: boolean;
+  placeholderText?: string;
+}
+
+const DiagramSection: React.FC<DiagramSectionProps> = ({
+  title,
+  description,
+  externalLink,
+  image,
+  mermaidCode,
+  mode,
+  setMode,
+  onLinkChange,
+  onImageUpload,
+  onImageRemove,
+  onMermaidChange,
+  canEdit,
+  isApproved,
+  placeholderText = "Sube una imagen de tu diagrama usando el botón de arriba o pega el enlace externo."
+}) => {
+  const [linkInput, setLinkInput] = useState(externalLink);
+  
+  useEffect(() => {
+    setLinkInput(externalLink);
+  }, [externalLink]);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          onImageUpload(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden mt-6">
+      <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div>
+          <h3 className="text-[16px] font-bold text-slate-800">{title}</h3>
+          <p className="text-[12px] text-slate-500 mt-0.5">{description}</p>
+        </div>
+        
+        <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
+          <button 
+            onClick={() => setMode('image')}
+            className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", mode === 'image' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+          >
+            Imagen / Enlace
+          </button>
+          <button 
+            onClick={() => setMode('mermaid')}
+            className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", mode === 'mermaid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+          >
+            Código Mermaid
+          </button>
+        </div>
+      </div>
+
+      {mode === 'image' ? (
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-slate-400 text-[20px]">link</span>
+            <input 
+              type="text" 
+              placeholder="Enlace externo (opcional)" 
+              className="flex-1 p-2 border border-slate-200 rounded-lg text-[13px] outline-none bg-slate-50 disabled:opacity-60"
+              value={linkInput}
+              onChange={e => setLinkInput(e.target.value)}
+              onBlur={() => onLinkChange(linkInput)}
+              disabled={isApproved || !canEdit}
+            />
+            {linkInput && (
+              <a href={linkInput} target="_blank" rel="noopener noreferrer" className="text-primary font-bold text-[13px] hover:underline whitespace-nowrap">
+                Abrir enlace
+              </a>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <label className={cn(
+              "cursor-pointer bg-white border border-slate-200 text-slate-700 font-bold text-[13px] px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-primary transition-colors flex items-center gap-2 shadow-sm",
+              (isApproved || !canEdit) && "opacity-50 cursor-not-allowed pointer-events-none"
+            )}>
+              <span className="material-symbols-outlined text-[18px]">upload</span> Subir Imagen
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} disabled={isApproved || !canEdit} />
+            </label>
+            {image && !isApproved && canEdit && (
+              <button onClick={onImageRemove} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center gap-1 text-[13px] font-bold" title="Eliminar imagen">
+                <span className="material-symbols-outlined text-[18px]">delete</span> Eliminar
+              </button>
+            )}
+          </div>
+
+          {image ? (
+            <div className="p-8 bg-slate-50 border border-slate-100 rounded-xl flex justify-center items-center">
+              <img src={image} alt={title} className="max-w-full max-h-[350px] rounded-lg shadow-sm border border-slate-200" />
+            </div>
+          ) : (
+            <div className="p-12 flex flex-col items-center justify-center text-slate-400 border border-slate-200 border-dashed bg-slate-50/50 rounded-xl">
+              <span className="material-symbols-outlined text-[48px] mb-3 opacity-50">image</span>
+              <p className="text-[14px] font-medium text-slate-500">Aún no hay una imagen cargada</p>
+              <p className="text-[12px] mt-1 text-center max-w-md">{placeholderText}</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="p-6 space-y-4">
+          <textarea 
+            className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[12px] text-slate-700 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-60"
+            rows={6}
+            value={mermaidCode}
+            onChange={e => onMermaidChange(e.target.value)}
+            disabled={isApproved || !canEdit}
+            placeholder="graph TD..."
+          />
+          {mermaidCode ? (
+            <div className="p-6 bg-slate-50 border border-slate-100 rounded-xl flex justify-center min-h-[150px] overflow-auto">
+              <MermaidChart chart={mermaidCode} />
+            </div>
+          ) : (
+            <div className="p-12 text-center text-slate-400 border border-slate-200 border-dashed rounded-xl bg-slate-50/50 flex flex-col items-center justify-center">
+              <span className="material-symbols-outlined text-[48px] mb-3 opacity-50">code</span>
+              <p className="text-[13px]">Escribe código Mermaid arriba para ver el diagrama en vivo.</p>
+              {!isApproved && canEdit && (
+                <button 
+                  onClick={() => onMermaidChange(`graph TD
+  A[Inicio] --> B[Proceso]
+  B --> C[Fin]`)}
+                  className="mt-2 text-primary font-bold text-[13px] hover:underline"
+                >
+                  + Generar plantilla básica
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- Phase 3 ---
 export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
   if (modo.projectType === 'Reingeniería') {
     return <Phase3Reengineering modo={modo} />;
   }
-  const { updateModoPhase, macroprocesos, currentUser } = useAppStore();
+  const { updateModoPhase, macroprocesos, procesos, procedimientos, kpis, currentUser } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const phaseData = modo.phases[3]?.data || {};
   const isApproved = modo.phases[3]?.status === 'Aprobado';
   const [notas, setNotas] = useState(phaseData.notas || '');
-  const [diagramMode, setDiagramMode] = useState<'image' | 'mermaid'>(
-    phaseData.asIsImage ? 'image' : (phaseData.mermaidASIS ? 'mermaid' : 'image')
+
+  const [sipocMode, setSipocMode] = useState<'image' | 'mermaid'>(
+    (phaseData.sipocImage || phaseData.asIsImage) ? 'image' : ((phaseData.mermaidSipoc || phaseData.mermaidASIS) ? 'mermaid' : 'image')
+  );
+  const [vsmMode, setVsmMode] = useState<'image' | 'mermaid'>(
+    phaseData.vsmImage ? 'image' : (phaseData.mermaidVsm ? 'mermaid' : 'image')
   );
 
   const toArray = (val: any) => Array.isArray(val) ? val : (typeof val === 'string' && val ? val.split(',').map(s=>s.trim()) : []);
@@ -2506,7 +2771,8 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
     herramientas: toArray(phaseData.asIsMapping?.herramientas),
     sistemas: toArray(phaseData.asIsMapping?.sistemas),
     puestos: toArray(phaseData.asIsMapping?.puestos),
-    externalLink: phaseData.asIsLink || ''
+    sipocLink: phaseData.sipocLink || phaseData.asIsLink || '',
+    vsmLink: phaseData.vsmLink || ''
   });
 
   useEffect(() => {
@@ -2521,9 +2787,10 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
       herramientas: toArray(phaseData.asIsMapping?.herramientas),
       sistemas: toArray(phaseData.asIsMapping?.sistemas),
       puestos: toArray(phaseData.asIsMapping?.puestos),
-      externalLink: phaseData.asIsLink || ''
+      sipocLink: phaseData.sipocLink || phaseData.asIsLink || '',
+      vsmLink: phaseData.vsmLink || ''
     });
-  }, [phaseData.asIsMapping, phaseData.asIsLink]);
+  }, [phaseData.asIsMapping, phaseData.sipocLink, phaseData.asIsLink, phaseData.vsmLink]);
 
   const handleNotesBlur = () => {
     if (isApproved || !canEdit) return;
@@ -2531,6 +2798,102 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
       data: {
         ...phaseData,
         notas: notas
+      }
+    });
+  };
+
+  const handleMacroprocesoChange = (macroprocesoName: string) => {
+    if (isApproved || !canEdit) return;
+    
+    if (!macroprocesoName) {
+      const updatedMapping = {
+        macroproceso: '',
+        procedimientos: [],
+        puestos: [],
+        indicadores: [],
+        herramientas: [],
+        sistemas: []
+      };
+      setMappingInputs(prev => ({
+        ...prev,
+        ...updatedMapping
+      }));
+      const currentPhaseData = modo.phases[3]?.data || {};
+      updateModoPhase(modo.id, 3, {
+        data: {
+          ...currentPhaseData,
+          asIsMapping: updatedMapping
+        }
+      });
+      return;
+    }
+
+    const mac = macroprocesos.find(m => m.name === macroprocesoName);
+    if (!mac) {
+      const updatedMapping = {
+        macroproceso: macroprocesoName,
+        procedimientos: [],
+        puestos: [],
+        indicadores: [],
+        herramientas: [],
+        sistemas: []
+      };
+      setMappingInputs(prev => ({
+        ...prev,
+        ...updatedMapping
+      }));
+      const currentPhaseData = modo.phases[3]?.data || {};
+      updateModoPhase(modo.id, 3, {
+        data: {
+          ...currentPhaseData,
+          asIsMapping: updatedMapping
+        }
+      });
+      return;
+    }
+
+    const macProcesos = procesos.filter(p => p.macroprocesoId === mac.id);
+    const processIds = macProcesos.map(p => p.id);
+    const macProcedimientos = procedimientos.filter(proc => processIds.includes(proc.procesoId));
+
+    const linkedProcedures = macProcedimientos.map(proc => proc.name);
+
+    const linkedPuestosSet = new Set<string>();
+    macProcesos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    macProcedimientos.forEach(p => p.puestos?.forEach(puesto => { if (puesto) linkedPuestosSet.add(puesto); }));
+    const linkedPuestos = Array.from(linkedPuestosSet);
+
+    const linkedKPIs = kpis
+      .filter(k => k.macroprocesoId === mac.id || (k.procesoId && processIds.includes(k.procesoId)))
+      .map(k => k.name);
+
+    const linkedToolsSet = new Set<string>();
+    macProcedimientos.forEach(p => p.herramientas?.forEach(tool => { if (tool) linkedToolsSet.add(tool); }));
+    const linkedTools = Array.from(linkedToolsSet);
+
+    const linkedSystemsSet = new Set<string>();
+    macProcedimientos.forEach(p => p.sistemas?.forEach(sys => { if (sys) linkedSystemsSet.add(sys); }));
+    const linkedSystems = Array.from(linkedSystemsSet);
+
+    const updatedMapping = {
+      macroproceso: macroprocesoName,
+      procedimientos: linkedProcedures,
+      puestos: linkedPuestos,
+      indicadores: linkedKPIs,
+      herramientas: linkedTools,
+      sistemas: linkedSystems
+    };
+
+    setMappingInputs(prev => ({
+      ...prev,
+      ...updatedMapping
+    }));
+
+    const currentPhaseData = modo.phases[3]?.data || {};
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...currentPhaseData,
+        asIsMapping: updatedMapping
       }
     });
   };
@@ -2549,21 +2912,68 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
           sistemas: mappingInputs.sistemas,
           puestos: mappingInputs.puestos
         },
-        asIsLink: mappingInputs.externalLink
+        asIsLink: mappingInputs.sipocLink,
+        sipocLink: mappingInputs.sipocLink,
+        vsmLink: mappingInputs.vsmLink
       } 
     });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isApproved || !canEdit) return;
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateModoPhase(modo.id, 3, { data: { ...phaseData, asIsImage: reader.result } });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleSipocImageUpload = (base64: string) => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        sipocImage: base64,
+        asIsImage: base64
+      }
+    });
+  };
+
+  const handleSipocImageRemove = () => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        sipocImage: null,
+        asIsImage: null
+      }
+    });
+  };
+
+  const handleSipocMermaidChange = (code: string) => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        mermaidSipoc: code,
+        mermaidASIS: code
+      }
+    });
+  };
+
+  const handleVsmImageUpload = (base64: string) => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        vsmImage: base64
+      }
+    });
+  };
+
+  const handleVsmImageRemove = () => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        vsmImage: null
+      }
+    });
+  };
+
+  const handleVsmMermaidChange = (code: string) => {
+    updateModoPhase(modo.id, 3, {
+      data: {
+        ...phaseData,
+        mermaidVsm: code
+      }
+    });
   };
 
   const handleGenerate = async () => {
@@ -2602,127 +3012,45 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
         />
       </div>
       
-      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden mt-6">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div>
-            <h3 className="text-[18px] font-bold text-slate-900">Diagrama AS-IS (SIPOC con VSM)</h3>
-            <p className="text-[13px] text-slate-500 mt-1">Elige entre escribir código Mermaid o subir una imagen de tu diagrama.</p>
-          </div>
-          
-          <div className="flex bg-slate-100 p-1 rounded-lg">
-            <button 
-              onClick={() => setDiagramMode('image')}
-              className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramMode === 'image' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-            >
-              Imagen / Enlace
-            </button>
-            <button 
-              onClick={() => setDiagramMode('mermaid')}
-              className={cn("px-4 py-1.5 rounded-md text-[13px] font-bold transition-colors", diagramMode === 'mermaid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
-            >
-              Código Mermaid
-            </button>
-          </div>
-        </div>
+      <DiagramSection
+        title="Diagrama SIPOC (AS-IS)"
+        description="Sube el diagrama SIPOC o escribe su código Mermaid."
+        externalLink={mappingInputs.sipocLink}
+        image={phaseData.sipocImage || phaseData.asIsImage || null}
+        mermaidCode={phaseData.mermaidSipoc || phaseData.mermaidASIS || ''}
+        mode={sipocMode}
+        setMode={setSipocMode}
+        onLinkChange={(val) => {
+          setMappingInputs(prev => ({ ...prev, sipocLink: val }));
+          updateModoPhase(modo.id, 3, { data: { ...phaseData, sipocLink: val, asIsLink: val } });
+        }}
+        onImageUpload={handleSipocImageUpload}
+        onImageRemove={handleSipocImageRemove}
+        onMermaidChange={handleSipocMermaidChange}
+        canEdit={canEdit}
+        isApproved={isApproved}
+        placeholderText="Sube una imagen de tu SIPOC usando el botón de arriba o pega el enlace externo."
+      />
 
-        {diagramMode === 'image' ? (
-          <>
-            <div className="p-6 bg-white border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3 max-w-2xl flex-1">
-                <span className="material-symbols-outlined text-slate-400 text-[20px]">link</span>
-                <input 
-                  type="text" 
-                  placeholder="Enlace externo a Lucidchart o draw.io (opcional)" 
-                  className="flex-1 p-2 border border-slate-200 rounded-lg text-[13px] focus:ring-1 focus:ring-primary focus:border-primary outline-none disabled:opacity-60"
-                  value={mappingInputs.externalLink}
-                  onChange={e => setMappingInputs(prev => ({ ...prev, externalLink: e.target.value }))}
-                  onBlur={handleBlur}
-                  disabled={isApproved || !canEdit}
-                />
-                {mappingInputs.externalLink && (
-                  <a href={mappingInputs.externalLink} target="_blank" rel="noopener noreferrer" className="text-primary font-bold text-[13px] hover:underline whitespace-nowrap">
-                    Abrir enlace
-                  </a>
-                )}
-              </div>
-              <div className="flex items-center gap-3 justify-end">
-                <label className={cn(
-                  "cursor-pointer bg-white border border-slate-200 text-slate-700 font-bold text-[13px] px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-primary hover:border-primary/50 transition-colors flex items-center gap-2 shadow-sm",
-                  (isApproved || !canEdit) && "opacity-50 cursor-not-allowed pointer-events-none"
-                )}>
-                  <span className="material-symbols-outlined text-[18px]">upload</span> Subir Imagen
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isApproved || !canEdit} />
-                </label>
-                {phaseData.asIsImage && !isApproved && canEdit && (
-                  <button onClick={() => updateModoPhase(modo.id, 3, { data: { ...phaseData, asIsImage: null } })} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center" title="Eliminar imagen">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {phaseData.asIsImage ? (
-              <div className="p-8 bg-slate-50 flex justify-center items-center">
-                <img src={phaseData.asIsImage as string} alt="Diagrama AS-IS" className="max-w-full rounded-lg shadow-sm border border-slate-200" />
-              </div>
-            ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-slate-400 border-dashed bg-slate-50/50">
-                <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">image</span>
-                <p className="text-[14px] font-medium">Aún no hay una imagen de diagrama cargada</p>
-                <p className="text-[12px] mt-1 text-center max-w-md">Sube una imagen de tu SIPOC/VSM usando el botón de arriba o pega el enlace externo.</p>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="p-6 bg-white flex flex-col gap-5">
-            {phaseData.mermaidASIS ? (
-              <div className="p-8 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center min-h-[220px] overflow-auto">
-                <MermaidChart chart={phaseData.mermaidASIS} />
-              </div>
-            ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-slate-400 border border-slate-200 border-dashed bg-slate-50/50 rounded-xl">
-                <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">code</span>
-                <p className="text-[14px] font-medium">No hay código Mermaid ingresado</p>
-                <button 
-                  onClick={() => {
-                    updateModoPhase(modo.id, 3, { 
-                      data: { 
-                        ...phaseData, 
-                        mermaidASIS: 'graph TD\n    A[Inicio] --> B[Paso 1]\n    B --> C[Fin]' 
-                      } 
-                    });
-                  }}
-                  className="mt-4 px-4 py-2 bg-slate-900 text-white text-[12px] font-bold rounded-lg hover:bg-slate-800 transition-colors"
-                  disabled={isApproved || !canEdit}
-                >
-                  Generar plantilla de inicio
-                </button>
-              </div>
-            )}
-
-            {phaseData.mermaidASIS && (
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase">Código Mermaid (Editable)</label>
-                <textarea 
-                  className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[12px] text-slate-700 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-60"
-                  rows={8}
-                  value={phaseData.mermaidASIS}
-                  onChange={(e) => {
-                    updateModoPhase(modo.id, 3, { 
-                      data: { 
-                        ...phaseData, 
-                        mermaidASIS: e.target.value 
-                      } 
-                    });
-                  }}
-                  disabled={isApproved || !canEdit}
-                  placeholder="Escribe tu código Mermaid aquí..."
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <DiagramSection
+        title="Diagrama VSM (AS-IS)"
+        description="Sube el diagrama de cadena de valor (VSM) o escribe su código Mermaid."
+        externalLink={mappingInputs.vsmLink}
+        image={phaseData.vsmImage || null}
+        mermaidCode={phaseData.mermaidVsm || ''}
+        mode={vsmMode}
+        setMode={setVsmMode}
+        onLinkChange={(val) => {
+          setMappingInputs(prev => ({ ...prev, vsmLink: val }));
+          updateModoPhase(modo.id, 3, { data: { ...phaseData, vsmLink: val } });
+        }}
+        onImageUpload={handleVsmImageUpload}
+        onImageRemove={handleVsmImageRemove}
+        onMermaidChange={handleVsmMermaidChange}
+        canEdit={canEdit}
+        isApproved={isApproved}
+        placeholderText="Sube una imagen de tu VSM usando el botón de arriba o pega el enlace externo."
+      />
 
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm mt-6 p-8">
         <h3 className="text-[16px] font-bold text-slate-900 mb-6 flex items-center gap-2">
@@ -2736,8 +3064,7 @@ export const Phase3: React.FC<{ modo: Modo }> = ({ modo }) => {
             <select 
               className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-[14px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               value={mappingInputs.macroproceso}
-              onChange={e => setMappingInputs(prev => ({ ...prev, macroproceso: e.target.value }))}
-              onBlur={handleBlur}
+              onChange={e => handleMacroprocesoChange(e.target.value)}
               disabled={isApproved || !canEdit}
             >
               <option value="">-- Seleccionar Macroproceso --</option>

@@ -212,6 +212,7 @@ export type AppState = {
   propuestas: PropuestaProyecto[];
   addPropuesta: (p: Omit<PropuestaProyecto, 'id'>) => void;
   updatePropuesta: (id: string, updates: Partial<PropuestaProyecto>) => void;
+  deletePropuesta: (id: string) => void;
   formatos: Formato[];
 };
 
