@@ -4,12 +4,13 @@ import { AppProvider, useAppStore } from './store';
 import { Dashboard } from './components/Dashboard';
 import { ModoDetail } from './components/ModoDetail';
 import { DocumentosView, KPIsView, GlosarioView, AdministracionView, SolicitudesView, MacroprocesosView } from './components/GlobalViews';
+import { OrganigramaView } from './components/OrganigramaView';
 import Login from './components/Login';
 import { onAuthStateChanged, signOut, updatePassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { cn } from './utils';
 
-type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'KPIs' | 'Glosario' | 'Administración' | 'Macroprocesos';
+type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'KPIs' | 'Glosario' | 'Administración' | 'Macroprocesos' | 'Organigrama';
 
 const MainLayout: React.FC = () => {
   const { currentUser, setCurrentUser, users, updateUser, syncState, syncErrorMessage } = useAppStore();
@@ -119,6 +120,7 @@ const MainLayout: React.FC = () => {
       case 'Glosario': return <GlosarioView />;
       case 'Administración': return canEdit ? <AdministracionView /> : <Dashboard onSelectModo={setSelectedModoId} />;
       case 'Macroprocesos': return <MacroprocesosView />;
+      case 'Organigrama': return <OrganigramaView onSelectModo={setSelectedModoId} />;
       default: return <Dashboard onSelectModo={setSelectedModoId} />;
     }
   };
@@ -166,6 +168,10 @@ const MainLayout: React.FC = () => {
             <button onClick={() => { setActiveGlobalTab('Macroprocesos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Macroprocesos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
               <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Macroprocesos' && !selectedModoId && "filled")}>account_tree</span>
               <span className="text-[13px]">Macroprocesos</span>
+            </button>
+            <button onClick={() => { setActiveGlobalTab('Organigrama'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Organigrama' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Organigrama' && !selectedModoId && "filled")}>badge</span>
+              <span className="text-[13px]">Organigrama</span>
             </button>
             
             {canEdit && (

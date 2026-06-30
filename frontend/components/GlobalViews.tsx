@@ -367,27 +367,65 @@ export const GlosarioView = () => {
 };
 
 export const AdministracionView = () => {
-  const { users, addUser, deleteUser, areas } = useAppStore();
+  const { users, addUser, deleteUser, updateUser, areas } = useAppStore();
   const [nombre, setNombre] = useState('');
   const [puesto, setPuesto] = useState('');
   const [rol, setRol] = useState<SystemRole>('Facilitador');
   const [area, setArea] = useState('Todas');
   const [sucursal, setSucursal] = useState('Todas');
+  const [telefono, setTelefono] = useState('');
+  const [reportsTo, setReportsTo] = useState('');
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
-  const handleAdd = () => {
+  const handleSave = () => {
     if (!nombre || !puesto) return;
-    addUser({
+    
+    const userPayload = {
       name: nombre,
       puesto,
       systemRole: rol,
       areas: area === 'Todas' ? areas : [area],
-      sucursales: sucursal === 'Todas' ? ['Todas'] : [sucursal]
-    });
+      sucursales: sucursal === 'Todas' ? ['Todas'] : [sucursal],
+      telefono: telefono.trim() || undefined,
+      reportsTo: reportsTo || undefined
+    };
+
+    if (editingUserId) {
+      updateUser(editingUserId, userPayload);
+      setEditingUserId(null);
+    } else {
+      addUser(userPayload);
+    }
+
     setNombre('');
     setPuesto('');
     setRol('Facilitador');
     setArea('Todas');
     setSucursal('Todas');
+    setTelefono('');
+    setReportsTo('');
+  };
+
+  const handleStartEdit = (u: User) => {
+    setEditingUserId(u.id);
+    setNombre(u.name);
+    setPuesto(u.puesto || '');
+    setRol(u.systemRole);
+    setArea(u.areas.includes('Todas') ? 'Todas' : (u.areas[0] || 'Todas'));
+    setSucursal(u.sucursales?.includes('Todas') ? 'Todas' : (u.sucursales?.[0] || 'Todas'));
+    setTelefono(u.telefono || '');
+    setReportsTo(u.reportsTo || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setNombre('');
+    setPuesto('');
+    setRol('Facilitador');
+    setArea('Todas');
+    setSucursal('Todas');
+    setTelefono('');
+    setReportsTo('');
   };
 
   return (
@@ -415,6 +453,8 @@ export const AdministracionView = () => {
                   <th className="py-3 px-4 font-semibold">Rol de sistema</th>
                   <th className="py-3 px-4 font-semibold">Áreas</th>
                   <th className="py-3 px-4 font-semibold">Sucursales</th>
+                  <th className="py-3 px-4 font-semibold">Teléfono</th>
+                  <th className="py-3 px-4 font-semibold">Reporta a</th>
                   <th className="py-3 px-4 font-semibold"></th>
                 </tr>
               </thead>
@@ -430,10 +470,19 @@ export const AdministracionView = () => {
                     </td>
                     <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.areas.includes('Todas') || u.areas.length === areas.length ? 'Todas' : u.areas.join(', ')}</td>
                     <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.sucursales?.includes('Todas') ? 'Todas' : (u.sucursales?.join(', ') || 'Todas')}</td>
+                    <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.telefono || 'N/A'}</td>
+                    <td className="py-3 px-4 text-body-md text-on-surface-variant">
+                      {u.reportsTo ? (users.find(parent => parent.id === u.reportsTo)?.name || 'N/A') : 'Ninguno (Raíz)'}
+                    </td>
                     <td className="py-3 px-4 text-right">
-                      <button onClick={() => deleteUser(u.id)} className="text-outline-variant hover:text-red-500 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">delete</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-2.5">
+                        <button onClick={() => handleStartEdit(u)} className="text-outline-variant hover:text-primary transition-colors" title="Editar usuario">
+                          <span className="material-symbols-outlined text-[20px]">edit</span>
+                        </button>
+                        <button onClick={() => deleteUser(u.id)} className="text-outline-variant hover:text-red-500 transition-colors" title="Eliminar usuario">
+                          <span className="material-symbols-outlined text-[20px]">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -443,8 +492,12 @@ export const AdministracionView = () => {
         </div>
 
         <div className="p-6 bg-surface-container-lowest">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-[200px]">
+          <h4 className="font-title-sm text-title-sm text-on-surface uppercase tracking-wider mb-4">
+            {editingUserId ? 'EDITAR USUARIO' : 'AGREGAR NUEVO USUARIO'}
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div className="min-w-[200px]">
               <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Nombre</label>
               <input 
                 type="text" 
@@ -453,7 +506,7 @@ export const AdministracionView = () => {
                 placeholder="Nombre completo"
               />
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div className="min-w-[200px]">
               <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Puesto</label>
               <input 
                 type="text" 
@@ -462,7 +515,7 @@ export const AdministracionView = () => {
                 placeholder="Cargo o puesto"
               />
             </div>
-            <div className="w-[200px]">
+            <div>
               <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Rol de sistema</label>
               <select 
                 value={rol} onChange={e => setRol(e.target.value as SystemRole)}
@@ -473,9 +526,19 @@ export const AdministracionView = () => {
                 <option value="Patrocinador">Patrocinador</option>
                 <option value="Facilitador">Facilitador</option>
                 <option value="Usuario clave">Usuario clave</option>
+                <option value="Lector">Lector</option>
               </select>
             </div>
-            <div className="w-[150px]">
+            <div>
+              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Teléfono</label>
+              <input 
+                type="text" 
+                value={telefono} onChange={e => setTelefono(e.target.value)}
+                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
+                placeholder="Teléfono de contacto"
+              />
+            </div>
+            <div>
               <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Área</label>
               <select 
                 value={area} onChange={e => setArea(e.target.value)}
@@ -485,7 +548,7 @@ export const AdministracionView = () => {
                 {areas.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>
-            <div className="w-[150px]">
+            <div>
               <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Sucursal</label>
               <select 
                 value={sucursal} onChange={e => setSucursal(e.target.value)}
@@ -498,14 +561,37 @@ export const AdministracionView = () => {
                 <option value="SCL">SCL</option>
               </select>
             </div>
-            <button 
-              onClick={handleAdd}
-              disabled={!nombre || !puesto}
-              className="h-[46px] px-6 border border-outline-variant hover:bg-surface-container-low rounded-lg font-label-md text-primary transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Agregar usuario
-            </button>
+            <div>
+              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Reporta a (Superior)</label>
+              <select 
+                value={reportsTo} onChange={e => setReportsTo(e.target.value)}
+                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
+              >
+                <option value="">Ninguno / Raíz</option>
+                {users.filter(u => u.id !== editingUserId).map(u => (
+                  <option key={u.id} value={u.id}>{u.name} ({u.puesto || 'Sin puesto'})</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSave}
+                disabled={!nombre || !puesto}
+                className="flex-1 h-[46px] px-4 bg-slate-900 border border-slate-900 hover:bg-slate-800 text-white rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">{editingUserId ? 'save' : 'add'}</span>
+                {editingUserId ? 'Guardar' : 'Agregar'}
+              </button>
+              {editingUserId && (
+                <button 
+                  onClick={handleCancelEdit}
+                  className="h-[46px] px-4 border border-outline-variant hover:bg-surface-container-low rounded-lg font-label-md text-slate-650 hover:text-slate-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

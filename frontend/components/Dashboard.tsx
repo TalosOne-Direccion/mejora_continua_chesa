@@ -9,10 +9,17 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
   const allModos = Object.values(modos);
   const canEdit = canEditModo(currentUser?.name);
 
+  // Filtrado de visibilidad para roles que no son administradores
+  const isProjectAdmin = currentUser?.systemRole === 'Admin' || currentUser?.systemRole === 'Equipo de Mejora Continua';
+  const allowedModos = allModos.filter(m => {
+    if (isProjectAdmin) return true;
+    return Object.values(m.team).includes(currentUser?.name);
+  });
+
   const [filterArea, setFilterArea] = useState('Todas las Áreas');
   const [filterType, setFilterType] = useState('Todos los Tipos');
 
-  const visibleModos = allModos.filter(m => {
+  const visibleModos = allowedModos.filter(m => {
     if (filterArea !== 'Todas las Áreas' && m.area !== filterArea) return false;
     if (filterType !== 'Todos los Tipos' && m.projectType !== filterType) return false;
     return true;
@@ -64,9 +71,9 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
     }
   };
 
-  const activeCount = allModos.length;
-  const avgProgress = activeCount > 0 ? Math.round(allModos.reduce((acc, m) => acc + m.progress, 0) / activeCount) : 0;
-  const criticalCount = allModos.filter(m => m.status === 'At Risk' || m.status === 'Delayed').length;
+  const activeCount = allowedModos.length;
+  const avgProgress = activeCount > 0 ? Math.round(allowedModos.reduce((acc, m) => acc + m.progress, 0) / activeCount) : 0;
+  const criticalCount = allowedModos.filter(m => m.status === 'At Risk' || m.status === 'Delayed').length;
 
   return (
     <div className="max-w-[1400px] mx-auto pb-12">

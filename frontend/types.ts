@@ -67,7 +67,10 @@ export type User = {
   sucursales?: string[];
   avatar?: string | null;
   password?: string;
+  reportsTo?: string;
+  telefono?: string;
 };
+
 
 export type ProjectRisk = {
   id: string;

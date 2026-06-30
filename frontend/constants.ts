@@ -40,10 +40,10 @@ export const INITIAL_PROCESOS: import('./types').Proceso[] = [
 ];
 
 export const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'Carlos Barrientos', puesto: 'Gerente de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'] },
-  { id: 'u2', name: 'Ivonne', puesto: 'Líder de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'] },
-  { id: 'u3', name: 'Armando', puesto: 'Líder de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'] },
-  { id: 'u4', name: 'Líder de Área', puesto: 'Líder de Área (Solo Lectura)', systemRole: 'Lector', areas: ['Todas'], sucursales: ['Todas'] }
+  { id: 'u1', name: 'Carlos Barrientos', puesto: 'Gerente de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'], telefono: '4421234567' },
+  { id: 'u2', name: 'Ivonne', puesto: 'Líder de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'], reportsTo: 'u1', telefono: '4427654321' },
+  { id: 'u3', name: 'Armando', puesto: 'Líder de Mejora Continua', systemRole: 'Admin', areas: ['Todas'], sucursales: ['Todas'], reportsTo: 'u1', telefono: '4429876543' },
+  { id: 'u4', name: 'Líder de Área', puesto: 'Líder de Área (Solo Lectura)', systemRole: 'Lector', areas: ['Todas'], sucursales: ['Todas'], reportsTo: 'u2', telefono: '4421112233' }
 ];
 
 export const PROJECT_PHASES: Record<ProjectType, string[]> = {
