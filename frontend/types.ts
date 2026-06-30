@@ -69,6 +69,7 @@ export type User = {
   password?: string;
   reportsTo?: string;
   telefono?: string;
+  isSystemUser?: boolean;
 };
 
 
@@ -217,6 +218,9 @@ export type AppState = {
   updatePropuesta: (id: string, updates: Partial<PropuestaProyecto>) => void;
   deletePropuesta: (id: string) => void;
   formatos: Formato[];
+  sucursales: string[];
+  addSucursal: (name: string) => void;
+  deleteSucursal: (name: string) => void;
 };
 
 export const _cacheBuster = 1;

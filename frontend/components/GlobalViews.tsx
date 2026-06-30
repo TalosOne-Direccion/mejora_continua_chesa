@@ -367,15 +367,17 @@ export const GlosarioView = () => {
 };
 
 export const AdministracionView = () => {
-  const { users, addUser, deleteUser, updateUser, areas } = useAppStore();
+  const { users, addUser, deleteUser, updateUser, areas, sucursales, addSucursal, deleteSucursal } = useAppStore();
   const [nombre, setNombre] = useState('');
   const [puesto, setPuesto] = useState('');
   const [rol, setRol] = useState<SystemRole>('Facilitador');
   const [area, setArea] = useState('Todas');
-  const [sucursal, setSucursal] = useState('Todas');
+  const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
   const [telefono, setTelefono] = useState('');
   const [reportsTo, setReportsTo] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [isSystemUser, setIsSystemUser] = useState(true);
+  const [newSucName, setNewSucName] = useState('');
 
   const handleSave = () => {
     if (!nombre || !puesto) return;
@@ -383,11 +385,12 @@ export const AdministracionView = () => {
     const userPayload = {
       name: nombre,
       puesto,
-      systemRole: rol,
+      systemRole: isSystemUser ? rol : 'Lector',
       areas: area === 'Todas' ? areas : [area],
-      sucursales: sucursal === 'Todas' ? ['Todas'] : [sucursal],
+      sucursales: selectedSucursales.includes('Todas') ? ['Todas'] : selectedSucursales,
       telefono: telefono.trim() || undefined,
-      reportsTo: reportsTo || undefined
+      reportsTo: reportsTo || undefined,
+      isSystemUser: isSystemUser
     };
 
     if (editingUserId) {
@@ -401,9 +404,10 @@ export const AdministracionView = () => {
     setPuesto('');
     setRol('Facilitador');
     setArea('Todas');
-    setSucursal('Todas');
+    setSelectedSucursales([]);
     setTelefono('');
     setReportsTo('');
+    setIsSystemUser(true);
   };
 
   const handleStartEdit = (u: User) => {
@@ -412,9 +416,10 @@ export const AdministracionView = () => {
     setPuesto(u.puesto || '');
     setRol(u.systemRole);
     setArea(u.areas.includes('Todas') ? 'Todas' : (u.areas[0] || 'Todas'));
-    setSucursal(u.sucursales?.includes('Todas') ? 'Todas' : (u.sucursales?.[0] || 'Todas'));
+    setSelectedSucursales(u.sucursales || []);
     setTelefono(u.telefono || '');
     setReportsTo(u.reportsTo || '');
+    setIsSystemUser(u.isSystemUser !== false);
   };
 
   const handleCancelEdit = () => {
@@ -423,9 +428,10 @@ export const AdministracionView = () => {
     setPuesto('');
     setRol('Facilitador');
     setArea('Todas');
-    setSucursal('Todas');
+    setSelectedSucursales([]);
     setTelefono('');
     setReportsTo('');
+    setIsSystemUser(true);
   };
 
   return (
@@ -442,7 +448,7 @@ export const AdministracionView = () => {
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b border-outline-variant">
-          <h3 className="font-title-md text-title-md text-on-surface uppercase tracking-wider mb-4">USUARIOS</h3>
+          <h3 className="font-title-md text-title-md text-on-surface uppercase tracking-wider mb-4">USUARIOS Y COLABORADORES</h3>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -450,6 +456,7 @@ export const AdministracionView = () => {
                 <tr className="border-b border-outline-variant text-label-sm text-on-surface-variant uppercase tracking-wider">
                   <th className="py-3 px-4 font-semibold">Nombre</th>
                   <th className="py-3 px-4 font-semibold">Puesto</th>
+                  <th className="py-3 px-4 font-semibold">Tipo</th>
                   <th className="py-3 px-4 font-semibold">Rol de sistema</th>
                   <th className="py-3 px-4 font-semibold">Áreas</th>
                   <th className="py-3 px-4 font-semibold">Sucursales</th>
@@ -464,9 +471,26 @@ export const AdministracionView = () => {
                     <td className="py-3 px-4 text-body-md text-on-surface font-medium">{u.name}</td>
                     <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.puesto || 'N/A'}</td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-label-sm border border-outline-variant bg-surface">
-                        {u.systemRole}
-                      </span>
+                      {u.isSystemUser !== false ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          Usuario
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                          Colaborador
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      {u.isSystemUser !== false ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-label-sm border border-outline-variant bg-surface">
+                          {u.systemRole}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic text-[13px]">Sin Acceso</span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.areas.includes('Todas') || u.areas.length === areas.length ? 'Todas' : u.areas.join(', ')}</td>
                     <td className="py-3 px-4 text-body-md text-on-surface-variant">{u.sucursales?.includes('Todas') ? 'Todas' : (u.sucursales?.join(', ') || 'Todas')}</td>
@@ -476,10 +500,10 @@ export const AdministracionView = () => {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2.5">
-                        <button onClick={() => handleStartEdit(u)} className="text-outline-variant hover:text-primary transition-colors" title="Editar usuario">
+                        <button onClick={() => handleStartEdit(u)} className="text-outline-variant hover:text-primary transition-colors cursor-pointer" title="Editar usuario">
                           <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
-                        <button onClick={() => deleteUser(u.id)} className="text-outline-variant hover:text-red-500 transition-colors" title="Eliminar usuario">
+                        <button onClick={() => deleteUser(u.id)} className="text-outline-variant hover:text-red-500 transition-colors cursor-pointer" title="Eliminar usuario">
                           <span className="material-symbols-outlined text-[20px]">delete</span>
                         </button>
                       </div>
@@ -493,105 +517,230 @@ export const AdministracionView = () => {
 
         <div className="p-6 bg-surface-container-lowest">
           <h4 className="font-title-sm text-title-sm text-on-surface uppercase tracking-wider mb-4">
-            {editingUserId ? 'EDITAR USUARIO' : 'AGREGAR NUEVO USUARIO'}
+            {editingUserId ? 'EDITAR COLABORADOR / USUARIO' : 'AGREGAR NUEVO COLABORADOR / USUARIO'}
           </h4>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            <div className="min-w-[200px]">
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Nombre</label>
+          <div className="space-y-6">
+            {/* Checkbox de Acceso a Sistema */}
+            <div className="flex items-center gap-2.5 p-3 bg-slate-50 border border-slate-200 rounded-lg w-fit">
               <input 
-                type="text" 
-                value={nombre} onChange={e => setNombre(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
-                placeholder="Nombre completo"
+                type="checkbox" 
+                id="isSystemUser" 
+                checked={isSystemUser} 
+                onChange={e => setIsSystemUser(e.target.checked)}
+                className="rounded border-slate-350 text-slate-900 focus:ring-slate-900 h-4 w-4 cursor-pointer animate-none"
               />
+              <label htmlFor="isSystemUser" className="text-[13px] font-bold text-slate-700 cursor-pointer select-none">
+                ¿Tiene acceso al sistema? (Habilitar como usuario)
+              </label>
             </div>
-            <div className="min-w-[200px]">
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Puesto</label>
-              <input 
-                type="text" 
-                value={puesto} onChange={e => setPuesto(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
-                placeholder="Cargo o puesto"
-              />
-            </div>
-            <div>
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Rol de sistema</label>
-              <select 
-                value={rol} onChange={e => setRol(e.target.value as SystemRole)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
-              >
-                <option value="Admin">Admin</option>
-                <option value="Equipo de Mejora Continua">Equipo de Mejora Continua</option>
-                <option value="Patrocinador">Patrocinador</option>
-                <option value="Facilitador">Facilitador</option>
-                <option value="Usuario clave">Usuario clave</option>
-                <option value="Lector">Lector</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Teléfono</label>
-              <input 
-                type="text" 
-                value={telefono} onChange={e => setTelefono(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
-                placeholder="Teléfono de contacto"
-              />
-            </div>
-            <div>
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Área</label>
-              <select 
-                value={area} onChange={e => setArea(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
-              >
-                <option value="Todas">Todas</option>
-                {areas.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Sucursal</label>
-              <select 
-                value={sucursal} onChange={e => setSucursal(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
-              >
-                <option value="Todas">Todas</option>
-                <option value="TGZ">TGZ</option>
-                <option value="SCC">SCC</option>
-                <option value="TAP">TAP</option>
-                <option value="SCL">SCL</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Reporta a (Superior)</label>
-              <select 
-                value={reportsTo} onChange={e => setReportsTo(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
-              >
-                <option value="">Ninguno / Raíz</option>
-                {users.filter(u => u.id !== editingUserId).map(u => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.puesto || 'Sin puesto'})</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={handleSave}
-                disabled={!nombre || !puesto}
-                className="flex-1 h-[46px] px-4 bg-slate-900 border border-slate-900 hover:bg-slate-800 text-white rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[18px]">{editingUserId ? 'save' : 'add'}</span>
-                {editingUserId ? 'Guardar' : 'Agregar'}
-              </button>
-              {editingUserId && (
-                <button 
-                  onClick={handleCancelEdit}
-                  className="h-[46px] px-4 border border-outline-variant hover:bg-surface-container-low rounded-lg font-label-md text-slate-650 hover:text-slate-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+
+            {/* Inputs Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+              <div className="min-w-[200px]">
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Nombre</label>
+                <input 
+                  type="text" 
+                  value={nombre} onChange={e => setNombre(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
+                  placeholder="Nombre completo"
+                />
+              </div>
+              <div className="min-w-[200px]">
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Puesto</label>
+                <input 
+                  type="text" 
+                  value={puesto} onChange={e => setPuesto(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
+                  placeholder="Cargo o puesto"
+                />
+              </div>
+              
+              {/* Rol de Sistema / Oculto si no es usuario */}
+              {isSystemUser ? (
+                <div>
+                  <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Rol de sistema</label>
+                  <select 
+                    value={rol} onChange={e => setRol(e.target.value as SystemRole)}
+                    className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Equipo de Mejora Continua">Equipo de Mejora Continua</option>
+                    <option value="Patrocinador">Patrocinador</option>
+                    <option value="Facilitador">Facilitador</option>
+                    <option value="Usuario clave">Usuario clave</option>
+                    <option value="Lector">Lector</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold opacity-50">Rol de sistema</label>
+                  <div className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-slate-100 text-slate-500 font-medium select-none">
+                    Solo Organigrama (Sin Acceso)
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Teléfono</label>
+                <input 
+                  type="text" 
+                  value={telefono} onChange={e => setTelefono(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors"
+                  placeholder="Teléfono de contacto"
+                />
+              </div>
+
+              <div>
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Área</label>
+                <select 
+                  value={area} onChange={e => setArea(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                  Cancelar
+                  <option value="Todas">Todas</option>
+                  {areas.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+
+              {/* Selector Múltiple de Sucursales */}
+              <div className="lg:col-span-2">
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Sucursales Asociadas</label>
+                <div className="flex flex-wrap gap-3.5 p-2.5 bg-slate-50 border border-outline-variant rounded-lg min-h-[46px] items-center">
+                  <label className="flex items-center gap-1.5 text-body-md text-slate-700 cursor-pointer font-bold select-none pr-3 border-r border-slate-200">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedSucursales.includes('Todas')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSucursales(['Todas']);
+                        } else {
+                          setSelectedSucursales([]);
+                        }
+                      }}
+                      className="rounded border-slate-350 text-slate-900 focus:ring-slate-900 h-4 w-4 cursor-pointer"
+                    />
+                    Todas
+                  </label>
+                  
+                  {sucursales.map(s => {
+                    const isChecked = selectedSucursales.includes(s) && !selectedSucursales.includes('Todas');
+                    const isDisabled = selectedSucursales.includes('Todas');
+                    return (
+                      <label 
+                        key={s} 
+                        className={cn(
+                          "flex items-center gap-1.5 text-body-md text-slate-700 select-none",
+                          isDisabled ? "opacity-45 cursor-not-allowed" : "cursor-pointer font-medium"
+                        )}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={isChecked}
+                          disabled={isDisabled}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedSucursales(prev => [...prev.filter(x => x !== 'Todas'), s]);
+                            } else {
+                              setSelectedSucursales(prev => prev.filter(x => x !== s));
+                            }
+                          }}
+                          className="rounded border-slate-350 text-slate-900 focus:ring-slate-900 h-4 w-4 cursor-pointer"
+                        />
+                        {s}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Reporta a (Superior)</label>
+                <select 
+                  value={reportsTo} onChange={e => setReportsTo(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md bg-white focus:border-primary outline-none transition-colors"
+                >
+                  <option value="">Ninguno / Raíz</option>
+                  {users.filter(u => u.id !== editingUserId).map(u => (
+                    <option key={u.id} value={u.id}>{u.name} ({u.puesto || 'Sin puesto'})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-2 lg:col-span-4 justify-end mt-2">
+                <button 
+                  onClick={handleSave}
+                  disabled={!nombre || !puesto}
+                  className="px-6 h-[46px] bg-slate-900 border border-slate-900 hover:bg-slate-800 text-white rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-bold"
+                >
+                  <span className="material-symbols-outlined text-[18px]">{editingUserId ? 'save' : 'add'}</span>
+                  {editingUserId ? 'Guardar Cambios' : 'Agregar Colaborador'}
                 </button>
+                {editingUserId && (
+                  <button 
+                    onClick={handleCancelEdit}
+                    className="h-[46px] px-6 border border-outline-variant hover:bg-surface-container-low rounded-lg font-label-md text-slate-650 hover:text-slate-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                    Cancelar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Catálogo de Sucursales */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden p-6">
+        <h3 className="font-title-md text-title-md text-on-surface uppercase tracking-wider mb-4">CATÁLOGO DE SUCURSALES</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Listado */}
+          <div>
+            <p className="text-[12px] text-slate-400 font-bold uppercase tracking-wider mb-3">Sucursales del Sistema</p>
+            <div className="flex flex-wrap gap-2.5">
+              {sucursales.map(s => (
+                <div key={s} className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-body-md font-bold text-slate-700">
+                  <span>{s}</span>
+                  <button 
+                    onClick={() => deleteSucursal(s)}
+                    className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer flex items-center justify-center p-0.5 hover:bg-white rounded"
+                    title={`Eliminar sucursal ${s}`}
+                  >
+                    <span className="material-symbols-outlined text-[16px] leading-none">close</span>
+                  </button>
+                </div>
+              ))}
+              {sucursales.length === 0 && (
+                <p className="text-[13px] text-slate-500 italic">No hay sucursales registradas en el catálogo.</p>
               )}
             </div>
+          </div>
+          
+          {/* Formulario */}
+          <div className="flex items-end gap-3 max-w-sm">
+            <div className="flex-1">
+              <label className="block text-label-sm text-on-surface-variant mb-1 font-semibold">Nueva Sucursal</label>
+              <input 
+                type="text" 
+                value={newSucName} 
+                onChange={e => setNewSucName(e.target.value)}
+                className="w-full p-2.5 rounded-lg border border-outline-variant text-body-md focus:border-primary outline-none transition-colors uppercase"
+                placeholder="Ej: CDMX"
+              />
+            </div>
+            <button 
+              onClick={() => {
+                if (newSucName.trim()) {
+                  addSucursal(newSucName.trim());
+                  setNewSucName('');
+                }
+              }}
+              className="h-[46px] px-5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0 font-bold"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Agregar
+            </button>
           </div>
         </div>
       </div>

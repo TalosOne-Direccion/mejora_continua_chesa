@@ -8,7 +8,7 @@ interface OrganigramaViewProps {
 }
 
 export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }) => {
-  const { users, modos, procedimientos, areas } = useAppStore();
+  const { users, modos, procedimientos, areas, sucursales } = useAppStore();
 
   const [filterArea, setFilterArea] = useState('Todas');
   const [filterSucursal, setFilterSucursal] = useState('Todas');
@@ -96,13 +96,27 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
             <h4 className="text-[14px] font-bold text-slate-800 truncate" title={u.name}>{u.name}</h4>
             <p className="text-[11px] text-slate-500 font-medium truncate" title={u.puesto}>{u.puesto || 'Sin Puesto'}</p>
             <div className="flex gap-1.5 mt-1.5 flex-wrap">
-              <span className="inline-flex px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-bold text-slate-600 uppercase tracking-wide">
-                {u.systemRole === 'Lector' ? 'Líder Área' : u.systemRole}
-              </span>
-              {u.sucursales && u.sucursales[0] !== 'Todas' && (
-                <span className="inline-flex px-1.5 py-0.5 bg-orange-50 rounded text-[9px] font-bold text-orange-600 uppercase tracking-wide">
-                  {u.sucursales[0]}
+              {u.isSystemUser !== false ? (
+                <span className="inline-flex px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-bold text-slate-600 uppercase tracking-wide">
+                  {u.systemRole === 'Lector' ? 'Líder Área' : u.systemRole}
                 </span>
+              ) : (
+                <span className="inline-flex px-1.5 py-0.5 bg-slate-200 rounded text-[9px] font-bold text-slate-700 uppercase tracking-wide">
+                  {u.areas[0] || 'Organización'}
+                </span>
+              )}
+              {u.sucursales && (
+                u.sucursales.includes('Todas') ? (
+                  <span className="inline-flex px-1.5 py-0.5 bg-orange-50 rounded text-[9px] font-bold text-orange-600 uppercase tracking-wide">
+                    Todas
+                  </span>
+                ) : (
+                  u.sucursales.map(s => (
+                    <span key={s} className="inline-flex px-1.5 py-0.5 bg-orange-50 rounded text-[9px] font-bold text-orange-600 uppercase tracking-wide">
+                      {s}
+                    </span>
+                  ))
+                )
               )}
             </div>
           </div>
@@ -122,7 +136,6 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
             {/* Hijos alineados en fila */}
             <div className="flex gap-12 pt-6 relative">
               {children.map(child => {
-                const childChildren = getChildren(child.id);
                 return (
                   <div key={child.id} className="relative flex flex-col items-center">
                     {/* Línea vertical corta arriba de cada hijo */}
@@ -193,10 +206,7 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
               className="bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-semibold text-slate-700 px-3 py-1.5 focus:ring-1 focus:ring-orange-500 outline-none"
             >
               <option value="Todas">Todas las Sucursales</option>
-              <option value="TGZ">TGZ</option>
-              <option value="SCC">SCC</option>
-              <option value="TAP">TAP</option>
-              <option value="SCL">SCL</option>
+              {sucursales.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
@@ -267,9 +277,17 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
               <div>
                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1.5">Datos Generales</h4>
                 <div className="grid grid-cols-2 gap-4">
+                  {selectedUser.isSystemUser !== false && (
+                    <div>
+                      <span className="block text-[11px] font-medium text-slate-400">Rol en Sistema</span>
+                      <span className="text-[13px] font-bold text-slate-700">{selectedUser.systemRole}</span>
+                    </div>
+                  )}
                   <div>
-                    <span className="block text-[11px] font-medium text-slate-400">Rol en Sistema</span>
-                    <span className="text-[13px] font-bold text-slate-700">{selectedUser.systemRole}</span>
+                    <span className="block text-[11px] font-medium text-slate-400">Tipo de Miembro</span>
+                    <span className="text-[13px] font-bold text-slate-700">
+                      {selectedUser.isSystemUser !== false ? 'Usuario de Sistema' : 'Solo Organigrama'}
+                    </span>
                   </div>
                   <div>
                     <span className="block text-[11px] font-medium text-slate-400">Teléfono</span>
@@ -295,7 +313,6 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-1.5">Proyectos Asignados</h4>
                 <div className="space-y-3">
                   {getUserProjects(selectedUser.name).map(project => {
-                    const isFinished = project.progress === 100;
                     return (
                       <div key={project.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-orange-200 hover:bg-orange-50/10 transition-colors flex flex-col gap-2">
                         <div className="flex justify-between items-start">

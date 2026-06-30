@@ -92,6 +92,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => loadState('chesa_macroprocesos', INITIAL_MACROPROCESOS));
   const [procesos, setProcesos] = useState<Proceso[]>(() => loadState('chesa_procesos', INITIAL_PROCESOS));
   const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => loadState('chesa_procedimientos', INITIAL_PROCEDIMIENTOS));
+  const [sucursales, setSucursales] = useState<string[]>(() => loadState<string[]>('chesa_sucursales', ['TGZ', 'SCC', 'TAP', 'SCL']));
   const [propuestas, setPropuestas] = useState<PropuestaProyecto[]>(() => {
     const saved = localStorage.getItem('chesa_propuestas');
     if (saved) {
@@ -142,7 +143,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const loadedCollections = new Set<string>();
     const collectionsToSync = [
       'users', 'modos', 'solicitudes', 'glossary',
-      'kpis', 'macroprocesos', 'procesos', 'procedimientos', 'propuestas', 'formatos'
+      'kpis', 'macroprocesos', 'procesos', 'procedimientos', 'propuestas', 'formatos', 'sucursales'
     ];
 
     setSyncState('loading');
@@ -179,7 +180,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       syncDoc('procesos', setProcesos),
       syncDoc('procedimientos', setProcedimientos),
       syncDoc('propuestas', setPropuestas),
-      syncDoc('formatos', setFormatos)
+      syncDoc('formatos', setFormatos),
+      syncDoc('sucursales', setSucursales)
     ];
 
     return () => unsubscribes.forEach(unsub => unsub());
@@ -207,6 +209,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('chesa_procedimientos', JSON.stringify(procedimientos));
       localStorage.setItem('chesa_propuestas', JSON.stringify(propuestas));
       localStorage.setItem('chesa_formatos', JSON.stringify(formatos));
+      localStorage.setItem('chesa_sucursales', JSON.stringify(sucursales));
     } catch (e) {
       console.warn("Local storage quota exceeded or writing failed:", e);
     }
@@ -238,7 +241,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     saveDoc('procedimientos', procedimientos);
     saveDoc('propuestas', propuestas);
     saveDoc('formatos', formatos);
-  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, procedimientos, propuestas, formatos, hasLoadedFromServer]);
+    saveDoc('sucursales', sucursales);
+  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, procedimientos, propuestas, formatos, sucursales, hasLoadedFromServer]);
 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
@@ -293,6 +297,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   
   const addFormato = (f: Omit<Formato, 'id'>) => setFormatos(prev => [...prev, { ...f, id: `fmt${Date.now()}` }]);
   const deleteFormato = (id: string) => setFormatos(prev => prev.filter(f => f.id !== id));
+
+  const addSucursal = (name: string) => {
+    const cleanName = name.trim().toUpperCase();
+    if (!cleanName || sucursales.includes(cleanName)) return;
+    setSucursales(prev => [...prev, cleanName]);
+  };
+
+  const deleteSucursal = (name: string) => {
+    setSucursales(prev => prev.filter(s => s !== name));
+  };
 
   const addKPI = (kpi: Omit<ProjectKPI, 'id'>) => {
     setKpis(prev => [...prev, { ...kpi, id: `kpi${Date.now()}` }]);
@@ -547,6 +561,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
         propuestas, addPropuesta, updatePropuesta, deletePropuesta,
         formatos, addFormato, deleteFormato,
+        sucursales, addSucursal, deleteSucursal,
         syncState, syncErrorMessage,
       }}
     >
