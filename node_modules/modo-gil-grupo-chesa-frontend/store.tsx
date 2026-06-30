@@ -555,7 +555,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         kpis, addKPI, updateKPI, deleteKPI,
         modos, updateModoPhase, updateModoTeam, addModo, deleteModo, updateModoRisks, updateModoCompromisos, addPhaseLog, addAgenda, deleteAgenda,
         solicitudes, addSolicitud, updateSolicitudStatus, deleteSolicitud,
-        areas: AREAS,
+        areas: macroprocesos.length > 0 ? macroprocesos.map(m => m.name) : AREAS,
         macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso, updateMacroprocesosOrder,
         procesos, addProceso, updateProceso, deleteProceso,
         procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,

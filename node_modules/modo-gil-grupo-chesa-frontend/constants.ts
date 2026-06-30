@@ -11,7 +11,18 @@ export const INITIAL_GLOSSARY: GlossaryTerm[] = [
   { term: 'RACI', definition: 'Responsible, Accountable, Consulted, Informed. Matriz utilizada para asignar y clarificar roles y responsabilidades.' }
 ];
 
-export const AREAS = ['BDC', 'Ventas', 'Postventa', 'Calidad', 'Administración', 'TI', 'Contabilidad', 'Mejora Continua', 'Auditoría', 'Analista de Datos'];
+export const AREAS = [
+  'Planeación Anual',
+  'BDC (Atracción y Gestión de Leads)',
+  'Venta (En Piso)',
+  'Postventa',
+  'Calidad',
+  'Administración',
+  'TI',
+  'Contabilidad',
+  'Mejora Continua',
+  'Auditoría'
+];
 
 export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
   { id: 'm1', name: 'Planeación Anual', type: 'Principal', order: 1 },
@@ -165,7 +176,7 @@ export const INITIAL_MODOS: Record<string, Modo> = {
     id: 'm1',
     name: 'Entrega de unidades nuevas',
     projectType: 'MODO',
-    area: 'Ventas',
+    area: 'Venta (En Piso)',
     currentPhase: 1,
     progress: 10,
     status: 'On Track',
@@ -198,7 +209,7 @@ export const INITIAL_MODOS: Record<string, Modo> = {
     id: 'm3',
     name: 'Optimización de Tiempos de Respuesta',
     projectType: 'Taller de Herramientas',
-    area: 'BDC',
+    area: 'BDC (Atracción y Gestión de Leads)',
     currentPhase: 1,
     progress: 0,
     status: 'On Track',

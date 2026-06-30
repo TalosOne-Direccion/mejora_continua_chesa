@@ -14,6 +14,7 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
   const [filterSucursal, setFilterSucursal] = useState('Todas');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [collapsedNodes, setCollapsedNodes] = useState<Record<string, boolean>>({});
 
   // Determinar si un usuario coincide con los filtros activos
   const matchesFilters = (u: User) => {
@@ -30,12 +31,36 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
     return true;
   };
 
-  // Construir el árbol de reportes
-  // Si no tiene reportsTo, o el supervisor indicado no existe, se considera raíz.
-  const rootUsers = users.filter(u => !u.reportsTo || !users.some(parent => parent.id === u.reportsTo));
+  // Obtener los usuarios raíz para el árbol visible
+  const getRootUsers = () => {
+    if (filterArea === 'Todas') {
+      // Nodos raíz globales (sin superior o cuyo superior no existe)
+      return users.filter(u => !u.reportsTo || !users.some(parent => parent.id === u.reportsTo));
+    } else {
+      // Encontrar usuarios del área seleccionada cuyo jefe inmediato no pertenezca a la misma área
+      return users.filter(u => {
+        const belongsToArea = u.areas.includes(filterArea) || u.areas.includes('Todas');
+        if (!belongsToArea) return false;
+        
+        // Si no tiene jefe, o su jefe no está en la misma área, es un nodo raíz de esta área
+        if (!u.reportsTo) return true;
+        const supervisor = users.find(parent => parent.id === u.reportsTo);
+        if (!supervisor) return true;
+        
+        const supervisorBelongsToArea = supervisor.areas.includes(filterArea) || supervisor.areas.includes('Todas');
+        return !supervisorBelongsToArea;
+      });
+    }
+  };
 
   const getChildren = (userId: string) => {
-    return users.filter(u => u.reportsTo === userId);
+    const allChildren = users.filter(u => u.reportsTo === userId);
+    if (filterArea === 'Todas') {
+      return allChildren;
+    } else {
+      // Filtrar subordinados que pertenecen al área seleccionada
+      return allChildren.filter(u => u.areas.includes(filterArea) || u.areas.includes('Todas'));
+    }
   };
 
   // Obtener iniciales para el avatar
@@ -54,10 +79,14 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
     return procedimientos.filter(p => p.puestos?.some(pos => pos.toLowerCase().trim() === userPuesto.toLowerCase().trim()));
   };
 
+  const rootUsers = getRootUsers();
+
   // Renderizar un nodo y recursivamente sus hijos
   const renderTreeNode = (u: User) => {
     const children = getChildren(u.id);
     const hasChildren = children.length > 0;
+    // Si hay una búsqueda activa, auto-expandimos todos los nodos para mostrar resultados
+    const isCollapsed = collapsedNodes[u.id] && !searchQuery.trim();
     const isHighlighted = matchesFilters(u);
     const hasActiveFilters = filterArea !== 'Todas' || filterSucursal !== 'Todas' || searchQuery.trim() !== '';
 
@@ -112,7 +141,7 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
                   </span>
                 ) : (
                   u.sucursales.map(s => (
-                    <span key={s} className="inline-flex px-1.5 py-0.5 bg-orange-50 rounded text-[9px] font-bold text-orange-600 uppercase tracking-wide">
+                    <span key={s} className="inline-flex px-1.5 py-0.5 bg-orange-50 rounded text-[9px] font-bold text-orange-600 uppercase tracking-wide mr-0.5">
                       {s}
                     </span>
                   ))
@@ -120,10 +149,26 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
               )}
             </div>
           </div>
+
+          {/* Botón de Colapsar/Expandir Subnivel */}
+          {hasChildren && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setCollapsedNodes(prev => ({ ...prev, [u.id]: !prev[u.id] }));
+              }}
+              className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border border-slate-250 hover:border-slate-400 shadow-sm flex items-center justify-center text-slate-550 hover:text-slate-800 transition-colors z-20 cursor-pointer"
+              title={isCollapsed ? "Expandir subordinados" : "Colapsar subordinados"}
+            >
+              <span className="material-symbols-outlined text-[14px] font-bold select-none">
+                {isCollapsed ? 'add' : 'remove'}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Conectores y Subnodos */}
-        {hasChildren && (
+        {hasChildren && !isCollapsed && (
           <div className="flex flex-col items-center mt-6 relative w-full">
             {/* Línea vertical que baja del padre */}
             <div className="absolute top-0 w-px h-6 bg-slate-200 -mt-6"></div>
@@ -187,10 +232,13 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
         {/* Filters Grid */}
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Área:</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Área / Macroproceso:</span>
             <select
               value={filterArea}
-              onChange={e => setFilterArea(e.target.value)}
+              onChange={e => {
+                setFilterArea(e.target.value);
+                setCollapsedNodes({}); // Limpiar colapsados al cambiar de área
+              }}
               className="bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-semibold text-slate-700 px-3 py-1.5 focus:ring-1 focus:ring-orange-500 outline-none"
             >
               <option value="Todas">Todas las Áreas</option>
@@ -212,7 +260,7 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
 
           {(filterArea !== 'Todas' || filterSucursal !== 'Todas' || searchQuery !== '') && (
             <button 
-              onClick={() => { setFilterArea('Todas'); setFilterSucursal('Todas'); setSearchQuery(''); }}
+              onClick={() => { setFilterArea('Todas'); setFilterSucursal('Todas'); setSearchQuery(''); setCollapsedNodes({}); }}
               className="text-[12px] font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">filter_alt_off</span>
@@ -229,8 +277,8 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
           {rootUsers.length === 0 && (
             <div className="text-center py-20">
               <span className="material-symbols-outlined text-slate-350 text-[64px] mb-4">account_tree</span>
-              <p className="text-slate-500 font-bold text-[16px]">No se pudo cargar la estructura jerárquica.</p>
-              <p className="text-slate-400 text-[13px] mt-1">Asegúrate de configurar a quién reporta cada usuario en el panel de Administración.</p>
+              <p className="text-slate-500 font-bold text-[16px]">No se encontraron colaboradores en esta área.</p>
+              <p className="text-slate-400 text-[13px] mt-1">Asigna colaboradores a esta área en el panel de Administración para ver su estructura.</p>
             </div>
           )}
         </div>

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
-import { AREAS, PROJECT_PHASES } from '../constants';
+import { PROJECT_PHASES } from '../constants';
 import { ProjectType } from '../types';
 import { canEditModo } from '../utils';
 
 export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ onSelectModo }) => {
-  const { modos, addModo, deleteModo, currentUser } = useAppStore();
+  const { modos, addModo, deleteModo, currentUser, areas } = useAppStore();
   const allModos = Object.values(modos);
   const canEdit = canEditModo(currentUser?.name);
 
@@ -114,7 +114,7 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
             onChange={e => setFilterArea(e.target.value)}
           >
             <option>Todas las Áreas</option>
-            {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+            {areas.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div className="flex-1 min-w-[200px]">
@@ -317,7 +317,7 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
                 </label>
 
                 <label className={`border-2 rounded-2xl p-6 cursor-pointer transition-all ${formData.projectType === 'Reingeniería' ? 'border-primary bg-primary/5 shadow-md' : 'border-slate-200 hover:border-primary/30 hover:bg-slate-50'}`}>
-                  <input type="radio" name="projectType" value="Reingeniería" checked={formData.projectType === 'Reingeniería'} onChange={() => setFormData({...formData, projectType: 'Reingeniería', area: AREAS[0]})} className="hidden" />
+                  <input type="radio" name="projectType" value="Reingeniería" checked={formData.projectType === 'Reingeniería'} onChange={() => setFormData({...formData, projectType: 'Reingeniería', area: areas[0]})} className="hidden" />
                   <div className="w-12 h-12 rounded-xl bg-slate-800 text-white flex items-center justify-center mb-5 shadow-sm">
                     <span className="material-symbols-outlined text-[24px]">settings</span>
                   </div>
@@ -362,7 +362,7 @@ export const Dashboard: React.FC<{ onSelectModo: (id: string) => void }> = ({ on
                     onChange={e => setFormData({...formData, area: e.target.value})}
                   >
                     <option value="" disabled>Selecciona un área...</option>
-                    {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+                    {areas.map(a => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </div>
               </div>
