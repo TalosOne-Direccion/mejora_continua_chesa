@@ -97,15 +97,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => loadState('chesa_macroprocesos', INITIAL_MACROPROCESOS));
   const [procesos, setProcesos] = useState<Proceso[]>(() => {
-    const loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
-    if (loaded.some(p => p.id === 'p3' || p.id === 'p4')) {
-      return INITIAL_PROCESOS;
+    let loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
+    if (!loaded.some(p => p.id === 'p_bdc_mkt')) {
+      loaded = loaded.filter(p => p.macroprocesoId !== 'm2');
+      loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
     }
     return loaded;
   });
   const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => {
     const loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
-    if (loaded.some(p => p.id === 'procsub1' || p.id === 'procsub4')) {
+    if (!loaded.some(p => p.id === 'bdc_mkt_1')) {
       return INITIAL_PROCEDIMIENTOS;
     }
     return loaded;
