@@ -40,8 +40,10 @@ export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
 export const INITIAL_PROCESOS: import('./types').Proceso[] = [
   { id: 'p1', macroprocesoId: 'm1', name: 'Análisis del Entorno y del Negocio' },
   { id: 'p2', macroprocesoId: 'm1', name: 'Definición de Objetivos Anuales' },
-  { id: 'p3', macroprocesoId: 'm2', name: 'Estrategia de Atracción (Canales Digitales)' },
-  { id: 'p4', macroprocesoId: 'm2', name: 'Generación de Leads' },
+  { id: 'p_bdc_mkt', macroprocesoId: 'm2', name: 'Marketing Digital' },
+  { id: 'p_bdc_ventas', macroprocesoId: 'm2', name: 'Ventas Digital' },
+  { id: 'p_bdc_posventa', macroprocesoId: 'm2', name: 'Postventa Digital' },
+  { id: 'p_bdc_calidad', macroprocesoId: 'm2', name: 'Calidad Digital' },
   { id: 'p5', macroprocesoId: 'm3', name: 'Recepción y Bienvenida del Cliente' },
   { id: 'p6', macroprocesoId: 'm3', name: 'Cotización y Negociación' },
   { id: 'p7', macroprocesoId: 'm4', name: 'Programación de Citas / Servicios' },
@@ -263,14 +265,47 @@ export const INITIAL_SOLICITUDES: Record<string, Solicitud> = {
 };
 
 export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
-  { id: 'procsub1', procesoId: 'p3', name: 'Definición de Presupuesto Mensual de Atracción' },
-  { id: 'procsub2', procesoId: 'p3', name: 'Configuración de Campañas en Facebook & Google Ads' },
-  { id: 'procsub3', procesoId: 'p3', name: 'Diseño de Creativos y Redacción de Copys' },
-  { id: 'procsub4', procesoId: 'p4', name: 'Monitoreo Diario de Lead Inbox en CRM' },
-  { id: 'procsub5', procesoId: 'p4', name: 'Calificación Inicial y Asignación de Leads' },
+  // Nuevos procedimientos del BDC
+  { id: 'bdc_mkt_1', procesoId: 'p_bdc_mkt', name: 'Captación y Registro de Lead', puestos: ['MKT Digital'], sistemas: ['Portales Web', 'CRM'] },
+  { id: 'bdc_mkt_2', procesoId: 'p_bdc_mkt', name: 'Asignación de Lead', puestos: ['Lead Manager'], sistemas: ['CRM'] },
+  { id: 'bdc_mkt_3', procesoId: 'p_bdc_mkt', name: 'Primer Contacto', puestos: ['Asesor BDC'], sistemas: ['Conmutador', 'CRM'] },
+  { id: 'bdc_mkt_4', procesoId: 'p_bdc_mkt', name: 'Perfilamiento e Identificación de Necesidad', puestos: ['Asesor BDC'], sistemas: ['CRM'] },
+  { id: 'bdc_mkt_5', procesoId: 'p_bdc_mkt', name: 'Cotización y Propuesta', puestos: ['Asesor Ventas'], sistemas: ['Intelisis', 'CRM'] },
+  { id: 'bdc_mkt_6', procesoId: 'p_bdc_mkt', name: 'Prueba de Manejo', puestos: ['Asesor Ventas'], sistemas: ['CRM'] },
+  { id: 'bdc_mkt_7', procesoId: 'p_bdc_mkt', name: 'Negociación y Cierre de Venta', puestos: ['Asesor Ventas', 'Gerente Ventas'], sistemas: ['Intelisis', 'CRM'] },
+  { id: 'bdc_mkt_8', procesoId: 'p_bdc_mkt', name: 'Preparación de Entrega', puestos: ['Asesor Ventas', 'Coordinador Entregas'], sistemas: ['SIP', 'Intelisis'] },
+  { id: 'bdc_mkt_9', procesoId: 'p_bdc_mkt', name: 'Entrega de Unidad', puestos: ['Coordinador Entregas'], sistemas: ['CRM'] },
+  
+  { id: 'bdc_ven_1', procesoId: 'p_bdc_ventas', name: 'Recepción de Lead Digital', puestos: ['Lead Manager', 'Contact Center'], sistemas: ['CRM', 'Redes Sociales'] },
+  { id: 'bdc_ven_2', procesoId: 'p_bdc_ventas', name: 'Intento de Contacto (Llamada/WhatsApp)', puestos: ['Asesor BDC'], sistemas: ['WhatsApp Business', 'Telefonía VoIP'] },
+  { id: 'bdc_ven_3', procesoId: 'p_bdc_ventas', name: 'Perfilamiento y Cotización Digital', puestos: ['Asesor BDC'], sistemas: ['CRM', 'Intelisis'] },
+  { id: 'bdc_ven_4', procesoId: 'p_bdc_ventas', name: 'Agendamiento de Cita en Sucursal', puestos: ['Asesor BDC'], sistemas: ['CRM', 'Agenda Digital'] },
+  { id: 'bdc_ven_5', procesoId: 'p_bdc_ventas', name: 'Seguimiento a Cita', puestos: ['Asesor BDC'], sistemas: ['WhatsApp Business', 'CRM'] },
+  
+  { id: 'bdc_pos_1', procesoId: 'p_bdc_posventa', name: 'Agendamiento de Cita de Servicio', puestos: ['Asesor BDC Servicio'], sistemas: ['CRM Servicio', 'Intelisis'] },
+  { id: 'bdc_pos_2', procesoId: 'p_bdc_posventa', name: 'Recordatorio de Cita', puestos: ['Asesor BDC Servicio'], sistemas: ['WhatsApp Business', 'Telefonía VoIP'] },
+  { id: 'bdc_pos_3', procesoId: 'p_bdc_posventa', name: 'Recepción en Taller', puestos: ['Asesor de Servicio'], sistemas: ['Intelisis', 'Tableta Recepción'] },
+  { id: 'bdc_pos_4', procesoId: 'p_bdc_posventa', name: 'Seguimiento de Reparación', puestos: ['Asesor de Servicio'], sistemas: ['WhatsApp Business', 'CRM Servicio'] },
+  { id: 'bdc_pos_5', procesoId: 'p_bdc_posventa', name: 'Entrega y Cobro', puestos: ['Asesor de Servicio', 'Caja'], sistemas: ['Intelisis', 'Terminal de Pagos'] },
+  
+  { id: 'bdc_cal_1', procesoId: 'p_bdc_calidad', name: 'Encuesta de Calidad Posventa', puestos: ['Agente BDC Calidad'], sistemas: ['CRM', 'Sistema Encuestas'] },
+  { id: 'bdc_cal_2', procesoId: 'p_bdc_calidad', name: 'Encuesta de Calidad Ventas', puestos: ['Agente BDC Calidad'], sistemas: ['CRM', 'Sistema Encuestas'] },
+  { id: 'bdc_cal_3', procesoId: 'p_bdc_calidad', name: 'Tratamiento de Alertas / Detractores', puestos: ['Líder BDC', 'Gerente Sucursal'], sistemas: ['CRM', 'Portal Alertas'] },
+  { id: 'bdc_cal_4', procesoId: 'p_bdc_calidad', name: 'Cierre y Plan de Acción', puestos: ['Gerente Sucursal', 'Mejora Continua'], sistemas: ['Herramienta Jira/Trello', 'CRM'] },
+  
+  // Procedimientos antiguos conservados
   { id: 'procsub6', procesoId: 'p7', name: 'Recepción Telefónica / WhatsApp del Cliente' },
   { id: 'procsub7', procesoId: 'p7', name: 'Validación de Capacidad y Asignación de Bahía' },
   { id: 'procsub8', procesoId: 'p8', name: 'Inspección Visual 28 Puntos en Elevador' },
   { id: 'procsub9', procesoId: 'p8', name: 'Apertura y Firma de Orden de Servicio' },
   { id: 'procsub10', procesoId: 'p8', name: 'Ejecución de Mantenimiento / Reparación Mecánica' }
+];
+
+export const INITIAL_KPIS: import('./types').ProjectKPI[] = [
+  { id: 'kpi_bdc_1', projectId: 'global', name: 'SLA Primer Contacto (< 15 min)', status: 'Aprobado', procedimientoId: 'bdc_ven_2' },
+  { id: 'kpi_bdc_2', projectId: 'global', name: '% Contactabilidad', status: 'Aprobado', procedimientoId: 'bdc_ven_2' },
+  { id: 'kpi_bdc_3', projectId: 'global', name: '% Conversión de Lead a Cita', status: 'Aprobado', procedimientoId: 'bdc_ven_4' },
+  { id: 'kpi_bdc_4', projectId: 'global', name: '% de Citas Asistidas (Showroom)', status: 'Aprobado', procedimientoId: 'bdc_ven_5' },
+  { id: 'kpi_bdc_5', projectId: 'global', name: 'NPS Ventas', status: 'Aprobado', procedimientoId: 'bdc_cal_2' },
+  { id: 'kpi_bdc_6', projectId: 'global', name: 'CSI Posventa', status: 'Aprobado', procedimientoId: 'bdc_cal_1' }
 ];

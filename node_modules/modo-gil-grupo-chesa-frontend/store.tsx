@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { AppState, Modo, PhaseState, ProjectType, Solicitud, User, GlossaryTerm, ProjectKPI, Macroproceso, Proceso, Procedimiento, PropuestaProyecto, Formato, MeetingAgenda } from './types';
-import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS, INITIAL_PROCEDIMIENTOS } from './constants';
+import { INITIAL_MODOS, AREAS, PROJECT_PHASES, MOCK_USERS, INITIAL_SOLICITUDES, INITIAL_GLOSSARY, INITIAL_MACROPROCESOS, INITIAL_PROCESOS, INITIAL_PROCEDIMIENTOS, INITIAL_KPIS } from './constants';
 import { db, auth } from './firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -88,10 +88,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [solicitudes, setSolicitudes] = useState<Record<string, Solicitud>>(() => loadState('chesa_solicitudes', INITIAL_SOLICITUDES));
   const [glossary, setGlossary] = useState<GlossaryTerm[]>(() => loadState('chesa_glossary', INITIAL_GLOSSARY));
-  const [kpis, setKpis] = useState<ProjectKPI[]>(() => loadState('chesa_kpis', []));
+  const [kpis, setKpis] = useState<ProjectKPI[]>(() => {
+    const loaded = loadState<ProjectKPI[]>('chesa_kpis', INITIAL_KPIS);
+    if (!loaded.some(k => k.id === 'kpi_bdc_1')) {
+      return [...loaded, ...INITIAL_KPIS.filter(k => !loaded.some(lk => lk.id === k.id))];
+    }
+    return loaded;
+  });
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => loadState('chesa_macroprocesos', INITIAL_MACROPROCESOS));
-  const [procesos, setProcesos] = useState<Proceso[]>(() => loadState('chesa_procesos', INITIAL_PROCESOS));
-  const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => loadState('chesa_procedimientos', INITIAL_PROCEDIMIENTOS));
+  const [procesos, setProcesos] = useState<Proceso[]>(() => {
+    const loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
+    if (loaded.some(p => p.id === 'p3' || p.id === 'p4')) {
+      return INITIAL_PROCESOS;
+    }
+    return loaded;
+  });
+  const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => {
+    const loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
+    if (loaded.some(p => p.id === 'procsub1' || p.id === 'procsub4')) {
+      return INITIAL_PROCEDIMIENTOS;
+    }
+    return loaded;
+  });
   const [sucursales, setSucursales] = useState<string[]>(() => loadState<string[]>('chesa_sucursales', ['TGZ', 'SCC', 'TAP', 'SCL']));
   const [propuestas, setPropuestas] = useState<PropuestaProyecto[]>(() => {
     const saved = localStorage.getItem('chesa_propuestas');
