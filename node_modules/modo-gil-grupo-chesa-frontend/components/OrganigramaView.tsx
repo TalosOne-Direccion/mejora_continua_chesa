@@ -33,12 +33,13 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
 
   // Obtener los usuarios raíz para el árbol visible
   const getRootUsers = () => {
+    let roots: User[] = [];
     if (filterArea === 'Todas') {
       // Nodos raíz globales (sin superior o cuyo superior no existe)
-      return users.filter(u => !u.reportsTo || !users.some(parent => parent.id === u.reportsTo));
+      roots = users.filter(u => !u.reportsTo || !users.some(parent => parent.id === u.reportsTo));
     } else {
       // Encontrar usuarios del área seleccionada cuyo jefe inmediato no pertenezca a la misma área
-      return users.filter(u => {
+      roots = users.filter(u => {
         const belongsToArea = u.areas.includes(filterArea) || u.areas.includes('Todas');
         if (!belongsToArea) return false;
         
@@ -51,6 +52,17 @@ export const OrganigramaView: React.FC<OrganigramaViewProps> = ({ onSelectModo }
         return !supervisorBelongsToArea;
       });
     }
+
+    // Filtrar nodos "huérfanos": que no reportan a nadie y nadie les reporta
+    return roots.filter(u => {
+      const hasValidManager = u.reportsTo && users.some(parent => parent.id === u.reportsTo);
+      const hasChildren = users.some(child => child.reportsTo === u.id);
+      
+      if (!hasValidManager && !hasChildren) {
+        return false; // Ocultar del organigrama
+      }
+      return true;
+    });
   };
 
   const getChildren = (userId: string) => {
