@@ -95,18 +95,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => {
     let loaded = loadState<Macroproceso[]>('chesa_macroprocesos', INITIAL_MACROPROCESOS);
-    // If the original m1 was wiped, OR if the newly added m11 is missing, restore all missing defaults
-    if (!loaded.some(m => m.id === 'm1') || !loaded.some(m => m.id === 'm11')) {
-      loaded = [...loaded, ...INITIAL_MACROPROCESOS.filter(m => !loaded.some(lm => lm.id === m.id))];
-    }
+    // Unconditionally restore any missing default macroprocesos so the user never loses them
+    loaded = [...loaded, ...INITIAL_MACROPROCESOS.filter(m => !loaded.some(lm => lm.id === m.id))];
     return loaded;
   });
   const [procesos, setProcesos] = useState<Proceso[]>(() => {
     let loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
-    // If the original p1 was wiped, restore all missing defaults
-    if (!loaded.some(p => p.id === 'p1')) {
-      loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => !loaded.some(lp => lp.id === p.id))];
-    }
+    // Unconditionally restore any missing default procesos
+    loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => !loaded.some(lp => lp.id === p.id))];
     // Ensure BDC MKT exists
     if (!loaded.some(p => p.id === 'p_bdc_mkt')) {
       loaded = loaded.filter(p => p.macroprocesoId !== 'm2');
@@ -116,10 +112,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => {
     let loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
-    // If original missing, bring them back
-    if (!loaded.some(p => p.id === 'procsub6')) {
-      loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => !loaded.some(lp => lp.id === p.id))];
-    }
+    // Unconditionally bring back missing default procedimientos
+    loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => !loaded.some(lp => lp.id === p.id))];
     // Ensure BDC MKT exists
     if (!loaded.some(p => p.id === 'bdc_mkt_1')) {
       loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => p.id.startsWith('bdc_'))];
