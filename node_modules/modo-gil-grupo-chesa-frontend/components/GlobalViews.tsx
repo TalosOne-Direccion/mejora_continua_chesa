@@ -35,7 +35,8 @@ export const KPIsView = () => {
   const [filterSucursal, setFilterSucursal] = useState('');
 
   // Consider KPIs that are not just "Propuesto" or maybe all of them, but usually Aprobado/Liberado are managed here
-  const visibleKpis = kpis.filter(k => {
+  const visibleKpis = (kpis || []).filter(k => {
+    if (!k) return false;
     if (filterPuesto && k.puesto?.toLowerCase().indexOf(filterPuesto.toLowerCase()) === -1) return false;
     if (filterArea && k.area !== filterArea) return false;
     if (filterSucursal && k.sucursal !== filterSucursal) return false;
@@ -261,9 +262,9 @@ export const GlosarioView = () => {
   const [newTerm, setNewTerm] = useState('');
   const [newDefinition, setNewDefinition] = useState('');
   
-  const filteredTerms = glossary.filter(t => 
-    t.term.toLowerCase().includes(search.toLowerCase()) || 
-    t.definition.toLowerCase().includes(search.toLowerCase())
+  const filteredTerms = (glossary || []).filter(t => 
+    t && (t.term.toLowerCase().includes(search.toLowerCase()) || 
+    t.definition.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleAdd = () => {
