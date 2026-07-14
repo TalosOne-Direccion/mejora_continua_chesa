@@ -1180,18 +1180,45 @@ export const MacroprocesosView = () => {
                         Procedimiento
                       </span>
                     </div>
-                    <h2 className="text-[20px] font-bold text-slate-800">
-                      {sub.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      {canEdit ? (
+                        <input
+                          type="text"
+                          value={sub.name}
+                          onChange={(e) => updateProcedimiento(sub.id, { name: e.target.value })}
+                          className="text-[20px] font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-primary focus:outline-none transition-colors w-full"
+                          placeholder="Nombre del procedimiento"
+                        />
+                      ) : (
+                        <h2 className="text-[20px] font-bold text-slate-800">
+                          {sub.name}
+                        </h2>
+                      )}
+                    </div>
                     <p className="text-[13px] text-slate-500 mt-1">
                       Configura el diagrama, puestos, indicadores, sistemas y herramientas de este procedimiento.
                     </p>
                   </div>
                 ) : (
                   <div>
-                    <h2 className="text-[20px] font-bold text-slate-800">
-                      Detalles del Proceso: {proc.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-[20px] font-bold text-slate-800 whitespace-nowrap">
+                        Detalles del Proceso: 
+                      </h2>
+                      {canEdit ? (
+                        <input
+                          type="text"
+                          value={proc.name}
+                          onChange={(e) => updateProceso(proc.id, { name: e.target.value })}
+                          className="text-[20px] font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-primary focus:outline-none transition-colors w-full"
+                          placeholder="Nombre del proceso"
+                        />
+                      ) : (
+                        <h2 className="text-[20px] font-bold text-slate-800">
+                          {proc.name}
+                        </h2>
+                      )}
+                    </div>
                     <p className="text-[13px] text-slate-500 mt-1">
                       Consolidado de diagramas, puestos, KPIs, sistemas, herramientas y procedimientos de este proceso.
                     </p>
