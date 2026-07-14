@@ -2226,7 +2226,7 @@ export const CatalogosView = () => {
               <div key={item} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors gap-4">
                 <div className="flex-1">
                   <span className="font-bold text-slate-700 text-[15px]">{item}</span>
-                  {(areasArr.length > 0 || puestosArr.length > 0) && (
+                  {(areasArr.length > 0 || puestosArr.length > 0) && type !== 'Puestos' && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {areasArr.map(a => (
                         <span key={a} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
@@ -2242,7 +2242,7 @@ export const CatalogosView = () => {
                       ))}
                     </div>
                   )}
-                  {areasArr.length === 0 && puestosArr.length === 0 && (
+                  {areasArr.length === 0 && puestosArr.length === 0 && type !== 'Puestos' && (
                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 mt-2">
                         Sin asignación en procedimientos
                      </span>
