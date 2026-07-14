@@ -739,7 +739,7 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder, catalogoPuestos, catalogoSistemas, catalogoHerramientas, deleteCatalogoPuesto, deleteCatalogoSistema, deleteCatalogoHerramienta, resetBDC } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder, catalogoPuestos, catalogoSistemas, catalogoHerramientas, deleteCatalogoPuesto, deleteCatalogoSistema, deleteCatalogoHerramienta } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
 
   const handleDeleteItem = (type: 'puestos' | 'sistemas' | 'herramientas', val: string, currentArray: string[], procId: string) => {
@@ -1163,21 +1163,7 @@ const activeTab = (viewingProcedimientoId && activeProcessTab === 'procedimiento
               
               {/* HEADER */}
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 mb-6 gap-4">
-                {canEdit && (
-                  <div className="w-full flex justify-end mb-2">
-                    <button 
-                      onClick={() => {
-                        if(window.confirm('¿Estás seguro de que deseas reiniciar y sobrescribir toda la base de datos BDC con los datos por defecto? Esto no se puede deshacer.')) {
-                          resetBDC();
-                        }
-                      }}
-                      className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-bold text-[13px] flex items-center gap-2 transition-colors border border-red-200"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">database</span>
-                      Restaurar BDC Inicial
-                    </button>
-                  </div>
-                )}
+
                 {sub ? (
                   <div>
                     <div className="flex items-center gap-2 mb-1">

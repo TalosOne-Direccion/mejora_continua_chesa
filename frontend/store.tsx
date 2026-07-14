@@ -38,7 +38,6 @@ interface AppContextType extends AppState {
   addFormato: (f: Omit<Formato, 'id'>) => void;
   deleteFormato: (id: string) => void;
   syncState: 'loading' | 'synced' | 'error';
-  resetBDC: () => void;
   syncErrorMessage: string | null;
 }
 
@@ -91,14 +90,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [glossary, setGlossary] = useState<GlossaryTerm[]>(() => loadState('chesa_glossary', INITIAL_GLOSSARY));
   const [kpis, setKpis] = useState<ProjectKPI[]>(() => {
     const loaded = loadState<ProjectKPI[]>('chesa_kpis', INITIAL_KPIS);
-    if (!loaded.some(k => k.id === 'kpi_bdc_1')) {
-      return [...loaded, ...INITIAL_KPIS.filter(k => !loaded.some(lk => lk.id === k.id))];
+    // Automatically bring in any newly added or missing default KPIs
+    return [...loaded, ...INITIAL_KPIS.filter(k => !loaded.some(lk => lk.id === k.id))];
+  });
+  const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => {
+    let loaded = loadState<Macroproceso[]>('chesa_macroprocesos', INITIAL_MACROPROCESOS);
+    // If the original m1 was wiped, restore all missing defaults
+    if (!loaded.some(m => m.id === 'm1')) {
+      loaded = [...loaded, ...INITIAL_MACROPROCESOS.filter(m => !loaded.some(lm => lm.id === m.id))];
     }
     return loaded;
   });
-  const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => loadState('chesa_macroprocesos', INITIAL_MACROPROCESOS));
   const [procesos, setProcesos] = useState<Proceso[]>(() => {
     let loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
+    // If the original p1 was wiped, restore all missing defaults
+    if (!loaded.some(p => p.id === 'p1')) {
+      loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => !loaded.some(lp => lp.id === p.id))];
+    }
+    // Ensure BDC MKT exists
     if (!loaded.some(p => p.id === 'p_bdc_mkt')) {
       loaded = loaded.filter(p => p.macroprocesoId !== 'm2');
       loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
@@ -106,9 +115,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return loaded;
   });
   const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => {
-    const loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
+    let loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
+    // If original missing, bring them back
+    if (!loaded.some(p => p.id === 'procsub6')) {
+      loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => !loaded.some(lp => lp.id === p.id))];
+    }
+    // Ensure BDC MKT exists
     if (!loaded.some(p => p.id === 'bdc_mkt_1')) {
-      return INITIAL_PROCEDIMIENTOS;
+      loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => p.id.startsWith('bdc_'))];
     }
     return loaded;
   });
@@ -261,7 +275,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [currentUser]);
 
   useEffect(() => {
-    // 2. Save global states locally and to Firestore
     try {
       localStorage.setItem('chesa_users', JSON.stringify(users));
       localStorage.setItem('chesa_modos', JSON.stringify(modos));
@@ -282,12 +295,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     const saveDoc = async (key: string, data: any) => {
-      if (!hasLoadedFromServer[key]) return; // Avoid overwriting server data with default states before loading
+      if (!hasLoadedFromServer[key]) return;
       const dataStr = JSON.stringify(data);
       if (serverDataRef.current[key] !== dataStr) {
         serverDataRef.current[key] = dataStr;
         try {
-          // Clean undefined values by parsing the stringified JSON
           const cleanData = JSON.parse(dataStr);
           await setDoc(doc(db, 'app_state', key), { data: cleanData });
         } catch (e: any) {
@@ -426,7 +438,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       
       const currentPhaseState = modo.phases[phase] || { status: 'Pendiente', data: {}, checklistOut: {} };
       
-      // Update phases dictionary first with the new data
       const updatedPhases = {
         ...modo.phases,
         [phase]: { ...currentPhaseState, ...data }
@@ -434,7 +445,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       const maxPhases = (PROJECT_PHASES[modo.projectType] || []).length || 7;
 
-      // Calculate first unapproved/incomplete phase
       let firstUnapproved = maxPhases;
       for (let p = 1; p <= maxPhases; p++) {
         const pStatus = updatedPhases[p]?.status || 'Pendiente';
@@ -444,7 +454,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
 
-      // Calculate max sequential approved phases for progress
       let maxApprovedSequential = 0;
       for (let p = 1; p <= maxPhases; p++) {
         const pStatus = updatedPhases[p]?.status || 'Pendiente';
@@ -644,13 +653,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     })));
   };
 
-  const resetBDC = () => {
-    setMacroprocesos(INITIAL_MACROPROCESOS);
-    setProcesos(INITIAL_PROCESOS);
-    setProcedimientos(INITIAL_PROCEDIMIENTOS);
-    setKpis(INITIAL_KPIS);
-  };
-
   return (
     <AppContext.Provider      value={{ 
         currentUser, setCurrentUser, 
@@ -669,7 +671,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
         catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
         catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,
-        resetBDC,
         syncState, syncErrorMessage,
       }}
     >
