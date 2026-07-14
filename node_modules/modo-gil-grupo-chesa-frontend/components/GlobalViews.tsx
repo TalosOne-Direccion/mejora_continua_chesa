@@ -2156,19 +2156,19 @@ export const CatalogosView = () => {
         </div>
         
         {/* FILTERS */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 mb-4">
-          <div className="flex-1">
-            <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filtrar por Área (Macroproceso)</label>
-            <select 
-              value={filterArea} 
-              onChange={e => setFilterArea(e.target.value)}
-              className="w-full p-2 border border-slate-200 rounded-lg outline-none text-[13px] bg-slate-50"
-            >
-              <option value="">Todas las áreas</option>
-              {availableAreas.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
-          {type !== 'Puestos' && (
+        {type !== 'Puestos' && (
+          <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 mb-4">
+            <div className="flex-1">
+              <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filtrar por Área (Macroproceso)</label>
+              <select 
+                value={filterArea} 
+                onChange={e => setFilterArea(e.target.value)}
+                className="w-full p-2 border border-slate-200 rounded-lg outline-none text-[13px] bg-slate-50"
+              >
+                <option value="">Todas las áreas</option>
+                {availableAreas.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
             <div className="flex-1">
               <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filtrar por Puesto</label>
               <select 
@@ -2180,8 +2180,8 @@ export const CatalogosView = () => {
                 {availablePuestos.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {canEdit && (
           <div className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
