@@ -3,14 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useAppStore } from './store';
 import { Dashboard } from './components/Dashboard';
 import { ModoDetail } from './components/ModoDetail';
-import { DocumentosView, KPIsView, GlosarioView, AdministracionView, SolicitudesView, MacroprocesosView } from './components/GlobalViews';
+import { DocumentosView, CatalogosView, AdministracionView, SolicitudesView, MacroprocesosView } from './components/GlobalViews';
 import { OrganigramaView } from './components/OrganigramaView';
 import Login from './components/Login';
 import { onAuthStateChanged, signOut, updatePassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { cn } from './utils';
 
-type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'KPIs' | 'Glosario' | 'Administración' | 'Macroprocesos' | 'Organigrama';
+type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'Catálogos' | 'Administración' | 'Macroprocesos' | 'Organigrama';
 
 const MainLayout: React.FC = () => {
   const { currentUser, setCurrentUser, users, updateUser, syncState, syncErrorMessage } = useAppStore();
@@ -116,8 +116,7 @@ const MainLayout: React.FC = () => {
       case 'Portafolio': return <Dashboard onSelectModo={setSelectedModoId} />;
       case 'Solicitudes': return <SolicitudesView />;
       case 'Documentos': return <DocumentosView />;
-      case 'KPIs': return <KPIsView />;
-      case 'Glosario': return <GlosarioView />;
+      case 'Catálogos': return <CatalogosView />;
       case 'Administración': return canEdit ? <AdministracionView /> : <Dashboard onSelectModo={setSelectedModoId} />;
       case 'Macroprocesos': return <MacroprocesosView />;
       case 'Organigrama': return <OrganigramaView onSelectModo={setSelectedModoId} />;
@@ -157,13 +156,9 @@ const MainLayout: React.FC = () => {
               <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Documentos' && !selectedModoId && "filled")}>folder_open</span>
               <span className="text-[13px]">Documentos</span>
             </button>
-            <button onClick={() => { setActiveGlobalTab('KPIs'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'KPIs' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'KPIs' && !selectedModoId && "filled")}>assessment</span>
-              <span className="text-[13px]">KPIs</span>
-            </button>
-            <button onClick={() => { setActiveGlobalTab('Glosario'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Glosario' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
-              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Glosario' && !selectedModoId && "filled")}>menu_book</span>
-              <span className="text-[13px]">Glosario</span>
+            <button onClick={() => { setActiveGlobalTab('Catálogos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Catálogos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+              <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Catálogos' && !selectedModoId && "filled")}>format_list_bulleted</span>
+              <span className="text-[13px]">Catálogos</span>
             </button>
             <button onClick={() => { setActiveGlobalTab('Macroprocesos'); setSelectedModoId(null); }} className={cn("w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-all duration-200", activeGlobalTab === 'Macroprocesos' && !selectedModoId ? "bg-primary/10 text-primary font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
               <span className={cn("material-symbols-outlined text-[20px]", activeGlobalTab === 'Macroprocesos' && !selectedModoId && "filled")}>account_tree</span>

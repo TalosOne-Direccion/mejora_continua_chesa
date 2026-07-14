@@ -28,7 +28,7 @@ export const DocumentosView = () => (
 );
 
 export const KPIsView = () => {
-  const { kpis, updateKPI, deleteKPI, areas, macroprocesos, procesos, currentUser } = useAppStore();
+  const { kpis, updateKPI, deleteKPI, areas, macroprocesos, procesos, currentUser, catalogoPuestos, sucursales } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
   const [filterPuesto, setFilterPuesto] = useState('');
   const [filterArea, setFilterArea] = useState('');
@@ -154,35 +154,24 @@ export const KPIsView = () => {
                     </select>
                   </td>
                   <td className="py-4 px-6 space-y-1.5">
-                    <input 
-                      type="text" 
-                      placeholder="Puesto..." 
+                    <select 
                       value={kpi.puesto || ''}
                       onChange={e => updateKPI(kpi.id, { puesto: e.target.value })}
                       disabled={!canEdit}
                       className="w-full p-1.5 text-[12px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
-                    />
-                    <div className="flex gap-2">
-                      <select 
-                        value={kpi.area || ''}
-                        onChange={e => updateKPI(kpi.id, { area: e.target.value })}
-                        disabled={!canEdit}
-                        className="w-1/2 p-1 text-[11px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
-                      >
-                        <option value="">(Área)</option>
-                        {areas.map(a => <option key={a} value={a}>{a}</option>)}
-                      </select>
+                    >
+                      <option value="">-- Puesto --</option>
+                      {catalogoPuestos.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                    <div className="flex gap-2 mt-1.5">
                       <select 
                         value={kpi.sucursal || ''}
                         onChange={e => updateKPI(kpi.id, { sucursal: e.target.value })}
                         disabled={!canEdit}
-                        className="w-1/2 p-1 text-[11px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
+                        className="w-full p-1 text-[11px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
                       >
                         <option value="">(Sucursal)</option>
-                        <option value="TGZ">TGZ</option>
-                        <option value="SCC">SCC</option>
-                        <option value="TAP">TAP</option>
-                        <option value="SCL">SCL</option>
+                        {sucursales.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </td>
@@ -749,7 +738,7 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder, catalogoPuestos, catalogoSistemas, catalogoHerramientas } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
   const [newMacName, setNewMacName] = useState('');
   const [newMacType, setNewMacType] = useState<'Principal' | 'Soporte'>('Soporte');
@@ -1396,22 +1385,14 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <input 
-                          type="text"
+                        <select 
                           value={newPuestoName}
                           onChange={e => setNewPuestoName(e.target.value)}
-                          placeholder="Ej. Coordinador de Operaciones, Operador de Máquina..."
                           className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && newPuestoName.trim()) {
-                              const currentPuestos = sub.puestos || [];
-                              if (!currentPuestos.includes(newPuestoName.trim())) {
-                                updateProcedimiento(sub.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
-                                setNewPuestoName('');
-                              }
-                            }
-                          }}
-                        />
+                        >
+                          <option value="">-- Seleccionar Puesto --</option>
+                          {catalogoPuestos.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
                         <button 
                           onClick={() => {
                             const currentPuestos = sub.puestos || [];
@@ -1507,22 +1488,14 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <input 
-                          type="text"
+                        <select 
                           value={newSistemaName}
                           onChange={e => setNewSistemaName(e.target.value)}
-                          placeholder="Ej. SAP, CRM, Portal del Proveedor..."
                           className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && newSistemaName.trim()) {
-                              const currentSistemas = sub.sistemas || [];
-                              if (!currentSistemas.includes(newSistemaName.trim())) {
-                                updateProcedimiento(sub.id, { sistemas: [...currentSistemas, newSistemaName.trim()] });
-                                setNewSistemaName('');
-                              }
-                            }
-                          }}
-                        />
+                        >
+                          <option value="">-- Seleccionar Sistema --</option>
+                          {catalogoSistemas.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
                         <button 
                           onClick={() => {
                             const currentSistemas = sub.sistemas || [];
@@ -1614,22 +1587,14 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <input 
-                          type="text"
+                        <select 
                           value={newHerramientaName}
                           onChange={e => setNewHerramientaName(e.target.value)}
-                          placeholder="Ej. Checkpoint de calidad, Plantilla Excel, Tacómetro..."
                           className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && newHerramientaName.trim()) {
-                              const currentHerramientas = sub.herramientas || [];
-                              if (!currentHerramientas.includes(newHerramientaName.trim())) {
-                                updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, newHerramientaName.trim()] });
-                                setNewHerramientaName('');
-                              }
-                            }
-                          }}
-                        />
+                        >
+                          <option value="">-- Seleccionar Herramienta --</option>
+                          {catalogoHerramientas.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
                         <button 
                           onClick={() => {
                             const currentHerramientas = sub.herramientas || [];
@@ -1996,3 +1961,136 @@ export const MacroprocesosView = () => {
 };
 
 export { SolicitudesView };
+
+export const CatalogosView = () => {
+  const [activeTab, setActiveTab] = useState<'Puestos' | 'Sistemas' | 'Herramientas' | 'Indicadores' | 'Glosario'>('Puestos');
+  const { 
+    currentUser, 
+    catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
+    catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
+    catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta
+  } = useAppStore();
+  const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
+  
+  const renderListEditor = (
+    title: string, 
+    icon: string, 
+    items: string[], 
+    onAdd: (v: string) => void, 
+    onDelete: (v: string) => void
+  ) => {
+    const [newVal, setNewVal] = useState('');
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-primary text-on-primary rounded-lg shadow-sm">
+            <span className="material-symbols-outlined">{icon}</span>
+          </div>
+          <div>
+            <h2 className="font-display-sm text-display-sm font-bold text-slate-800">Catálogo de {title}</h2>
+            <p className="text-body-md text-slate-500">Administra las opciones disponibles para los procedimientos.</p>
+          </div>
+        </div>
+        
+        {canEdit && (
+          <div className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <input 
+              type="text"
+              value={newVal}
+              onChange={e => setNewVal(e.target.value)}
+              placeholder={`Agregar nuevo ${title.toLowerCase()}...`}
+              className="flex-1 px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-primary text-[14px]"
+              onKeyDown={e => {
+                if (e.key === 'Enter' && newVal.trim() && !items.includes(newVal.trim().toUpperCase())) {
+                  onAdd(newVal.trim().toUpperCase());
+                  setNewVal('');
+                }
+              }}
+            />
+            <button 
+              onClick={() => {
+                if (newVal.trim() && !items.includes(newVal.trim().toUpperCase())) {
+                  onAdd(newVal.trim().toUpperCase());
+                  setNewVal('');
+                }
+              }}
+              className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Agregar
+            </button>
+          </div>
+        )}
+        
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
+          {items.map(item => (
+            <div key={item} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+              <span className="font-semibold text-slate-700">{item}</span>
+              {canEdit && (
+                <button 
+                  onClick={() => onDelete(item)}
+                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center"
+                  title="Eliminar"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              )}
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="p-8 text-center text-slate-400">
+              No hay {title.toLowerCase()} registrados.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-container-max mx-auto pb-12">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-3 bg-primary text-on-primary rounded-lg shadow-sm">
+          <span className="material-symbols-outlined">format_list_bulleted</span>
+        </div>
+        <div>
+          <h1 className="font-display-lg text-display-lg text-slate-800 font-bold">Catálogos</h1>
+          <p className="font-body-lg text-body-lg text-slate-500 mt-1">Gestión centralizada de listas y glosarios</p>
+        </div>
+      </div>
+
+      <div className="flex border-b border-slate-200 mb-8 overflow-x-auto">
+        {(['Puestos', 'Sistemas', 'Herramientas', 'Indicadores', 'Glosario'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "px-6 py-4 font-bold text-[13px] uppercase tracking-wider transition-all border-b-2 whitespace-nowrap",
+              activeTab === tab 
+                ? "border-primary text-primary" 
+                : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+            )}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto)}
+        {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema)}
+        {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta)}
+        {activeTab === 'Indicadores' && (
+          <div className="-mt-8">
+            <KPIsView />
+          </div>
+        )}
+        {activeTab === 'Glosario' && (
+          <div className="-mt-8">
+            <GlosarioView />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

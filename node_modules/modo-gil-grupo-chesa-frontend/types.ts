@@ -209,6 +209,15 @@ export type AppState = {
   kpis: ProjectKPI[];
   macroprocesos: Macroproceso[];
   procesos: Proceso[];
+  catalogoPuestos: string[];
+  addCatalogoPuesto: (item: string) => void;
+  deleteCatalogoPuesto: (item: string) => void;
+  catalogoSistemas: string[];
+  addCatalogoSistema: (item: string) => void;
+  deleteCatalogoSistema: (item: string) => void;
+  catalogoHerramientas: string[];
+  addCatalogoHerramienta: (item: string) => void;
+  deleteCatalogoHerramienta: (item: string) => void;
   procedimientos: Procedimiento[];
   addProcedimiento: (p: Omit<Procedimiento, 'id'>) => void;
   updateProcedimiento: (id: string, updates: Partial<Procedimiento>) => void;

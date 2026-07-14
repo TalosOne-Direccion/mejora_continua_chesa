@@ -143,6 +143,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return [];
   });
   const [formatos, setFormatos] = useState<Formato[]>(() => loadState('chesa_formatos', []));
+  const [catalogoPuestos, setCatalogoPuestos] = useState<string[]>(() => loadState('chesa_catalogoPuestos', []));
+  const [catalogoSistemas, setCatalogoSistemas] = useState<string[]>(() => loadState('chesa_catalogoSistemas', []));
+  const [catalogoHerramientas, setCatalogoHerramientas] = useState<string[]>(() => loadState('chesa_catalogoHerramientas', []));
 
   // Firebase Firestore synchronization
   const [fbUser, setFbUser] = useState<any>(null);
@@ -162,7 +165,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const loadedCollections = new Set<string>();
     const collectionsToSync = [
       'users', 'modos', 'solicitudes', 'glossary',
-      'kpis', 'macroprocesos', 'procesos', 'procedimientos', 'propuestas', 'formatos', 'sucursales'
+      'kpis', 'macroprocesos', 'procesos', 'procedimientos', 'propuestas', 'formatos', 'sucursales',
+      'catalogoPuestos', 'catalogoSistemas', 'catalogoHerramientas'
     ];
 
     setSyncState('loading');
@@ -237,7 +241,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       syncDoc('procedimientos', setProcedimientos),
       syncDoc('propuestas', setPropuestas),
       syncDoc('formatos', setFormatos),
-      syncDoc('sucursales', setSucursales)
+      syncDoc('sucursales', setSucursales),
+      syncDoc('catalogoPuestos', setCatalogoPuestos),
+      syncDoc('catalogoSistemas', setCatalogoSistemas),
+      syncDoc('catalogoHerramientas', setCatalogoHerramientas)
     ];
 
     return () => unsubscribes.forEach(unsub => unsub());
@@ -266,6 +273,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('chesa_propuestas', JSON.stringify(propuestas));
       localStorage.setItem('chesa_formatos', JSON.stringify(formatos));
       localStorage.setItem('chesa_sucursales', JSON.stringify(sucursales));
+      localStorage.setItem('chesa_catalogoPuestos', JSON.stringify(catalogoPuestos));
+      localStorage.setItem('chesa_catalogoSistemas', JSON.stringify(catalogoSistemas));
+      localStorage.setItem('chesa_catalogoHerramientas', JSON.stringify(catalogoHerramientas));
     } catch (e) {
       console.warn("Local storage quota exceeded or writing failed:", e);
     }
@@ -298,7 +308,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     saveDoc('propuestas', propuestas);
     saveDoc('formatos', formatos);
     saveDoc('sucursales', sucursales);
-  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, procedimientos, propuestas, formatos, sucursales, hasLoadedFromServer]);
+    saveDoc('catalogoPuestos', catalogoPuestos);
+    saveDoc('catalogoSistemas', catalogoSistemas);
+    saveDoc('catalogoHerramientas', catalogoHerramientas);
+  }, [users, modos, solicitudes, glossary, kpis, macroprocesos, procesos, procedimientos, propuestas, formatos, sucursales, catalogoPuestos, catalogoSistemas, catalogoHerramientas, hasLoadedFromServer]);
 
   const addMacroproceso = (m: Omit<Macroproceso, 'id'>) => setMacroprocesos(prev => [...prev, { ...m, id: `mac${Date.now()}` }]);
   const updateMacroproceso = (id: string, updates: Partial<Macroproceso>) => setMacroprocesos(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
@@ -603,6 +616,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
+  const addCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => [...prev, item]);
+  const deleteCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => prev.filter(x => x !== item));
+  
+  const addCatalogoSistema = (item: string) => setCatalogoSistemas(prev => [...prev, item]);
+  const deleteCatalogoSistema = (item: string) => setCatalogoSistemas(prev => prev.filter(x => x !== item));
+
+  const addCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => [...prev, item]);
+  const deleteCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => prev.filter(x => x !== item));
+
   return (
     <AppContext.Provider      value={{ 
         currentUser, setCurrentUser, 
@@ -618,6 +640,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         propuestas, addPropuesta, updatePropuesta, deletePropuesta,
         formatos, addFormato, deleteFormato,
         sucursales, addSucursal, deleteSucursal,
+        catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
+        catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
+        catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,
         syncState, syncErrorMessage,
       }}
     >
