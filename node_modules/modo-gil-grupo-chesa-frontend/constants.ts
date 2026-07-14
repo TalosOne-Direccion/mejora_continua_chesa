@@ -26,7 +26,7 @@ export const AREAS = [
 
 export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
   { id: 'm1', name: 'Planeación Anual', type: 'Principal', order: 1 },
-  { id: 'm2', name: 'BDC (Atracción y Gestión de Leads)', type: 'Principal', order: 2 },
+  { id: 'm2', name: 'BDC', type: 'Principal', order: 2 },
   { id: 'm3', name: 'Venta (En Piso)', type: 'Principal', order: 3 },
   { id: 'm4', name: 'Postventa', type: 'Principal', order: 4 },
   { id: 'm5', name: 'Calidad', type: 'Principal', order: 5 },
@@ -40,10 +40,10 @@ export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
 export const INITIAL_PROCESOS: import('./types').Proceso[] = [
   { id: 'p1', macroprocesoId: 'm1', name: 'Análisis del Entorno y del Negocio' },
   { id: 'p2', macroprocesoId: 'm1', name: 'Definición de Objetivos Anuales' },
-  { id: 'p_bdc_mkt', macroprocesoId: 'm2', name: 'Marketing Digital' },
-  { id: 'p_bdc_ventas', macroprocesoId: 'm2', name: 'Ventas Digital' },
-  { id: 'p_bdc_posventa', macroprocesoId: 'm2', name: 'Postventa Digital' },
-  { id: 'p_bdc_calidad', macroprocesoId: 'm2', name: 'Calidad Digital' },
+  { id: 'p_bdc_mkt', macroprocesoId: 'm2', name: '1. ÁREA DE MERCADOTECNIA DIGITAL (MKT)' },
+  { id: 'p_bdc_ventas', macroprocesoId: 'm2', name: '2. ÁREA DE VENTAS DIGITALES' },
+  { id: 'p_bdc_posventa', macroprocesoId: 'm2', name: '3. ÁREA DE POSVENTA' },
+  { id: 'p_bdc_calidad', macroprocesoId: 'm2', name: '4. ÁREA DE CALIDAD' },
   { id: 'p5', macroprocesoId: 'm3', name: 'Recepción y Bienvenida del Cliente' },
   { id: 'p6', macroprocesoId: 'm3', name: 'Cotización y Negociación' },
   { id: 'p7', macroprocesoId: 'm4', name: 'Programación de Citas / Servicios' },
@@ -266,32 +266,14 @@ export const INITIAL_SOLICITUDES: Record<string, Solicitud> = {
 
 export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
   // Nuevos procedimientos del BDC
-  { id: 'bdc_mkt_1', procesoId: 'p_bdc_mkt', name: 'Captación y Registro de Lead', puestos: ['MKT Digital'], sistemas: ['Portales Web', 'CRM'] },
-  { id: 'bdc_mkt_2', procesoId: 'p_bdc_mkt', name: 'Asignación de Lead', puestos: ['Lead Manager'], sistemas: ['CRM'] },
-  { id: 'bdc_mkt_3', procesoId: 'p_bdc_mkt', name: 'Primer Contacto', puestos: ['Asesor BDC'], sistemas: ['Conmutador', 'CRM'] },
-  { id: 'bdc_mkt_4', procesoId: 'p_bdc_mkt', name: 'Perfilamiento e Identificación de Necesidad', puestos: ['Asesor BDC'], sistemas: ['CRM'] },
-  { id: 'bdc_mkt_5', procesoId: 'p_bdc_mkt', name: 'Cotización y Propuesta', puestos: ['Asesor Ventas'], sistemas: ['Intelisis', 'CRM'] },
-  { id: 'bdc_mkt_6', procesoId: 'p_bdc_mkt', name: 'Prueba de Manejo', puestos: ['Asesor Ventas'], sistemas: ['CRM'] },
-  { id: 'bdc_mkt_7', procesoId: 'p_bdc_mkt', name: 'Negociación y Cierre de Venta', puestos: ['Asesor Ventas', 'Gerente Ventas'], sistemas: ['Intelisis', 'CRM'] },
-  { id: 'bdc_mkt_8', procesoId: 'p_bdc_mkt', name: 'Preparación de Entrega', puestos: ['Asesor Ventas', 'Coordinador Entregas'], sistemas: ['SIP', 'Intelisis'] },
-  { id: 'bdc_mkt_9', procesoId: 'p_bdc_mkt', name: 'Entrega de Unidad', puestos: ['Coordinador Entregas'], sistemas: ['CRM'] },
-  
-  { id: 'bdc_ven_1', procesoId: 'p_bdc_ventas', name: 'Recepción de Lead Digital', puestos: ['Lead Manager', 'Contact Center'], sistemas: ['CRM', 'Redes Sociales'] },
-  { id: 'bdc_ven_2', procesoId: 'p_bdc_ventas', name: 'Intento de Contacto (Llamada/WhatsApp)', puestos: ['Asesor BDC'], sistemas: ['WhatsApp Business', 'Telefonía VoIP'] },
-  { id: 'bdc_ven_3', procesoId: 'p_bdc_ventas', name: 'Perfilamiento y Cotización Digital', puestos: ['Asesor BDC'], sistemas: ['CRM', 'Intelisis'] },
-  { id: 'bdc_ven_4', procesoId: 'p_bdc_ventas', name: 'Agendamiento de Cita en Sucursal', puestos: ['Asesor BDC'], sistemas: ['CRM', 'Agenda Digital'] },
-  { id: 'bdc_ven_5', procesoId: 'p_bdc_ventas', name: 'Seguimiento a Cita', puestos: ['Asesor BDC'], sistemas: ['WhatsApp Business', 'CRM'] },
-  
-  { id: 'bdc_pos_1', procesoId: 'p_bdc_posventa', name: 'Agendamiento de Cita de Servicio', puestos: ['Asesor BDC Servicio'], sistemas: ['CRM Servicio', 'Intelisis'] },
-  { id: 'bdc_pos_2', procesoId: 'p_bdc_posventa', name: 'Recordatorio de Cita', puestos: ['Asesor BDC Servicio'], sistemas: ['WhatsApp Business', 'Telefonía VoIP'] },
-  { id: 'bdc_pos_3', procesoId: 'p_bdc_posventa', name: 'Recepción en Taller', puestos: ['Asesor de Servicio'], sistemas: ['Intelisis', 'Tableta Recepción'] },
-  { id: 'bdc_pos_4', procesoId: 'p_bdc_posventa', name: 'Seguimiento de Reparación', puestos: ['Asesor de Servicio'], sistemas: ['WhatsApp Business', 'CRM Servicio'] },
-  { id: 'bdc_pos_5', procesoId: 'p_bdc_posventa', name: 'Entrega y Cobro', puestos: ['Asesor de Servicio', 'Caja'], sistemas: ['Intelisis', 'Terminal de Pagos'] },
-  
-  { id: 'bdc_cal_1', procesoId: 'p_bdc_calidad', name: 'Encuesta de Calidad Posventa', puestos: ['Agente BDC Calidad'], sistemas: ['CRM', 'Sistema Encuestas'] },
-  { id: 'bdc_cal_2', procesoId: 'p_bdc_calidad', name: 'Encuesta de Calidad Ventas', puestos: ['Agente BDC Calidad'], sistemas: ['CRM', 'Sistema Encuestas'] },
-  { id: 'bdc_cal_3', procesoId: 'p_bdc_calidad', name: 'Tratamiento de Alertas / Detractores', puestos: ['Líder BDC', 'Gerente Sucursal'], sistemas: ['CRM', 'Portal Alertas'] },
-  { id: 'bdc_cal_4', procesoId: 'p_bdc_calidad', name: 'Cierre y Plan de Acción', puestos: ['Gerente Sucursal', 'Mejora Continua'], sistemas: ['Herramienta Jira/Trello', 'CRM'] },
+  { 
+    id: 'bdc_mkt_1', 
+    procesoId: 'p_bdc_mkt', 
+    name: '1. Planeación y Autorización de Parrillas',
+    puestos: ['Mercadólogos de agencia', 'Gerente de MKT', 'Coordinador MKT BDC'],
+    sistemas: ['Correo', 'Google Drive', 'Google Calendar'],
+    herramientas: ['Plantillas de presupuesto', 'Plantillas de parrillas', 'Políticas de contenido y uso de marca']
+  },
   
   // Procedimientos antiguos conservados
   { id: 'procsub6', procesoId: 'p7', name: 'Recepción Telefónica / WhatsApp del Cliente' },
@@ -302,10 +284,6 @@ export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
 ];
 
 export const INITIAL_KPIS: import('./types').ProjectKPI[] = [
-  { id: 'kpi_bdc_1', projectId: 'global', name: 'SLA Primer Contacto (< 15 min)', status: 'Aprobado', procedimientoId: 'bdc_ven_2' },
-  { id: 'kpi_bdc_2', projectId: 'global', name: '% Contactabilidad', status: 'Aprobado', procedimientoId: 'bdc_ven_2' },
-  { id: 'kpi_bdc_3', projectId: 'global', name: '% Conversión de Lead a Cita', status: 'Aprobado', procedimientoId: 'bdc_ven_4' },
-  { id: 'kpi_bdc_4', projectId: 'global', name: '% de Citas Asistidas (Showroom)', status: 'Aprobado', procedimientoId: 'bdc_ven_5' },
-  { id: 'kpi_bdc_5', projectId: 'global', name: 'NPS Ventas', status: 'Aprobado', procedimientoId: 'bdc_cal_2' },
-  { id: 'kpi_bdc_6', projectId: 'global', name: 'CSI Posventa', status: 'Aprobado', procedimientoId: 'bdc_cal_1' }
+  { id: 'kpi_bdc_1', projectId: 'global', name: 'Cumplimiento en fechas de entrega (días 20-25 del mes previo)', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' },
+  { id: 'kpi_bdc_2', projectId: 'global', name: 'Aprobación de presupuesto', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' }
 ];

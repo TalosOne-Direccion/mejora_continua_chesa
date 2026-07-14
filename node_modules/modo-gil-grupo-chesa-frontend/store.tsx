@@ -176,24 +176,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           
           // --- BDC MIGRATION PARA FIREBASE ---
           if (key === 'macroprocesos') {
-            if (!val.some((m: any) => m.id === 'm2')) {
+            const m2Index = val.findIndex((m: any) => m.id === 'm2');
+            if (m2Index === -1) {
               const bdcMacro = INITIAL_MACROPROCESOS.find(m => m.id === 'm2');
               if (bdcMacro) val = [...val, bdcMacro];
+            } else if (val[m2Index].name !== 'BDC') {
+              val[m2Index].name = 'BDC';
             }
           } else if (key === 'procesos') {
-            if (!val.some((p: any) => p.id === 'p_bdc_mkt')) {
+            if (!val.some((p: any) => p.id === 'p_bdc_mkt' && p.name === '1. ÁREA DE MERCADOTECNIA DIGITAL (MKT)')) {
               val = val.filter((p: any) => p.macroprocesoId !== 'm2');
               val = [...val, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
             }
           } else if (key === 'procedimientos') {
-            if (!val.some((p: any) => p.id === 'bdc_mkt_1')) {
+            if (!val.some((p: any) => p.id === 'bdc_mkt_1' && p.name === '1. Planeación y Autorización de Parrillas')) {
+              val = val.filter((p: any) => !['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'].includes(p.procesoId));
               const bdcProcIds = ['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'];
               const bdcProcedimientos = INITIAL_PROCEDIMIENTOS.filter(p => bdcProcIds.includes(p.procesoId));
               val = [...val, ...bdcProcedimientos];
             }
           } else if (key === 'kpis') {
-            if (!val.some((k: any) => k.id === 'kpi_bdc_1')) {
-              val = [...val, ...INITIAL_KPIS.filter(k => !val.some((lk: any) => lk.id === k.id))];
+            if (!val.some((k: any) => k.id === 'kpi_bdc_1' && k.name === 'Cumplimiento en fechas de entrega (días 20-25 del mes previo)')) {
+              val = val.filter((k: any) => !k.id.startsWith('kpi_bdc_'));
+              val = [...val, ...INITIAL_KPIS.filter(k => k.id.startsWith('kpi_bdc_'))];
             }
           }
           // -----------------------------------
