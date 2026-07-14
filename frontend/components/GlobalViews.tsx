@@ -2044,7 +2044,7 @@ export const CatalogosView = () => {
     catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
     catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
     catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,
-    procedimientos
+    procedimientos, procesos, macroprocesos
   } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
 
@@ -2088,17 +2088,63 @@ export const CatalogosView = () => {
       handleSyncFromProcedimientos();
     }
   }, [procedimientos]);
+
+  const itemMetadata = React.useMemo(() => {
+    const meta: Record<string, { areas: Set<string>, puestos: Set<string> }> = {};
+    const getMeta = (item: string) => {
+      const key = item.toUpperCase();
+      if (!meta[key]) meta[key] = { areas: new Set(), puestos: new Set() };
+      return meta[key];
+    };
+
+    (procedimientos || []).forEach(proc => {
+      const proceso = (procesos || []).find(p => p.id === proc.procesoId);
+      const macroproceso = (macroprocesos || []).find(m => m.id === proceso?.macroprocesoId);
+      const areaName = macroproceso?.name || 'Sin área asignada';
+      
+      const procPuestos = proc.puestos || [];
+      const procSistemas = proc.sistemas || [];
+      const procHerramientas = proc.herramientas || [];
+
+      procPuestos.forEach(p => getMeta(p).areas.add(areaName));
+      procSistemas.forEach(s => {
+        const m = getMeta(s);
+        m.areas.add(areaName);
+        procPuestos.forEach(pu => m.puestos.add(pu));
+      });
+      procHerramientas.forEach(h => {
+        const m = getMeta(h);
+        m.areas.add(areaName);
+        procPuestos.forEach(pu => m.puestos.add(pu));
+      });
+    });
+    return meta;
+  }, [procedimientos, procesos, macroprocesos]);
   
   const renderListEditor = (
     title: string, 
     icon: string, 
     items: string[], 
     onAdd: (v: string) => void, 
-    onDelete: (v: string) => void
+    onDelete: (v: string) => void,
+    type: 'Puestos' | 'Sistemas' | 'Herramientas'
   ) => {
     const [newVal, setNewVal] = useState('');
+    const [filterArea, setFilterArea] = useState('');
+    const [filterPuesto, setFilterPuesto] = useState('');
+    
+    const availableAreas = Array.from(new Set(items.flatMap(item => Array.from(itemMetadata[item.toUpperCase()]?.areas || [])))).sort();
+    const availablePuestos = Array.from(new Set(items.flatMap(item => Array.from(itemMetadata[item.toUpperCase()]?.puestos || [])))).sort();
+
+    const filteredItems = items.filter(item => {
+      const meta = itemMetadata[item.toUpperCase()];
+      if (filterArea && (!meta || !meta.areas.has(filterArea))) return false;
+      if (type !== 'Puestos' && filterPuesto && (!meta || !meta.puestos.has(filterPuesto))) return false;
+      return true;
+    });
+
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-primary text-on-primary rounded-lg shadow-sm">
             <span className="material-symbols-outlined">{icon}</span>
@@ -2109,6 +2155,34 @@ export const CatalogosView = () => {
           </div>
         </div>
         
+        {/* FILTERS */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filtrar por Área (Macroproceso)</label>
+            <select 
+              value={filterArea} 
+              onChange={e => setFilterArea(e.target.value)}
+              className="w-full p-2 border border-slate-200 rounded-lg outline-none text-[13px] bg-slate-50"
+            >
+              <option value="">Todas las áreas</option>
+              {availableAreas.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+          {type !== 'Puestos' && (
+            <div className="flex-1">
+              <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-1">Filtrar por Puesto</label>
+              <select 
+                value={filterPuesto} 
+                onChange={e => setFilterPuesto(e.target.value)}
+                className="w-full p-2 border border-slate-200 rounded-lg outline-none text-[13px] bg-slate-50"
+              >
+                <option value="">Todos los puestos</option>
+                {availablePuestos.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+
         {canEdit && (
           <div className="flex gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <input 
@@ -2144,23 +2218,51 @@ export const CatalogosView = () => {
         )}
         
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
-          {items.map(item => (
-            <div key={item} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
-              <span className="font-semibold text-slate-700">{item}</span>
-              {canEdit && (
-                <button 
-                  onClick={() => onDelete(item)}
-                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center"
-                  title="Eliminar"
-                >
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                </button>
-              )}
-            </div>
-          ))}
-          {items.length === 0 && (
+          {filteredItems.map(item => {
+            const meta = itemMetadata[item.toUpperCase()];
+            const areasArr = Array.from(meta?.areas || []);
+            const puestosArr = Array.from(meta?.puestos || []);
+            return (
+              <div key={item} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors gap-4">
+                <div className="flex-1">
+                  <span className="font-bold text-slate-700 text-[15px]">{item}</span>
+                  {(areasArr.length > 0 || puestosArr.length > 0) && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {areasArr.map(a => (
+                        <span key={a} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                          <span className="material-symbols-outlined text-[12px]">domain</span>
+                          {a}
+                        </span>
+                      ))}
+                      {type !== 'Puestos' && puestosArr.map(p => (
+                        <span key={p} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <span className="material-symbols-outlined text-[12px]">badge</span>
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {areasArr.length === 0 && puestosArr.length === 0 && (
+                     <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 mt-2">
+                        Sin asignación en procedimientos
+                     </span>
+                  )}
+                </div>
+                {canEdit && (
+                  <button 
+                    onClick={() => onDelete(item)}
+                    className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center shrink-0"
+                    title="Eliminar"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+          {filteredItems.length === 0 && (
             <div className="p-8 text-center text-slate-400">
-              No hay {title.toLowerCase()} registrados.
+              {items.length === 0 ? `No hay ${title.toLowerCase()} registrados.` : 'No hay resultados que coincidan con los filtros.'}
             </div>
           )}
         </div>
@@ -2211,9 +2313,9 @@ export const CatalogosView = () => {
       </div>
 
       <div>
-        {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos || [], addCatalogoPuesto, deleteCatalogoPuesto)}
-        {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas || [], addCatalogoSistema, deleteCatalogoSistema)}
-        {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas || [], addCatalogoHerramienta, deleteCatalogoHerramienta)}
+        {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos || [], addCatalogoPuesto, deleteCatalogoPuesto, 'Puestos')}
+        {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas || [], addCatalogoSistema, deleteCatalogoSistema, 'Sistemas')}
+        {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas || [], addCatalogoHerramienta, deleteCatalogoHerramienta, 'Herramientas')}
       </div>
     </div>
   );

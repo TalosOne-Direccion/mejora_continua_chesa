@@ -21,7 +21,11 @@ export const AREAS = [
   'TI',
   'Contabilidad',
   'Mejora Continua',
-  'Auditoría'
+  'Auditoría',
+  'RRHH',
+  'Refacciones y Accesorios',
+  'Cajas',
+  'Gestoría'
 ];
 
 export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
@@ -34,7 +38,11 @@ export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
   { id: 'm7', name: 'TI', type: 'Soporte', order: 7 },
   { id: 'm8', name: 'Contabilidad', type: 'Soporte', order: 8 },
   { id: 'm9', name: 'Mejora Continua', type: 'Soporte', order: 9 },
-  { id: 'm10', name: 'Auditoría', type: 'Soporte', order: 10 }
+  { id: 'm10', name: 'Auditoría', type: 'Soporte', order: 10 },
+  { id: 'm11', name: 'RRHH', type: 'Soporte', order: 11 },
+  { id: 'm12', name: 'Refacciones y Accesorios', type: 'Soporte', order: 12 },
+  { id: 'm13', name: 'Cajas', type: 'Soporte', order: 13 },
+  { id: 'm14', name: 'Gestoría', type: 'Soporte', order: 14 }
 ];
 
 export const INITIAL_PROCESOS: import('./types').Proceso[] = [

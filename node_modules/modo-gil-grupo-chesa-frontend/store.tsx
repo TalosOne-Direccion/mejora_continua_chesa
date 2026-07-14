@@ -95,8 +95,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => {
     let loaded = loadState<Macroproceso[]>('chesa_macroprocesos', INITIAL_MACROPROCESOS);
-    // If the original m1 was wiped, restore all missing defaults
-    if (!loaded.some(m => m.id === 'm1')) {
+    // If the original m1 was wiped, OR if the newly added m11 is missing, restore all missing defaults
+    if (!loaded.some(m => m.id === 'm1') || !loaded.some(m => m.id === 'm11')) {
       loaded = [...loaded, ...INITIAL_MACROPROCESOS.filter(m => !loaded.some(lm => lm.id === m.id))];
     }
     return loaded;
@@ -626,7 +626,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
-  const addCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => [...prev, item]);
+  const addCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => prev.some(x => x.toLowerCase() === item.toLowerCase()) ? prev : [...prev, item]);
   const deleteCatalogoPuesto = (item: string) => {
     setCatalogoPuestos(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
@@ -635,7 +635,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     })));
   };
   
-  const addCatalogoSistema = (item: string) => setCatalogoSistemas(prev => [...prev, item]);
+  const addCatalogoSistema = (item: string) => setCatalogoSistemas(prev => prev.some(x => x.toLowerCase() === item.toLowerCase()) ? prev : [...prev, item]);
   const deleteCatalogoSistema = (item: string) => {
     setCatalogoSistemas(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
@@ -644,7 +644,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     })));
   };
 
-  const addCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => [...prev, item]);
+  const addCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => prev.some(x => x.toLowerCase() === item.toLowerCase()) ? prev : [...prev, item]);
   const deleteCatalogoHerramienta = (item: string) => {
     setCatalogoHerramientas(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
