@@ -1385,19 +1385,41 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <select 
-                          value={newPuestoName}
-                          onChange={e => setNewPuestoName(e.target.value)}
-                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                        >
-                          <option value="">-- Seleccionar Puesto --</option>
-                          {catalogoPuestos.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
+                        <div className="flex-1 relative">
+                          <input 
+                            type="text"
+                            list="puestos-datalist"
+                            value={newPuestoName}
+                            onChange={e => setNewPuestoName(e.target.value)}
+                            placeholder="Ej. Coordinador de Operaciones..."
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && newPuestoName.trim()) {
+                                const currentPuestos = sub.puestos || [];
+                                const val = newPuestoName.trim().toUpperCase();
+                                if (!currentPuestos.includes(val)) {
+                                  updateProcedimiento(sub.id, { puestos: [...currentPuestos, val] });
+                                  if (!catalogoPuestos.includes(val)) {
+                                    useAppStore.getState().addCatalogoPuesto(val);
+                                  }
+                                  setNewPuestoName('');
+                                }
+                              }
+                            }}
+                          />
+                          <datalist id="puestos-datalist">
+                            {catalogoPuestos.map(p => <option key={p} value={p} />)}
+                          </datalist>
+                        </div>
                         <button 
                           onClick={() => {
                             const currentPuestos = sub.puestos || [];
-                            if (newPuestoName.trim() && !currentPuestos.includes(newPuestoName.trim())) {
-                              updateProcedimiento(sub.id, { puestos: [...currentPuestos, newPuestoName.trim()] });
+                            const val = newPuestoName.trim().toUpperCase();
+                            if (val && !currentPuestos.includes(val)) {
+                              updateProcedimiento(sub.id, { puestos: [...currentPuestos, val] });
+                              if (!catalogoPuestos.includes(val)) {
+                                useAppStore.getState().addCatalogoPuesto(val);
+                              }
                               setNewPuestoName('');
                             }
                           }}
@@ -1488,19 +1510,41 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <select 
-                          value={newSistemaName}
-                          onChange={e => setNewSistemaName(e.target.value)}
-                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                        >
-                          <option value="">-- Seleccionar Sistema --</option>
-                          {catalogoSistemas.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
+                        <div className="flex-1 relative">
+                          <input 
+                            type="text"
+                            list="sistemas-datalist"
+                            value={newSistemaName}
+                            onChange={e => setNewSistemaName(e.target.value)}
+                            placeholder="Ej. SAP, Salesforce..."
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && newSistemaName.trim()) {
+                                const currentSistemas = sub.sistemas || [];
+                                const val = newSistemaName.trim().toUpperCase();
+                                if (!currentSistemas.includes(val)) {
+                                  updateProcedimiento(sub.id, { sistemas: [...currentSistemas, val] });
+                                  if (!catalogoSistemas.includes(val)) {
+                                    useAppStore.getState().addCatalogoSistema(val);
+                                  }
+                                  setNewSistemaName('');
+                                }
+                              }
+                            }}
+                          />
+                          <datalist id="sistemas-datalist">
+                            {catalogoSistemas.map(s => <option key={s} value={s} />)}
+                          </datalist>
+                        </div>
                         <button 
                           onClick={() => {
                             const currentSistemas = sub.sistemas || [];
-                            if (newSistemaName.trim() && !currentSistemas.includes(newSistemaName.trim())) {
-                              updateProcedimiento(sub.id, { sistemas: [...currentSistemas, newSistemaName.trim()] });
+                            const val = newSistemaName.trim().toUpperCase();
+                            if (val && !currentSistemas.includes(val)) {
+                              updateProcedimiento(sub.id, { sistemas: [...currentSistemas, val] });
+                              if (!catalogoSistemas.includes(val)) {
+                                useAppStore.getState().addCatalogoSistema(val);
+                              }
                               setNewSistemaName('');
                             }
                           }}
@@ -1587,19 +1631,41 @@ export const MacroprocesosView = () => {
                   <div className="space-y-6">
                     {canEdit && (
                       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex gap-4 max-w-2xl">
-                        <select 
-                          value={newHerramientaName}
-                          onChange={e => setNewHerramientaName(e.target.value)}
-                          className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
-                        >
-                          <option value="">-- Seleccionar Herramienta --</option>
-                          {catalogoHerramientas.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
+                        <div className="flex-1 relative">
+                          <input 
+                            type="text"
+                            list="herramientas-datalist"
+                            value={newHerramientaName}
+                            onChange={e => setNewHerramientaName(e.target.value)}
+                            placeholder="Ej. Checkpoint Excel..."
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-primary outline-none text-[14px] bg-white transition-colors"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && newHerramientaName.trim()) {
+                                const currentHerramientas = sub.herramientas || [];
+                                const val = newHerramientaName.trim().toUpperCase();
+                                if (!currentHerramientas.includes(val)) {
+                                  updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, val] });
+                                  if (!catalogoHerramientas.includes(val)) {
+                                    useAppStore.getState().addCatalogoHerramienta(val);
+                                  }
+                                  setNewHerramientaName('');
+                                }
+                              }
+                            }}
+                          />
+                          <datalist id="herramientas-datalist">
+                            {catalogoHerramientas.map(h => <option key={h} value={h} />)}
+                          </datalist>
+                        </div>
                         <button 
                           onClick={() => {
                             const currentHerramientas = sub.herramientas || [];
-                            if (newHerramientaName.trim() && !currentHerramientas.includes(newHerramientaName.trim())) {
-                              updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, newHerramientaName.trim()] });
+                            const val = newHerramientaName.trim().toUpperCase();
+                            if (val && !currentHerramientas.includes(val)) {
+                              updateProcedimiento(sub.id, { herramientas: [...currentHerramientas, val] });
+                              if (!catalogoHerramientas.includes(val)) {
+                                useAppStore.getState().addCatalogoHerramienta(val);
+                              }
                               setNewHerramientaName('');
                             }
                           }}
@@ -1968,9 +2034,40 @@ export const CatalogosView = () => {
     currentUser, 
     catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
     catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
-    catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta
+    catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,
+    procedimientos
   } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
+
+  const handleSyncFromProcedimientos = () => {
+    const existingPuestos = new Set(catalogoPuestos.map(x => x.toUpperCase()));
+    const existingSistemas = new Set(catalogoSistemas.map(x => x.toUpperCase()));
+    const existingHerramientas = new Set(catalogoHerramientas.map(x => x.toUpperCase()));
+
+    procedimientos.forEach(proc => {
+      (proc.puestos || []).forEach(p => {
+        const val = p.trim().toUpperCase();
+        if (val && !existingPuestos.has(val)) {
+          addCatalogoPuesto(val);
+          existingPuestos.add(val);
+        }
+      });
+      (proc.sistemas || []).forEach(s => {
+        const val = s.trim().toUpperCase();
+        if (val && !existingSistemas.has(val)) {
+          addCatalogoSistema(val);
+          existingSistemas.add(val);
+        }
+      });
+      (proc.herramientas || []).forEach(h => {
+        const val = h.trim().toUpperCase();
+        if (val && !existingHerramientas.has(val)) {
+          addCatalogoHerramienta(val);
+          existingHerramientas.add(val);
+        }
+      });
+    });
+  };
   
   const renderListEditor = (
     title: string, 
@@ -2049,14 +2146,27 @@ export const CatalogosView = () => {
 
   return (
     <div className="max-w-container-max mx-auto pb-12">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 bg-primary text-on-primary rounded-lg shadow-sm">
-          <span className="material-symbols-outlined">format_list_bulleted</span>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-primary text-on-primary rounded-lg shadow-sm">
+            <span className="material-symbols-outlined">format_list_bulleted</span>
+          </div>
+          <div>
+            <h1 className="font-display-lg text-display-lg text-slate-800 font-bold">Catálogos</h1>
+            <p className="font-body-lg text-body-lg text-slate-500 mt-1">Gestión centralizada de listas y glosarios</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display-lg text-display-lg text-slate-800 font-bold">Catálogos</h1>
-          <p className="font-body-lg text-body-lg text-slate-500 mt-1">Gestión centralizada de listas y glosarios</p>
-        </div>
+        
+        {canEdit && (
+          <button 
+            onClick={handleSyncFromProcedimientos}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold text-[13px] transition-colors"
+            title="Importar automáticamente valores desde los procedimientos existentes"
+          >
+            <span className="material-symbols-outlined text-[18px]">sync</span>
+            Sincronizar Datos Previos
+          </button>
+        )}
       </div>
 
       <div className="flex border-b border-slate-200 mb-8 overflow-x-auto">
