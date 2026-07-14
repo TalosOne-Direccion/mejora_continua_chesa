@@ -269,31 +269,153 @@ export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
   { 
     id: 'bdc_mkt_1', 
     procesoId: 'p_bdc_mkt', 
-    name: '1. Planeación y Autorización de Parrillas',
-    puestos: ['Mercadólogos de agencia', 'Gerente de MKT', 'Coordinador MKT BDC'],
+    name: '1. Planeación y Autorización de Pautas',
+    puestos: ['Mercadólogo de agencia', 'Gerente de MKT', 'Coordinador MKT BDC'],
     sistemas: ['Correo', 'Google Drive', 'Google Calendar'],
-    herramientas: ['Plantillas de presupuesto', 'Plantillas de parrillas', 'Políticas de contenido y uso de marca']
+    herramientas: ['Plantilla de planeación', 'Plantillas de pauteo', 'Política de contenido y uso de marca']
   },
-  { id: 'bdc_mkt_2', procesoId: 'p_bdc_mkt', name: '2. Producción de contenido multimedia' },
-  { id: 'bdc_mkt_3', procesoId: 'p_bdc_mkt', name: '3. Programación y Pauta Digital' },
-  { id: 'bdc_mkt_4', procesoId: 'p_bdc_mkt', name: '4. Monitoreo y Optimización de Campañas' },
-  { id: 'bdc_mkt_5', procesoId: 'p_bdc_mkt', name: '5. Generación y Envío de Leads BDC' },
+  { 
+    id: 'bdc_mkt_2', 
+    procesoId: 'p_bdc_mkt', 
+    name: '2. Configuración de Pautas y Generación de Leads',
+    puestos: ['Coordinador MKT BDC', 'Auxiliar de MKT (Community Manager)'],
+    sistemas: ['CRM (Seekop / Sale-U)', 'Google Ads', 'Meta Business Suite'],
+    herramientas: ['Mapa publicitario (¿?)', 'Política de contenido y uso de marca']
+  },
+  { 
+    id: 'bdc_mkt_3', 
+    procesoId: 'p_bdc_mkt', 
+    name: '3. Gestión de Contenido Orgánico (Community Management)',
+    puestos: ['Coordinador MKT BDC', 'Auxiliar de MKT (Community Manager)'],
+    sistemas: ['LinkedIn', 'Meta Business Suite'],
+    herramientas: ['Pauta orgánica (¿?)', 'Material gráfico']
+  },
+  { 
+    id: 'bdc_mkt_4', 
+    procesoId: 'p_bdc_mkt', 
+    name: '4. Actualización de Catálogo de Seminuevos',
+    puestos: ['Gerentes de Seminuevos en agencia', 'Auxiliar de MKT (Community Manager)'],
+    sistemas: ['DMS (SIA)', 'CRM (Seekop)', 'Facebook Outlet Chesa', 'Portal web (¿?)'],
+    herramientas: ['Guía Fotos de seminuevos (¿?)', 'Formatos de alta de unidades (¿?)']
+  },
+  { 
+    id: 'bdc_mkt_5', 
+    procesoId: 'p_bdc_mkt', 
+    name: '5. Atención de Hostess BDC (Primer Contacto)',
+    puestos: ['Hostess Digital', 'APV Digital (APVD)'],
+    sistemas: ['ManyChat (bot de IA)', 'CRM Seekop / Sale-U', 'Messenger Meta (5 perfiles)', 'WhatsApp Business (10 líneas)'],
+    herramientas: ['Guion / speech de llamada y WhatsApp (¿?)']
+  },
 
   // Nuevos procedimientos del BDC (Ventas Digitales)
-  { id: 'bdc_ven_1', procesoId: 'p_bdc_ventas', name: '1. Recepción y asignación de Leads' },
-  { id: 'bdc_ven_2', procesoId: 'p_bdc_ventas', name: '2. Primer contacto y calificación' },
-  { id: 'bdc_ven_3', procesoId: 'p_bdc_ventas', name: '3. Seguimiento y nutrición de Leads' },
-  { id: 'bdc_ven_4', procesoId: 'p_bdc_ventas', name: '4. Agendamiento de Citas' },
+  { 
+    id: 'bdc_ven_1', 
+    procesoId: 'p_bdc_ventas', 
+    name: '1. Recepción y Pre-Asignación en CRM',
+    puestos: ['Coordinador de Ventas Digitales', 'Hostess Digital'],
+    sistemas: ['CRM Seekop (Nissan/Renault)', 'CRM Sale-U (Changan)'],
+    herramientas: ['Reporte de eficiencia de asignación (¿?)', 'Rol de guardias (¿?)']
+  },
+  { 
+    id: 'bdc_ven_2', 
+    procesoId: 'p_bdc_ventas', 
+    name: '2. Primer Contacto (APVD)',
+    puestos: ['APV Digital (APVD)', 'Coordinador de Ventas Digitales'],
+    sistemas: ['CRM Seekop / Sale-U', 'WhatsApp Business'],
+    herramientas: ['Guiones de contacto']
+  },
+  { 
+    id: 'bdc_ven_3', 
+    procesoId: 'p_bdc_ventas', 
+    name: '3. Perfilamiento, Agendamiento y Asignación de Escucha a Piso (¿?)',
+    puestos: ['APV Digital', 'APV 2.0 (Asesor de Piso)'],
+    sistemas: ['WhatsApp Business', 'CRM Seekop', 'CRM Sale-U'],
+    herramientas: ['Plantilla de asignación por WhatsApp (¿?)']
+  },
+  { 
+    id: 'bdc_ven_4', 
+    procesoId: 'p_bdc_ventas', 
+    name: '4. Seguimiento a Asignados, Inactivos y Escalamiento',
+    puestos: ['APV Digital', 'Coord. Ventas BDC', 'Gerente de Ventas de la agencia'],
+    sistemas: ['CRM Seekop / Sale-U'],
+    herramientas: ['Reportes de seguimiento (¿?)']
+  },
+  { 
+    id: 'bdc_ven_5', 
+    procesoId: 'p_bdc_ventas', 
+    name: '5. Rastreo de Ventas Facturadas (Corte de Mes)',
+    puestos: ['Coordinador de Ventas BDC', 'APV Digital'],
+    sistemas: ['CRM Seekop / Sale-U', 'SIA / Seekop (¿RH?)'],
+    herramientas: ['Tabla / reporte de corte de ventas (Excel) (¿?)']
+  },
 
   // Nuevos procedimientos del BDC (Posventa)
-  { id: 'bdc_pos_1', procesoId: 'p_bdc_posventa', name: '1. Recepción de solicitudes de servicio' },
-  { id: 'bdc_pos_2', procesoId: 'p_bdc_posventa', name: '2. Agendamiento de Citas de Servicio' },
-  { id: 'bdc_pos_3', procesoId: 'p_bdc_posventa', name: '3. Seguimiento y Confirmación' },
+  { 
+    id: 'bdc_pos_1', 
+    procesoId: 'p_bdc_posventa', 
+    name: '1. Extracción, Preparación y Cruce de Bases de Datos',
+    puestos: ['Coordinador de Posventa Digital'],
+    sistemas: ['SIA – DMS', 'Movicheck (¿?)', 'Dashboard Prosur'],
+    herramientas: ['Base de datos', 'Layout de extracción / normalización (¿?)']
+  },
+  { 
+    id: 'bdc_pos_2', 
+    procesoId: 'p_bdc_posventa', 
+    name: '2. Contacto Omnicanal y Agendamiento (Campañas)',
+    puestos: ['APV Digital (¿NP10?)'],
+    sistemas: ['Telefonía Neotel (predictivo)', 'Dashboard Prosur (cotizador)', 'SIA – DMS (registro de cita)'],
+    herramientas: ['Guion de atención (¿?)', 'Calendario de campañas (¿?)']
+  },
+  { 
+    id: 'bdc_pos_3', 
+    procesoId: 'p_bdc_posventa', 
+    name: '3. Auditoría y Actualización de Datos en Cita',
+    puestos: ['APV Digital', 'Asesores de Servicio (Piso)'],
+    sistemas: ['DMS SIA', 'Servisor Tablet'],
+    herramientas: ['Matriz / checklist de auditoría (¿?)']
+  },
+  { 
+    id: 'bdc_pos_4', 
+    procesoId: 'p_bdc_posventa', 
+    name: '4. Rescate de No-Shows',
+    puestos: ['APV Digital', 'Coordinador de Posventa Digital', 'Gerente de Posventa de agencia'],
+    sistemas: ['SMS SIA (envíos/confirmaciones)', 'WhatsApp'],
+    herramientas: ['Matriz de No-Shows (¿?)', 'Llamadas de reagendamiento (¿?)', 'WhatsApp de grupos de agencia (¿?)']
+  },
 
   // Nuevos procedimientos del BDC (Calidad)
-  { id: 'bdc_cal_1', procesoId: 'p_bdc_calidad', name: '1. Encuestas de Satisfacción (NPS)' },
-  { id: 'bdc_cal_2', procesoId: 'p_bdc_calidad', name: '2. Gestión de Quejas y Reclamos' },
-  { id: 'bdc_cal_3', procesoId: 'p_bdc_calidad', name: '3. Análisis de Resultados y Reportes' },
+  { 
+    id: 'bdc_cal_1', 
+    procesoId: 'p_bdc_calidad', 
+    name: '1. Sincronización y Envío de Encuesta Inicial',
+    puestos: ['Coordinadora de Calidad', 'Administradora de Entregas (Agencia)', 'Telencuestadoras'],
+    sistemas: ['SMS SIA (entregas)', 'Prosur (sync 3:00 am)', 'Twilio (envío 9:45 am)'],
+    herramientas: ['Reporte de entregas (¿?)']
+  },
+  { 
+    id: 'bdc_cal_2', 
+    procesoId: 'p_bdc_calidad', 
+    name: '2. Asignación Manual, Encuesta Telefónica y Filtro (¿?)',
+    puestos: ['Coordinadora de Calidad', 'Telencuestadoras'],
+    sistemas: ['Prosur (asignación manual)', 'Telefonía Neotel', 'Plataforma (¿Coro Papel?)'],
+    herramientas: ['Reporte diario de encuestas (¿?)']
+  },
+  { 
+    id: 'bdc_cal_3', 
+    procesoId: 'p_bdc_calidad', 
+    name: '3. Alertas de Insatisfacción y Escalamiento',
+    puestos: ['Telencuestadoras', 'Coordinadora de Calidad', '(¿KSFC / agencias?)', 'Gerencias de Ventas / Posventa'],
+    sistemas: ['Prosur (módulo de alertas)', '(¿Neotel?)'],
+    herramientas: ['Bitácora de alertas y cierres (¿?)']
+  },
+  { 
+    id: 'bdc_cal_4', 
+    procesoId: 'p_bdc_calidad', 
+    name: '4. Cotización y Venta de Seguros Digitales',
+    puestos: ['Ejecutiva de Seguros Digital'],
+    sistemas: ['Cotizadores web (Qualitas)', 'Listas de pólizas a renovar (¿?)'],
+    herramientas: ['Cartera de renovaciones (¿?)']
+  },
   
   // Procedimientos antiguos conservados
   { id: 'procsub6', procesoId: 'p7', name: 'Recepción Telefónica / WhatsApp del Cliente' },
@@ -304,6 +426,49 @@ export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
 ];
 
 export const INITIAL_KPIS: import('./types').ProjectKPI[] = [
-  { id: 'kpi_bdc_1', projectId: 'global', name: 'Cumplimiento en fechas de entrega (días 20-25 del mes previo)', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' },
-  { id: 'kpi_bdc_2', projectId: 'global', name: 'Aprobación de presupuesto', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' }
+  // MKT
+  { id: 'kpi_bdc_mkt_1_1', projectId: 'global', name: 'Cumplimiento en fechas de entrega (días 20–25 del mes previo)', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' },
+  { id: 'kpi_bdc_mkt_1_2', projectId: 'global', name: 'Aprobación de presupuesto', status: 'Propuesto', procedimientoId: 'bdc_mkt_1' },
+  { id: 'kpi_bdc_mkt_2_1', projectId: 'global', name: 'Costo por Lead (CPL)', status: 'Propuesto', procedimientoId: 'bdc_mkt_2' },
+  { id: 'kpi_bdc_mkt_2_2', projectId: 'global', name: 'ROI de inversión publicitaria', status: 'Propuesto', procedimientoId: 'bdc_mkt_2' },
+  { id: 'kpi_bdc_mkt_2_3', projectId: 'global', name: 'Tasa de contacto de leads (Meta: 35% al 50%)', status: 'Propuesto', procedimientoId: 'bdc_mkt_2' },
+  { id: 'kpi_bdc_mkt_2_4', projectId: 'global', name: 'Cumplimiento de citas por canal', status: 'Propuesto', procedimientoId: 'bdc_mkt_2' },
+  { id: 'kpi_bdc_mkt_3_1', projectId: 'global', name: 'Alcance y engagement de cuentas oficiales', status: 'Propuesto', procedimientoId: 'bdc_mkt_3' },
+  { id: 'kpi_bdc_mkt_4_1', projectId: 'global', name: '0 vehículos sin actualizar en catálogo', status: 'Propuesto', procedimientoId: 'bdc_mkt_4' },
+  { id: 'kpi_bdc_mkt_4_2', projectId: 'global', name: 'Cumplimiento de la Guía Fotos (8 fotografías)', status: 'Propuesto', procedimientoId: 'bdc_mkt_4' },
+  { id: 'kpi_bdc_mkt_5_1', projectId: 'global', name: 'SLA < 15 min', status: 'Propuesto', procedimientoId: 'bdc_mkt_5' },
+  { id: 'kpi_bdc_mkt_5_2', projectId: 'global', name: 'Cantidad de leads asignados a cada APVD vs cantidad registrada en Seekop', status: 'Propuesto', procedimientoId: 'bdc_mkt_5' },
+
+  // Ventas Digitales
+  { id: 'kpi_bdc_ven_1_1', projectId: 'global', name: 'Asignación de lead en CRM: 15 min', status: 'Propuesto', procedimientoId: 'bdc_ven_1' },
+  { id: 'kpi_bdc_ven_1_2', projectId: 'global', name: '0 leads sin asignar o extraviados en cola (Seekop)', status: 'Propuesto', procedimientoId: 'bdc_ven_1' },
+  { id: 'kpi_bdc_ven_2_1', projectId: 'global', name: 'Tiempo de primera respuesta: SLA < 15 min', status: 'Propuesto', procedimientoId: 'bdc_ven_2' },
+  { id: 'kpi_bdc_ven_2_2', projectId: 'global', name: 'Contactabilidad efectiva > 40%', status: 'Propuesto', procedimientoId: 'bdc_ven_2' },
+  { id: 'kpi_bdc_ven_3_1', projectId: 'global', name: 'Citas digitales: 5 diarias por APVD', status: 'Propuesto', procedimientoId: 'bdc_ven_3' },
+  { id: 'kpi_bdc_ven_3_2', projectId: 'global', name: 'Tasa de conversión a citas (¿% meta?)', status: 'Propuesto', procedimientoId: 'bdc_ven_3' },
+  { id: 'kpi_bdc_ven_3_3', projectId: 'global', name: 'Cero inasistencias sin registro en el CRM (¿?)', status: 'Propuesto', procedimientoId: 'bdc_ven_3' },
+  { id: 'kpi_bdc_ven_4_1', projectId: 'global', name: 'Regla de 72 hrs (descarte del lead)', status: 'Propuesto', procedimientoId: 'bdc_ven_4' },
+  { id: 'kpi_bdc_ven_4_2', projectId: 'global', name: 'Reasignación de leads: SLA (¿?)', status: 'Propuesto', procedimientoId: 'bdc_ven_4' },
+  { id: 'kpi_bdc_ven_5_1', projectId: 'global', name: 'Meta mínima: 12 ventas facturadas/mes por APVD', status: 'Propuesto', procedimientoId: 'bdc_ven_5' },
+  { id: 'kpi_bdc_ven_5_2', projectId: 'global', name: 'Mezcla de unidades de Piso vs Flujo (¿% exactos por verificar?)', status: 'Propuesto', procedimientoId: 'bdc_ven_5' },
+
+  // Posventa
+  { id: 'kpi_bdc_pos_1_1', projectId: 'global', name: 'Bases cruzadas en Semana 4 del mes previo', status: 'Propuesto', procedimientoId: 'bdc_pos_1' },
+  { id: 'kpi_bdc_pos_1_2', projectId: 'global', name: 'Depuración de duplicados / inactivos (¿12 hr?)', status: 'Propuesto', procedimientoId: 'bdc_pos_1' },
+  { id: 'kpi_bdc_pos_2_1', projectId: 'global', name: 'Citas de 1er Servicio', status: 'Propuesto', procedimientoId: 'bdc_pos_2' },
+  { id: 'kpi_bdc_pos_2_2', projectId: 'global', name: 'Retención (¿10 años?)', status: 'Propuesto', procedimientoId: 'bdc_pos_2' },
+  { id: 'kpi_bdc_pos_2_3', projectId: 'global', name: 'Cobertura BDC en taller: 65% al 70%', status: 'Propuesto', procedimientoId: 'bdc_pos_2' },
+  { id: 'kpi_bdc_pos_3_1', projectId: 'global', name: 'Datos incorrectos / básicos < 8% de la base (¿?)', status: 'Propuesto', procedimientoId: 'bdc_pos_3' },
+  { id: 'kpi_bdc_pos_3_2', projectId: 'global', name: 'Cumplimiento de Auditoría Interna BDC', status: 'Propuesto', procedimientoId: 'bdc_pos_3' },
+  { id: 'kpi_bdc_pos_4_1', projectId: 'global', name: 'Reducción del índice de No-Shows', status: 'Propuesto', procedimientoId: 'bdc_pos_4' },
+  { id: 'kpi_bdc_pos_4_2', projectId: 'global', name: 'Show Rate (asistencia real)', status: 'Propuesto', procedimientoId: 'bdc_pos_4' },
+  { id: 'kpi_bdc_pos_4_3', projectId: 'global', name: 'Órdenes de Reparación facturadas (Tipo 1)', status: 'Propuesto', procedimientoId: 'bdc_pos_4' },
+
+  // Calidad
+  { id: 'kpi_bdc_cal_1_1', projectId: 'global', name: 'Envío de encuesta en SLA de 24 hrs', status: 'Propuesto', procedimientoId: 'bdc_cal_1' },
+  { id: 'kpi_bdc_cal_1_2', projectId: 'global', name: 'Tasa de respuesta por WhatsApp', status: 'Propuesto', procedimientoId: 'bdc_cal_1' },
+  { id: 'kpi_bdc_cal_2_1', projectId: 'global', name: 'Respuesta efectiva en encuestas (Meta: 87%)', status: 'Propuesto', procedimientoId: 'bdc_cal_2' },
+  { id: 'kpi_bdc_cal_3_1', projectId: 'global', name: 'Cierre de alertas: máximo 48 hrs', status: 'Propuesto', procedimientoId: 'bdc_cal_3' },
+  { id: 'kpi_bdc_cal_3_2', projectId: 'global', name: 'Cumplimiento de Auditoría Interna BDC Calidad', status: 'Propuesto', procedimientoId: 'bdc_cal_3' },
+  { id: 'kpi_bdc_cal_4_1', projectId: 'global', name: 'Ventas y renovaciones de seguros automotrices', status: 'Propuesto', procedimientoId: 'bdc_cal_4' }
 ];
