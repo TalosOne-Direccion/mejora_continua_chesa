@@ -38,6 +38,7 @@ interface AppContextType extends AppState {
   addFormato: (f: Omit<Formato, 'id'>) => void;
   deleteFormato: (id: string) => void;
   syncState: 'loading' | 'synced' | 'error';
+  resetBDC: () => void;
   syncErrorMessage: string | null;
 }
 
@@ -618,29 +619,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => [...prev, item]);
   const deleteCatalogoPuesto = (item: string) => {
-    setCatalogoPuestos(prev => prev.filter(x => x !== item));
+    setCatalogoPuestos(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
       ...p,
-      puestos: (p.puestos || []).filter(x => x !== item)
+      puestos: (p.puestos || []).filter(x => x.toLowerCase() !== item.toLowerCase())
     })));
   };
   
   const addCatalogoSistema = (item: string) => setCatalogoSistemas(prev => [...prev, item]);
   const deleteCatalogoSistema = (item: string) => {
-    setCatalogoSistemas(prev => prev.filter(x => x !== item));
+    setCatalogoSistemas(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
       ...p,
-      sistemas: (p.sistemas || []).filter(x => x !== item)
+      sistemas: (p.sistemas || []).filter(x => x.toLowerCase() !== item.toLowerCase())
     })));
   };
 
   const addCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => [...prev, item]);
   const deleteCatalogoHerramienta = (item: string) => {
-    setCatalogoHerramientas(prev => prev.filter(x => x !== item));
+    setCatalogoHerramientas(prev => prev.filter(x => x.toLowerCase() !== item.toLowerCase()));
     setProcedimientos(prev => prev.map(p => ({
       ...p,
-      herramientas: (p.herramientas || []).filter(x => x !== item)
+      herramientas: (p.herramientas || []).filter(x => x.toLowerCase() !== item.toLowerCase())
     })));
+  };
+
+  const resetBDC = () => {
+    setMacroprocesos(INITIAL_MACROPROCESOS);
+    setProcesos(INITIAL_PROCESOS);
+    setProcedimientos(INITIAL_PROCEDIMIENTOS);
+    setKpis(INITIAL_KPIS);
   };
 
   return (
@@ -652,15 +660,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         modos, updateModoPhase, updateModoTeam, addModo, deleteModo, updateModoRisks, updateModoCompromisos, addPhaseLog, addAgenda, deleteAgenda,
         solicitudes, addSolicitud, updateSolicitudStatus, deleteSolicitud,
         areas: macroprocesos.length > 0 ? macroprocesos.map(m => m.name) : AREAS,
-        macroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso, updateMacroprocesosOrder,
-        procesos, addProceso, updateProceso, deleteProceso,
-        procedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
-        propuestas, addPropuesta, updatePropuesta, deletePropuesta,
-        formatos, addFormato, deleteFormato,
-        sucursales, addSucursal, deleteSucursal,
+        macroprocesos, setMacroprocesos, addMacroproceso, updateMacroproceso, deleteMacroproceso, updateMacroprocesosOrder,
+        procesos, setProcesos, addProceso, updateProceso, deleteProceso,
+        procedimientos, setProcedimientos, addProcedimiento, updateProcedimiento, deleteProcedimiento,
+        propuestas, setPropuestas, addPropuesta, updatePropuesta, deletePropuesta,
+        formatos, setFormatos, addFormato, deleteFormato,
+        sucursales, setSucursales, addSucursal, deleteSucursal,
         catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
         catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
         catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,
+        resetBDC,
         syncState, syncErrorMessage,
       }}
     >
