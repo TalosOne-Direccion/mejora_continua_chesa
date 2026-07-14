@@ -2041,11 +2041,11 @@ export const CatalogosView = () => {
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
 
   const handleSyncFromProcedimientos = () => {
-    const existingPuestos = new Set(catalogoPuestos.map(x => x.toUpperCase()));
-    const existingSistemas = new Set(catalogoSistemas.map(x => x.toUpperCase()));
-    const existingHerramientas = new Set(catalogoHerramientas.map(x => x.toUpperCase()));
+    const existingPuestos = new Set((catalogoPuestos || []).map(x => x.toUpperCase()));
+    const existingSistemas = new Set((catalogoSistemas || []).map(x => x.toUpperCase()));
+    const existingHerramientas = new Set((catalogoHerramientas || []).map(x => x.toUpperCase()));
 
-    procedimientos.forEach(proc => {
+    (procedimientos || []).forEach(proc => {
       (proc.puestos || []).forEach(p => {
         const val = p.trim().toUpperCase();
         if (val && !existingPuestos.has(val)) {
@@ -2195,9 +2195,9 @@ export const CatalogosView = () => {
       </div>
 
       <div>
-        {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto)}
-        {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema)}
-        {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta)}
+        {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos || [], addCatalogoPuesto, deleteCatalogoPuesto)}
+        {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas || [], addCatalogoSistema, deleteCatalogoSistema)}
+        {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas || [], addCatalogoHerramienta, deleteCatalogoHerramienta)}
         {activeTab === 'Indicadores' && (
           <div className="-mt-8">
             <KPIsView />
