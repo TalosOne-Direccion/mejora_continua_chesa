@@ -739,8 +739,22 @@ export const AdministracionView = () => {
 };
 
 export const MacroprocesosView = () => {
-  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder, catalogoPuestos, catalogoSistemas, catalogoHerramientas } = useAppStore();
+  const { currentUser, macroprocesos, procesos, procedimientos, addMacroproceso, addProceso, deleteMacroproceso, deleteProceso, updateProceso, kpis, addKPI, deleteKPI, updateKPI, addProcedimiento, deleteProcedimiento, updateProcedimiento, updateMacroprocesosOrder, catalogoPuestos, catalogoSistemas, catalogoHerramientas, deleteCatalogoPuesto, deleteCatalogoSistema, deleteCatalogoHerramienta } = useAppStore();
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
+
+  const handleDeleteItem = (type: 'puestos' | 'sistemas' | 'herramientas', val: string, currentArray: string[], procId: string) => {
+    updateProcedimiento(procId, { [type]: currentArray.filter(x => x !== val) });
+    const isUsedElsewhere = procedimientos.some(p => {
+      if (p.id === procId) return false;
+      const arr = p[type] || [];
+      return arr.includes(val);
+    });
+    if (!isUsedElsewhere) {
+      if (type === 'puestos') deleteCatalogoPuesto(val);
+      if (type === 'sistemas') deleteCatalogoSistema(val);
+      if (type === 'herramientas') deleteCatalogoHerramienta(val);
+    }
+  };
   const [newMacName, setNewMacName] = useState('');
   const [newMacType, setNewMacType] = useState<'Principal' | 'Soporte'>('Soporte');
   const [newProcName, setNewProcName] = useState('');
@@ -1573,9 +1587,7 @@ export const MacroprocesosView = () => {
                             </div>
                             {canEdit && (
                               <button 
-                                onClick={() => {
-                                  updateProcedimiento(sub.id, { sistemas: subSistemas.filter(x => x !== sistema) });
-                                }}
+                                onClick={() => handleDeleteItem('sistemas', sistema, subSistemas, sub.id)}
                                 className="text-slate-400 hover:text-red-500 transition-colors"
                                 title="Eliminar vinculación"
                               >
@@ -1694,9 +1706,7 @@ export const MacroprocesosView = () => {
                             </div>
                             {canEdit && (
                               <button 
-                                onClick={() => {
-                                  updateProcedimiento(sub.id, { herramientas: subHerramientas.filter(x => x !== herramienta) });
-                                }}
+                                onClick={() => handleDeleteItem('herramientas', herramienta, subHerramientas, sub.id)}
                                 className="text-slate-400 hover:text-red-500 transition-colors"
                                 title="Eliminar vinculación"
                               >
@@ -2040,6 +2050,10 @@ export const CatalogosView = () => {
   } = useAppStore();
   const canEdit = ['Carlos Barrientos', 'Ivonne', 'Armando'].includes(currentUser?.name || '');
 
+  const toTitleCase = (str: string) => {
+    return str.replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase()));
+  };
+
   const handleSyncFromProcedimientos = () => {
     const existingPuestos = new Set((catalogoPuestos || []).map(x => x.toUpperCase()));
     const existingSistemas = new Set((catalogoSistemas || []).map(x => x.toUpperCase()));
@@ -2047,24 +2061,24 @@ export const CatalogosView = () => {
 
     (procedimientos || []).forEach(proc => {
       (proc.puestos || []).forEach(p => {
-        const val = p.trim().toUpperCase();
-        if (val && !existingPuestos.has(val)) {
-          addCatalogoPuesto(val);
-          existingPuestos.add(val);
+        const valUpper = p.trim().toUpperCase();
+        if (valUpper && !existingPuestos.has(valUpper)) {
+          addCatalogoPuesto(toTitleCase(p.trim()));
+          existingPuestos.add(valUpper);
         }
       });
       (proc.sistemas || []).forEach(s => {
-        const val = s.trim().toUpperCase();
-        if (val && !existingSistemas.has(val)) {
-          addCatalogoSistema(val);
-          existingSistemas.add(val);
+        const valUpper = s.trim().toUpperCase();
+        if (valUpper && !existingSistemas.has(valUpper)) {
+          addCatalogoSistema(toTitleCase(s.trim()));
+          existingSistemas.add(valUpper);
         }
       });
       (proc.herramientas || []).forEach(h => {
-        const val = h.trim().toUpperCase();
-        if (val && !existingHerramientas.has(val)) {
-          addCatalogoHerramienta(val);
-          existingHerramientas.add(val);
+        const valUpper = h.trim().toUpperCase();
+        if (valUpper && !existingHerramientas.has(valUpper)) {
+          addCatalogoHerramienta(toTitleCase(h.trim()));
+          existingHerramientas.add(valUpper);
         }
       });
     });
@@ -2106,16 +2120,20 @@ export const CatalogosView = () => {
               placeholder={`Agregar nuevo ${title.toLowerCase()}...`}
               className="flex-1 px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-primary text-[14px]"
               onKeyDown={e => {
-                if (e.key === 'Enter' && newVal.trim() && !items.includes(newVal.trim().toUpperCase())) {
-                  onAdd(newVal.trim().toUpperCase());
+                const val = newVal.trim();
+                const isDuplicate = items.some(i => i.toLowerCase() === val.toLowerCase());
+                if (e.key === 'Enter' && val && !isDuplicate) {
+                  onAdd(toTitleCase(val));
                   setNewVal('');
                 }
               }}
             />
             <button 
               onClick={() => {
-                if (newVal.trim() && !items.includes(newVal.trim().toUpperCase())) {
-                  onAdd(newVal.trim().toUpperCase());
+                const val = newVal.trim();
+                const isDuplicate = items.some(i => i.toLowerCase() === val.toLowerCase());
+                if (val && !isDuplicate) {
+                  onAdd(toTitleCase(val));
                   setNewVal('');
                 }
               }}
