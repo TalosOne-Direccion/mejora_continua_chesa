@@ -1462,9 +1462,7 @@ export const MacroprocesosView = () => {
                             </div>
                             {canEdit && (
                               <button 
-                                onClick={() => {
-                                  updateProcedimiento(sub.id, { puestos: subPuestos.filter(x => x !== puesto) });
-                                }}
+                                onClick={() => handleDeleteItem('puestos', puesto, subPuestos, sub.id)}
                                 className="text-slate-400 hover:text-red-500 transition-colors"
                                 title="Eliminar vinculación"
                               >

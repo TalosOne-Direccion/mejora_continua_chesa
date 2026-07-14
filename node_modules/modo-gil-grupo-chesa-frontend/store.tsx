@@ -617,13 +617,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => [...prev, item]);
-  const deleteCatalogoPuesto = (item: string) => setCatalogoPuestos(prev => prev.filter(x => x !== item));
+  const deleteCatalogoPuesto = (item: string) => {
+    setCatalogoPuestos(prev => prev.filter(x => x !== item));
+    setProcedimientos(prev => prev.map(p => ({
+      ...p,
+      puestos: (p.puestos || []).filter(x => x !== item)
+    })));
+  };
   
   const addCatalogoSistema = (item: string) => setCatalogoSistemas(prev => [...prev, item]);
-  const deleteCatalogoSistema = (item: string) => setCatalogoSistemas(prev => prev.filter(x => x !== item));
+  const deleteCatalogoSistema = (item: string) => {
+    setCatalogoSistemas(prev => prev.filter(x => x !== item));
+    setProcedimientos(prev => prev.map(p => ({
+      ...p,
+      sistemas: (p.sistemas || []).filter(x => x !== item)
+    })));
+  };
 
   const addCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => [...prev, item]);
-  const deleteCatalogoHerramienta = (item: string) => setCatalogoHerramientas(prev => prev.filter(x => x !== item));
+  const deleteCatalogoHerramienta = (item: string) => {
+    setCatalogoHerramientas(prev => prev.filter(x => x !== item));
+    setProcedimientos(prev => prev.map(p => ({
+      ...p,
+      herramientas: (p.herramientas || []).filter(x => x !== item)
+    })));
+  };
 
   return (
     <AppContext.Provider      value={{ 
