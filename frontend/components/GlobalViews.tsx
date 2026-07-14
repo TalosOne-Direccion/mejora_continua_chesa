@@ -73,7 +73,7 @@ export const KPIsView = () => {
             className="w-full p-2.5 rounded-lg border border-slate-200 text-body-md outline-none focus:border-primary transition-colors bg-white"
           >
             <option value="">Todas</option>
-            {areas.map(a => <option key={a} value={a}>{a}</option>)}
+            {(areas || []).map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div className="w-[200px]">
@@ -142,7 +142,7 @@ export const KPIsView = () => {
                       className="w-full p-1 text-[12px] border border-slate-200 rounded outline-none bg-white disabled:opacity-55"
                     >
                       <option value="">-- Macroproceso --</option>
-                      {macroprocesos.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                      {(macroprocesos || []).map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                     </select>
                     <select 
                       value={kpi.procesoId || ''} 
@@ -151,7 +151,7 @@ export const KPIsView = () => {
                       className="w-full p-1 text-[12px] border border-slate-200 rounded outline-none bg-white disabled:opacity-55"
                     >
                       <option value="">-- Proceso --</option>
-                      {procesos.filter(p => p.macroprocesoId === kpi.macroprocesoId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      {(procesos || []).filter(p => p.macroprocesoId === kpi.macroprocesoId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </td>
                   <td className="py-4 px-6 space-y-1.5">
@@ -162,7 +162,7 @@ export const KPIsView = () => {
                       className="w-full p-1.5 text-[12px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
                     >
                       <option value="">-- Puesto --</option>
-                      {catalogoPuestos.map(p => <option key={p} value={p}>{p}</option>)}
+                      {(catalogoPuestos || []).map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                     <div className="flex gap-2 mt-1.5">
                       <select 
@@ -172,7 +172,7 @@ export const KPIsView = () => {
                         className="w-full p-1 text-[11px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
                       >
                         <option value="">(Sucursal)</option>
-                        {sucursales.map(s => <option key={s} value={s}>{s}</option>)}
+                        {(sucursales || []).map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   </td>
@@ -2069,6 +2069,13 @@ export const CatalogosView = () => {
       });
     });
   };
+
+  React.useEffect(() => {
+    // Sincronización automática al cargar el componente
+    if (procedimientos && procedimientos.length > 0) {
+      handleSyncFromProcedimientos();
+    }
+  }, [procedimientos]);
   
   const renderListEditor = (
     title: string, 
