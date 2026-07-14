@@ -175,7 +175,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           const originalValStr = JSON.stringify(val);
           
           // --- BDC MIGRATION PARA FIREBASE ---
-          if (key === 'procesos') {
+          if (key === 'macroprocesos') {
+            if (!val.some((m: any) => m.id === 'm2')) {
+              const bdcMacro = INITIAL_MACROPROCESOS.find(m => m.id === 'm2');
+              if (bdcMacro) val = [...val, bdcMacro];
+            }
+          } else if (key === 'procesos') {
             if (!val.some((p: any) => p.id === 'p_bdc_mkt')) {
               val = val.filter((p: any) => p.macroprocesoId !== 'm2');
               val = [...val, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
