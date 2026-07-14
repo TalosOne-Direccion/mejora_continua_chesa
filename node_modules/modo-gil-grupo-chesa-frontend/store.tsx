@@ -175,30 +175,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           const originalValStr = JSON.stringify(val);
           
           // --- BDC MIGRATION PARA FIREBASE ---
-          if (key === 'macroprocesos') {
-            const m2Index = val.findIndex((m: any) => m.id === 'm2');
-            if (m2Index === -1) {
-              const bdcMacro = INITIAL_MACROPROCESOS.find(m => m.id === 'm2');
-              if (bdcMacro) val = [...val, bdcMacro];
-            } else if (val[m2Index].name !== 'BDC') {
-              val[m2Index].name = 'BDC';
-            }
-          } else if (key === 'procesos') {
-            if (!val.some((p: any) => p.id === 'p_bdc_mkt' && p.name === '1. ÁREA DE MERCADOTECNIA DIGITAL (MKT)')) {
-              val = val.filter((p: any) => p.macroprocesoId !== 'm2');
-              val = [...val, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
-            }
-          } else if (key === 'procedimientos') {
-            if (!val.some((p: any) => p.id === 'bdc_mkt_1' && p.name === '1. Planeación y Autorización de Parrillas')) {
-              val = val.filter((p: any) => !['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'].includes(p.procesoId));
-              const bdcProcIds = ['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'];
-              const bdcProcedimientos = INITIAL_PROCEDIMIENTOS.filter(p => bdcProcIds.includes(p.procesoId));
-              val = [...val, ...bdcProcedimientos];
-            }
-          } else if (key === 'kpis') {
-            if (!val.some((k: any) => k.id === 'kpi_bdc_1' && k.name === 'Cumplimiento en fechas de entrega (días 20-25 del mes previo)')) {
-              val = val.filter((k: any) => !k.id.startsWith('kpi_bdc_'));
-              val = [...val, ...INITIAL_KPIS.filter(k => k.id.startsWith('kpi_bdc_'))];
+          if (localStorage.getItem(`bdc_migration_v4_${key}`) !== 'true') {
+            if (key === 'macroprocesos') {
+              const m2Index = val.findIndex((m: any) => m.id === 'm2');
+              if (m2Index === -1) {
+                const bdcMacro = INITIAL_MACROPROCESOS.find(m => m.id === 'm2');
+                if (bdcMacro) val = [...val, bdcMacro];
+              } else if (val[m2Index].name !== 'BDC') {
+                val[m2Index].name = 'BDC';
+              }
+              localStorage.setItem(`bdc_migration_v4_${key}`, 'true');
+            } else if (key === 'procesos') {
+              if (!val.some((p: any) => p.id === 'p_bdc_mkt' && p.name === '1. Mercadotecnia Digital (MKT)')) {
+                val = val.filter((p: any) => p.macroprocesoId !== 'm2');
+                val = [...val, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
+              }
+              localStorage.setItem(`bdc_migration_v4_${key}`, 'true');
+            } else if (key === 'procedimientos') {
+              if (!val.some((p: any) => p.id === 'bdc_mkt_1' && p.name === '1. Planeación y Autorización de Parrillas')) {
+                val = val.filter((p: any) => !['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'].includes(p.procesoId));
+                const bdcProcIds = ['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'];
+                const bdcProcedimientos = INITIAL_PROCEDIMIENTOS.filter(p => bdcProcIds.includes(p.procesoId));
+                val = [...val, ...bdcProcedimientos];
+              }
+              localStorage.setItem(`bdc_migration_v4_${key}`, 'true');
+            } else if (key === 'kpis') {
+              if (!val.some((k: any) => k.id === 'kpi_bdc_1' && k.name === 'Cumplimiento en fechas de entrega (días 20-25 del mes previo)')) {
+                val = val.filter((k: any) => !k.id.startsWith('kpi_bdc_'));
+                val = [...val, ...INITIAL_KPIS.filter(k => k.id.startsWith('kpi_bdc_'))];
+              }
+              localStorage.setItem(`bdc_migration_v4_${key}`, 'true');
             }
           }
           // -----------------------------------

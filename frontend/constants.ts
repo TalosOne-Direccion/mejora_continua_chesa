@@ -40,10 +40,10 @@ export const INITIAL_MACROPROCESOS: import('./types').Macroproceso[] = [
 export const INITIAL_PROCESOS: import('./types').Proceso[] = [
   { id: 'p1', macroprocesoId: 'm1', name: 'Análisis del Entorno y del Negocio' },
   { id: 'p2', macroprocesoId: 'm1', name: 'Definición de Objetivos Anuales' },
-  { id: 'p_bdc_mkt', macroprocesoId: 'm2', name: '1. ÁREA DE MERCADOTECNIA DIGITAL (MKT)' },
-  { id: 'p_bdc_ventas', macroprocesoId: 'm2', name: '2. ÁREA DE VENTAS DIGITALES' },
-  { id: 'p_bdc_posventa', macroprocesoId: 'm2', name: '3. ÁREA DE POSVENTA' },
-  { id: 'p_bdc_calidad', macroprocesoId: 'm2', name: '4. ÁREA DE CALIDAD' },
+  { id: 'p_bdc_mkt', macroprocesoId: 'm2', name: '1. Mercadotecnia Digital (MKT)' },
+  { id: 'p_bdc_ventas', macroprocesoId: 'm2', name: '2. Ventas Digitales' },
+  { id: 'p_bdc_posventa', macroprocesoId: 'm2', name: '3. Posventa' },
+  { id: 'p_bdc_calidad', macroprocesoId: 'm2', name: '4. Calidad' },
   { id: 'p5', macroprocesoId: 'm3', name: 'Recepción y Bienvenida del Cliente' },
   { id: 'p6', macroprocesoId: 'm3', name: 'Cotización y Negociación' },
   { id: 'p7', macroprocesoId: 'm4', name: 'Programación de Citas / Servicios' },
@@ -265,7 +265,7 @@ export const INITIAL_SOLICITUDES: Record<string, Solicitud> = {
 };
 
 export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
-  // Nuevos procedimientos del BDC
+  // Nuevos procedimientos del BDC (MKT)
   { 
     id: 'bdc_mkt_1', 
     procesoId: 'p_bdc_mkt', 
@@ -274,6 +274,26 @@ export const INITIAL_PROCEDIMIENTOS: import('./types').Procedimiento[] = [
     sistemas: ['Correo', 'Google Drive', 'Google Calendar'],
     herramientas: ['Plantillas de presupuesto', 'Plantillas de parrillas', 'Políticas de contenido y uso de marca']
   },
+  { id: 'bdc_mkt_2', procesoId: 'p_bdc_mkt', name: '2. Producción de contenido multimedia' },
+  { id: 'bdc_mkt_3', procesoId: 'p_bdc_mkt', name: '3. Programación y Pauta Digital' },
+  { id: 'bdc_mkt_4', procesoId: 'p_bdc_mkt', name: '4. Monitoreo y Optimización de Campañas' },
+  { id: 'bdc_mkt_5', procesoId: 'p_bdc_mkt', name: '5. Generación y Envío de Leads BDC' },
+
+  // Nuevos procedimientos del BDC (Ventas Digitales)
+  { id: 'bdc_ven_1', procesoId: 'p_bdc_ventas', name: '1. Recepción y asignación de Leads' },
+  { id: 'bdc_ven_2', procesoId: 'p_bdc_ventas', name: '2. Primer contacto y calificación' },
+  { id: 'bdc_ven_3', procesoId: 'p_bdc_ventas', name: '3. Seguimiento y nutrición de Leads' },
+  { id: 'bdc_ven_4', procesoId: 'p_bdc_ventas', name: '4. Agendamiento de Citas' },
+
+  // Nuevos procedimientos del BDC (Posventa)
+  { id: 'bdc_pos_1', procesoId: 'p_bdc_posventa', name: '1. Recepción de solicitudes de servicio' },
+  { id: 'bdc_pos_2', procesoId: 'p_bdc_posventa', name: '2. Agendamiento de Citas de Servicio' },
+  { id: 'bdc_pos_3', procesoId: 'p_bdc_posventa', name: '3. Seguimiento y Confirmación' },
+
+  // Nuevos procedimientos del BDC (Calidad)
+  { id: 'bdc_cal_1', procesoId: 'p_bdc_calidad', name: '1. Encuestas de Satisfacción (NPS)' },
+  { id: 'bdc_cal_2', procesoId: 'p_bdc_calidad', name: '2. Gestión de Quejas y Reclamos' },
+  { id: 'bdc_cal_3', procesoId: 'p_bdc_calidad', name: '3. Análisis de Resultados y Reportes' },
   
   // Procedimientos antiguos conservados
   { id: 'procsub6', procesoId: 'p7', name: 'Recepción Telefónica / WhatsApp del Cliente' },
