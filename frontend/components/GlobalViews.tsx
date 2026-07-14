@@ -2030,7 +2030,7 @@ export const MacroprocesosView = () => {
 export { SolicitudesView };
 
 export const CatalogosView = () => {
-  const [activeTab, setActiveTab] = useState<'Puestos' | 'Sistemas' | 'Herramientas' | 'Indicadores' | 'Glosario'>('Puestos');
+  const [activeTab, setActiveTab] = useState<'Puestos' | 'Sistemas' | 'Herramientas'>('Puestos');
   const { 
     currentUser, 
     catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
@@ -2178,7 +2178,7 @@ export const CatalogosView = () => {
       </div>
 
       <div className="flex border-b border-slate-200 mb-8 overflow-x-auto">
-        {(['Puestos', 'Sistemas', 'Herramientas', 'Indicadores', 'Glosario'] as const).map(tab => (
+        {(['Puestos', 'Sistemas', 'Herramientas'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -2198,16 +2198,6 @@ export const CatalogosView = () => {
         {activeTab === 'Puestos' && renderListEditor('Puestos', 'badge', catalogoPuestos || [], addCatalogoPuesto, deleteCatalogoPuesto)}
         {activeTab === 'Sistemas' && renderListEditor('Sistemas', 'desktop_windows', catalogoSistemas || [], addCatalogoSistema, deleteCatalogoSistema)}
         {activeTab === 'Herramientas' && renderListEditor('Herramientas', 'build', catalogoHerramientas || [], addCatalogoHerramienta, deleteCatalogoHerramienta)}
-        {activeTab === 'Indicadores' && (
-          <div className="-mt-8">
-            <KPIsView />
-          </div>
-        )}
-        {activeTab === 'Glosario' && (
-          <div className="-mt-8">
-            <GlosarioView />
-          </div>
-        )}
       </div>
     </div>
   );
