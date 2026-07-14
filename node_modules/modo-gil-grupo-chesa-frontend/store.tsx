@@ -171,8 +171,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const syncDoc = (key: string, setter: (val: any) => void) => {
       return onSnapshot(doc(db, 'app_state', key), (snapshot) => {
         if (snapshot.exists()) {
-          const val = snapshot.data().data;
-          serverDataRef.current[key] = JSON.stringify(val);
+          let val = snapshot.data().data;
+          const originalValStr = JSON.stringify(val);
+          
+          // --- BDC MIGRATION PARA FIREBASE ---
+          if (key === 'procesos') {
+            if (!val.some((p: any) => p.id === 'p_bdc_mkt')) {
+              val = val.filter((p: any) => p.macroprocesoId !== 'm2');
+              val = [...val, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
+            }
+          } else if (key === 'procedimientos') {
+            if (!val.some((p: any) => p.id === 'bdc_mkt_1')) {
+              const bdcProcIds = ['p_bdc_mkt', 'p_bdc_ventas', 'p_bdc_posventa', 'p_bdc_calidad'];
+              const bdcProcedimientos = INITIAL_PROCEDIMIENTOS.filter(p => bdcProcIds.includes(p.procesoId));
+              val = [...val, ...bdcProcedimientos];
+            }
+          } else if (key === 'kpis') {
+            if (!val.some((k: any) => k.id === 'kpi_bdc_1')) {
+              val = [...val, ...INITIAL_KPIS.filter(k => !val.some((lk: any) => lk.id === k.id))];
+            }
+          }
+          // -----------------------------------
+
+          serverDataRef.current[key] = originalValStr;
           setter(val);
         }
         loadedCollections.add(key);
