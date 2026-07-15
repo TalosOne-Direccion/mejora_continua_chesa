@@ -33,10 +33,23 @@ interface AppContextType extends AppState {
   addProceso: (p: Omit<Proceso, 'id'>) => void;
   updateProceso: (id: string, p: Partial<Proceso>) => void;
 
+  updateProceso: (id: string, p: Partial<Proceso>) => void;
+
   deleteMacroproceso: (id: string) => void;
   deleteProceso: (id: string) => void;
   addFormato: (f: Omit<Formato, 'id'>) => void;
   deleteFormato: (id: string) => void;
+  
+  tuberias: TuberiaData[];
+  addTuberia: (tuberia: Omit<TuberiaData, 'id'>) => void;
+  updateTuberia: (id: string, tuberia: Partial<TuberiaData>) => void;
+  deleteTuberia: (id: string) => void;
+
+  rpds: RPDConfig[];
+  addRPD: (rpd: Omit<RPDConfig, 'id'>) => void;
+  updateRPD: (id: string, rpd: Partial<RPDConfig>) => void;
+  deleteRPD: (id: string) => void;
+
   syncState: 'loading' | 'synced' | 'error';
   syncErrorMessage: string | null;
 }
@@ -89,21 +102,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [solicitudes, setSolicitudes] = useState<Record<string, Solicitud>>(() => loadState('chesa_solicitudes', INITIAL_SOLICITUDES));
   const [glossary, setGlossary] = useState<GlossaryTerm[]>(() => loadState('chesa_glossary', INITIAL_GLOSSARY));
   const [kpis, setKpis] = useState<ProjectKPI[]>(() => {
-    const loaded = loadState<ProjectKPI[]>('chesa_kpis', INITIAL_KPIS);
-    // Automatically bring in any newly added or missing default KPIs
-    return [...loaded, ...INITIAL_KPIS.filter(k => !loaded.some(lk => lk.id === k.id))];
+    return loadState<ProjectKPI[]>('chesa_kpis', INITIAL_KPIS);
   });
   const [macroprocesos, setMacroprocesos] = useState<Macroproceso[]>(() => {
-    let loaded = loadState<Macroproceso[]>('chesa_macroprocesos', INITIAL_MACROPROCESOS);
-    // Unconditionally restore any missing default macroprocesos so the user never loses them
-    loaded = [...loaded, ...INITIAL_MACROPROCESOS.filter(m => !loaded.some(lm => lm.id === m.id))];
-    return loaded;
+    return loadState<Macroproceso[]>('chesa_macroprocesos', INITIAL_MACROPROCESOS);
   });
   const [procesos, setProcesos] = useState<Proceso[]>(() => {
     let loaded = loadState<Proceso[]>('chesa_procesos', INITIAL_PROCESOS);
-    // Unconditionally restore any missing default procesos
-    loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => !loaded.some(lp => lp.id === p.id))];
-    // Ensure BDC MKT exists
+    // Ensure BDC MKT exists if the migration hasn't fully applied to local state
     if (!loaded.some(p => p.id === 'p_bdc_mkt')) {
       loaded = loaded.filter(p => p.macroprocesoId !== 'm2');
       loaded = [...loaded, ...INITIAL_PROCESOS.filter(p => p.macroprocesoId === 'm2')];
@@ -112,14 +118,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   const [procedimientos, setProcedimientos] = useState<Procedimiento[]>(() => {
     let loaded = loadState<Procedimiento[]>('chesa_procedimientos', INITIAL_PROCEDIMIENTOS);
-    // Unconditionally bring back missing default procedimientos
-    loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => !loaded.some(lp => lp.id === p.id))];
-    // Ensure BDC MKT exists
+    // Ensure BDC MKT exists if the migration hasn't fully applied to local state
     if (!loaded.some(p => p.id === 'bdc_mkt_1')) {
       loaded = [...loaded, ...INITIAL_PROCEDIMIENTOS.filter(p => p.id.startsWith('bdc_'))];
     }
     return loaded;
   });
+  const [tuberias, setTuberias] = useState<TuberiaData[]>(() => loadState<TuberiaData[]>('chesa_tuberias', []));
+  const [rpds, setRpds] = useState<RPDConfig[]>(() => loadState<RPDConfig[]>('chesa_rpds', []));
   const [sucursales, setSucursales] = useState<string[]>(() => loadState<string[]>('chesa_sucursales', ['TGZ', 'SCC', 'TAP', 'SCL']));
   const [propuestas, setPropuestas] = useState<PropuestaProyecto[]>(() => {
     const saved = localStorage.getItem('chesa_propuestas');
@@ -251,6 +257,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       syncDoc('propuestas', setPropuestas),
       syncDoc('formatos', setFormatos),
       syncDoc('sucursales', setSucursales),
+      syncDoc('tuberias', setTuberias),
+      syncDoc('rpds', setRpds),
       syncDoc('catalogoPuestos', setCatalogoPuestos),
       syncDoc('catalogoSistemas', setCatalogoSistemas),
       syncDoc('catalogoHerramientas', setCatalogoHerramientas)
@@ -281,6 +289,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('chesa_propuestas', JSON.stringify(propuestas));
       localStorage.setItem('chesa_formatos', JSON.stringify(formatos));
       localStorage.setItem('chesa_sucursales', JSON.stringify(sucursales));
+      localStorage.setItem('chesa_tuberias', JSON.stringify(tuberias));
+      localStorage.setItem('chesa_rpds', JSON.stringify(rpds));
       localStorage.setItem('chesa_catalogoPuestos', JSON.stringify(catalogoPuestos));
       localStorage.setItem('chesa_catalogoSistemas', JSON.stringify(catalogoSistemas));
       localStorage.setItem('chesa_catalogoHerramientas', JSON.stringify(catalogoHerramientas));
@@ -662,6 +672,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         propuestas, setPropuestas, addPropuesta, updatePropuesta, deletePropuesta,
         formatos, setFormatos, addFormato, deleteFormato,
         sucursales, setSucursales, addSucursal, deleteSucursal,
+        tuberias,
+        addTuberia: (t) => {
+          setTuberias(prev => [...prev, { ...t, id: `tub_${Date.now()}` }]);
+        },
+        updateTuberia: (id, t) => {
+          setTuberias(prev => prev.map(old => old.id === id ? { ...old, ...t } : old));
+        },
+        deleteTuberia: (id) => {
+          setTuberias(prev => prev.filter(old => old.id !== id));
+        },
+        rpds,
+        addRPD: (r) => {
+          setRpds(prev => [...prev, { ...r, id: `rpd_${Date.now()}` }]);
+        },
+        updateRPD: (id, r) => {
+          setRpds(prev => prev.map(old => old.id === id ? { ...old, ...r } : old));
+        },
+        deleteRPD: (id) => {
+          setRpds(prev => prev.filter(old => old.id !== id));
+        },
         catalogoPuestos, addCatalogoPuesto, deleteCatalogoPuesto,
         catalogoSistemas, addCatalogoSistema, deleteCatalogoSistema,
         catalogoHerramientas, addCatalogoHerramienta, deleteCatalogoHerramienta,

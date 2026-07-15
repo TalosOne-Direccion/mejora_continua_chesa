@@ -56,6 +56,29 @@ export type ProjectKPI = {
   procesoId?: string;
   procedimientoId?: string;
   fuenteInfo?: string;
+  target?: string;
+  hoshinObjective?: string;
+};
+
+export type RPDConfig = {
+  id: string;
+  kpiId: string;
+  projectId: string;
+  nombreReporte: string;
+  frecuencia: 'Diario' | 'Semanal' | 'Mensual' | 'Anual' | 'Otro';
+  tomadorDecision: string;
+  accionSiFalla: string;
+  urlTablero?: string;
+};
+
+export type TuberiaData = {
+  id: string;
+  projectId: string;
+  name: string;
+  fuentesDeOrigen: string[];
+  kpiIds: string[];
+  frecuenciaActualizacion: string;
+  responsableMantenimiento: string;
 };
 
 export type User = {

@@ -7,14 +7,14 @@ import { VisionGeneral } from './VisionGeneral';
 import { DocumentosProyecto } from './DocumentosProyecto';
 import { KitModo } from './KitModo';
 import { EquipoProyecto } from './EquipoProyecto';
-import { KPIsProyecto } from './KPIsProyecto';
+import { ControlMedicion } from './ControlMedicion';
 import { BitacoraProyecto } from './BitacoraProyecto';
 
 export const ModoDetail: React.FC<{ modoId: string, onBack: () => void }> = ({ modoId, onBack }) => {
   const { modos } = useAppStore();
   const modo = modos[modoId];
   const [activeTab, setActiveTab] = useState<number | 'vision' | 'docs'>(modo.currentPhase === 1 && Object.keys(modo.phases[1]?.data || {}).length === 0 ? 'vision' : modo.currentPhase);
-  const [internalTab, setInternalTab] = useState<'Detalles' | 'Documentos' | 'KPIs' | 'Equipo' | 'Kit' | 'Bitácora'>('Detalles');
+  const [internalTab, setInternalTab] = useState<'Detalles' | 'Documentos' | 'Control' | 'Equipo' | 'Kit' | 'Bitácora'>('Detalles');
 
   if (!modo) return <div>Proyecto no encontrado</div>;
 
@@ -27,7 +27,7 @@ export const ModoDetail: React.FC<{ modoId: string, onBack: () => void }> = ({ m
     if (internalTab === 'Equipo') return <EquipoProyecto modo={modo} />;
     if (internalTab === 'Kit') return <KitModo modo={modo} />; 
     if (internalTab === 'Documentos') return <DocumentosProyecto modo={modo} />;
-    if (internalTab === 'KPIs') return <KPIsProyecto modo={modo} />;
+    if (internalTab === 'Control') return <ControlMedicion modo={modo} />;
     if (internalTab === 'Bitácora') return <BitacoraProyecto modo={modo} />;
     if (internalTab !== 'Detalles') return (
       <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm mt-6">
@@ -148,7 +148,7 @@ export const ModoDetail: React.FC<{ modoId: string, onBack: () => void }> = ({ m
 
       {/* Internal Tabs */}
       <div className="border-b border-slate-200 flex gap-8 px-2 overflow-x-auto mt-8">
-        {(['Detalles', 'Documentos', 'KPIs', 'Equipo', 'Kit', 'Bitácora'] as const).map(tab => (
+        {(['Detalles', 'Documentos', 'Control', 'Equipo', 'Kit', 'Bitácora'] as const).map(tab => (
           <button 
             key={tab}
             onClick={() => setInternalTab(tab)}

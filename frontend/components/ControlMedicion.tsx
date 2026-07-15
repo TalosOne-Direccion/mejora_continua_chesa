@@ -2,8 +2,58 @@ import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { Modo } from '../types';
 import { cn } from '../utils';
+import { HKView } from './HKView';
+import { TuberiaView } from './TuberiaView';
+import { RPDView } from './RPDView';
 
-export const KPIsProyecto: React.FC<{ modo: Modo }> = ({ modo }) => {
+export const ControlMedicion: React.FC<{ modo: Modo }> = ({ modo }) => {
+  const [activeTab, setActiveTab] = useState<'kpis' | 'hk' | 'tuberia' | 'rpd'>('kpis');
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+      <div className="mb-6 border-b border-slate-100 pb-4 flex justify-between items-end">
+        <div>
+          <h3 className="font-title-lg text-title-lg font-bold text-slate-800">Control y Medición</h3>
+          <p className="text-slate-500 text-body-md mt-1">Gestiona los KPIs, Tuberías de Datos, Reportes y Hoshin Kanri del proyecto.</p>
+        </div>
+      </div>
+
+      <div className="flex gap-4 mb-6 border-b border-slate-100">
+        <button 
+          onClick={() => setActiveTab('kpis')} 
+          className={cn("px-4 py-2 font-bold text-[14px] border-b-2 transition-colors", activeTab === 'kpis' ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-800")}
+        >
+          Indicadores (KPIs)
+        </button>
+        <button 
+          onClick={() => setActiveTab('hk')} 
+          className={cn("px-4 py-2 font-bold text-[14px] border-b-2 transition-colors", activeTab === 'hk' ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-800")}
+        >
+          Hoshin Kanri (HK)
+        </button>
+        <button 
+          onClick={() => setActiveTab('tuberia')} 
+          className={cn("px-4 py-2 font-bold text-[14px] border-b-2 transition-colors", activeTab === 'tuberia' ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-800")}
+        >
+          Tubería de Datos
+        </button>
+        <button 
+          onClick={() => setActiveTab('rpd')} 
+          className={cn("px-4 py-2 font-bold text-[14px] border-b-2 transition-colors", activeTab === 'rpd' ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-800")}
+        >
+          Reportes para Decidir (RPD)
+        </button>
+      </div>
+
+      {activeTab === 'kpis' && <KPIsTab modo={modo} />}
+      {activeTab === 'hk' && <HKView modo={modo} />}
+      {activeTab === 'tuberia' && <TuberiaView modo={modo} />}
+      {activeTab === 'rpd' && <RPDView modo={modo} />}
+    </div>
+  );
+};
+
+const KPIsTab: React.FC<{ modo: Modo }> = ({ modo }) => {
   const { kpis, addKPI, macroprocesos, procesos } = useAppStore();
   const [newKpiName, setNewKpiName] = useState('');
   const [selectedMacId, setSelectedMacId] = useState('');
@@ -25,14 +75,7 @@ export const KPIsProyecto: React.FC<{ modo: Modo }> = ({ modo }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-      <div className="mb-8 border-b border-slate-100 pb-6 flex justify-between items-end">
-        <div>
-          <h3 className="font-title-lg text-title-lg font-bold text-slate-800">Indicadores del Proyecto (KPIs)</h3>
-          <p className="text-slate-500 text-body-md mt-1">Propón y gestiona los indicadores de éxito vinculados a un proceso específico.</p>
-        </div>
-      </div>
-
+    <div>
       {/* Add New KPI */}
       <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8 flex flex-col gap-4">
         <div className="flex gap-4">
