@@ -867,7 +867,7 @@ export const MacroprocesosView = () => {
                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                    </button>
                    <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                   <button onClick={() => deleteMacroproceso(mac.id)} className="text-slate-400 hover:text-red-500">
+                   <button onClick={() => { if (window.confirm('¿Estás seguro de eliminar este macroproceso?')) deleteMacroproceso(mac.id); }} className="text-slate-400 hover:text-red-500">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </div>
@@ -903,7 +903,7 @@ export const MacroprocesosView = () => {
                         </div>
                         {canEdit && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } }} 
+                            onClick={(e) => { e.stopPropagation(); if (window.confirm('¿Estás seguro de eliminar este proceso?')) { deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } } }} 
                             className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
                             title="Eliminar proceso"
                           >
@@ -992,7 +992,7 @@ export const MacroprocesosView = () => {
                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                  </button>
                  <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                 <button onClick={() => deleteMacroproceso(mac.id)} className="text-slate-400 hover:text-red-500">
+                 <button onClick={() => { if (window.confirm('¿Estás seguro de eliminar este macroproceso?')) deleteMacroproceso(mac.id); }} className="text-slate-400 hover:text-red-500">
                    <span className="material-symbols-outlined text-[18px]">delete</span>
                  </button>
                </div>
@@ -1027,7 +1027,7 @@ export const MacroprocesosView = () => {
                         </div>
                         {canEdit && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } }} 
+                            onClick={(e) => { e.stopPropagation(); if (window.confirm('¿Estás seguro de eliminar este proceso?')) { deleteProceso(p.id); if(viewingProcesoId===p.id) { setViewingProcesoId(null); setViewingProcedimientoId(null); } } }} 
                             className="text-slate-400 hover:text-red-500 opacity-0 group-hover/proc:opacity-100 transition-opacity"
                           >
                             <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -2250,7 +2250,7 @@ export const CatalogosView = () => {
                 </div>
                 {canEdit && (
                   <button 
-                    onClick={() => onDelete(item)}
+                    onClick={() => { if (window.confirm('¿Estás seguro de eliminar este elemento?')) onDelete(item); }}
                     className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center shrink-0"
                     title="Eliminar"
                   >
