@@ -6,6 +6,10 @@ import { SystemRole, ProjectKPI, KPITool } from '../types';
 import { cn } from '../utils';
 import { ToolBuilder } from './ToolBuilder';
 import { MermaidChart } from './MermaidChart';
+import { HKView } from './HKView';
+import { TuberiaView } from './TuberiaView';
+import { RPDView } from './RPDView';
+import { EvaluacionView } from './EvaluacionView';
 
 export const DocumentosView = () => (
   <div className="max-w-container-max mx-auto space-y-8">
@@ -33,6 +37,7 @@ export const KPIsView = () => {
   const [filterPuesto, setFilterPuesto] = useState('');
   const [filterArea, setFilterArea] = useState('');
   const [filterSucursal, setFilterSucursal] = useState('');
+  const [internalTab, setInternalTab] = useState<'Directorio' | 'HK' | 'Tubería' | 'RPD' | 'Evaluación'>('Directorio');
 
   // Consider KPIs that are not just "Propuesto" or maybe all of them, but usually Aprobado/Liberado are managed here
   const visibleKpis = (kpis || []).filter(k => {
@@ -55,9 +60,31 @@ export const KPIsView = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-end">
-        <div className="flex-1 min-w-[200px]">
+      <div className="flex border-b border-slate-200 gap-6">
+        {['Directorio', 'HK', 'Tubería', 'RPD', 'Evaluación'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setInternalTab(tab as any)}
+            className={cn(
+              "pb-3 text-[14px] font-bold transition-all relative",
+              internalTab === tab 
+                ? "text-primary" 
+                : "text-slate-500 hover:text-slate-800"
+            )}
+          >
+            {tab}
+            {internalTab === tab && (
+              <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-primary rounded-t-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {internalTab === 'Directorio' && (
+        <>
+          {/* Filters */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-end">
+            <div className="flex-1 min-w-[200px]">
           <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">Puesto</label>
           <input 
             type="text" 
@@ -155,15 +182,30 @@ export const KPIsView = () => {
                     </select>
                   </td>
                   <td className="py-4 px-6 space-y-1.5">
-                    <select 
-                      value={kpi.puesto || ''}
-                      onChange={e => updateKPI(kpi.id, { puesto: e.target.value })}
-                      disabled={!canEdit}
-                      className="w-full p-1.5 text-[12px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
-                    >
-                      <option value="">-- Puesto --</option>
-                      {(catalogoPuestos || []).map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-wrap gap-1">
+                        {(kpi.puestos || (kpi.puesto ? [kpi.puesto] : [])).map(p => (
+                          <span key={p} className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                            {p}
+                            {canEdit && <button onClick={() => updateKPI(kpi.id, { puestos: (kpi.puestos || [kpi.puesto]).filter(x => x !== p) })} className="hover:text-red-500 material-symbols-outlined text-[12px]">close</button>}
+                          </span>
+                        ))}
+                      </div>
+                      <select 
+                        value=""
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (!val) return;
+                          const curr = kpi.puestos || (kpi.puesto ? [kpi.puesto] : []);
+                          if (!curr.includes(val)) updateKPI(kpi.id, { puestos: [...curr, val] });
+                        }}
+                        disabled={!canEdit}
+                        className="w-full p-1.5 text-[11px] border border-slate-200 rounded bg-white outline-none disabled:opacity-75"
+                      >
+                        <option value="">+ Puesto...</option>
+                        {(catalogoPuestos || []).map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
                     <div className="flex gap-2 mt-1.5">
                       <select 
                         value={kpi.sucursal || ''}
@@ -252,6 +294,13 @@ export const KPIsView = () => {
           </tbody>
         </table>
       </div>
+        </>
+      )}
+
+      {internalTab === 'HK' && <HKView />}
+      {internalTab === 'Tubería' && <TuberiaView />}
+      {internalTab === 'RPD' && <RPDView />}
+      {internalTab === 'Evaluación' && <EvaluacionView />}
     </div>
   );
 };

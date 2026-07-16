@@ -2,9 +2,9 @@ import React from 'react';
 import { useAppStore } from '../store';
 import { Modo } from '../types';
 
-export const HKView: React.FC<{ modo: Modo }> = ({ modo }) => {
-  const { kpis } = useAppStore();
-  const projectKpis = kpis.filter(k => k.projectId === modo.id);
+export const HKView: React.FC<{ modo?: Modo }> = ({ modo }) => {
+  const { kpis, updateKPI } = useAppStore();
+  const projectKpis = modo ? kpis.filter(k => k.projectId === modo.id) : kpis;
 
   return (
     <div className="space-y-6">
@@ -28,9 +28,25 @@ export const HKView: React.FC<{ modo: Modo }> = ({ modo }) => {
           <tbody className="divide-y divide-slate-100">
             {projectKpis.map(kpi => (
               <tr key={kpi.id} className="hover:bg-slate-50/50">
-                <td className="p-4 font-semibold text-slate-800 text-[14px]">{kpi.name}</td>
-                <td className="p-4 text-slate-600 text-[14px]">{kpi.target || 'No definida'}</td>
-                <td className="p-4 text-slate-600 text-[14px]">{kpi.hoshinObjective || 'No alineado aún'}</td>
+                <td className="p-4 font-semibold text-slate-800 text-[13px]">{kpi.name}</td>
+                <td className="p-4 text-[13px]">
+                  <input 
+                    type="text" 
+                    placeholder="Definir meta..." 
+                    className="border border-slate-200 rounded px-2 py-1 outline-none focus:border-primary bg-white w-full max-w-[200px]"
+                    value={kpi.target || ''}
+                    onChange={e => updateKPI(kpi.id, { target: e.target.value })}
+                  />
+                </td>
+                <td className="p-4 text-[13px]">
+                  <input 
+                    type="text" 
+                    placeholder="Ej. Incrementar rentabilidad" 
+                    className="border border-slate-200 rounded px-2 py-1 outline-none focus:border-primary bg-white w-full max-w-[250px]"
+                    value={kpi.hoshinObjective || ''}
+                    onChange={e => updateKPI(kpi.id, { hoshinObjective: e.target.value })}
+                  />
+                </td>
                 <td className="p-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
                     En Evaluación

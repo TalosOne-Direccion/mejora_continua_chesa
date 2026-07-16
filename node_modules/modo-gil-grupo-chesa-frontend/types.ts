@@ -48,7 +48,8 @@ export type ProjectKPI = {
   projectId: string;
   name: string;
   status: KPIStatus;
-  puesto?: string;
+  puesto?: string; // Legacy
+  puestos?: string[]; // Multiple users/roles
   area?: string;
   sucursal?: string;
   tools?: KPITool[];
@@ -57,6 +58,7 @@ export type ProjectKPI = {
   procedimientoId?: string;
   fuenteInfo?: string;
   target?: string;
+  actualValue?: string; // For Evaluation
   hoshinObjective?: string;
 };
 

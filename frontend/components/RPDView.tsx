@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { Modo, RPDConfig } from '../types';
 
-export const RPDView: React.FC<{ modo: Modo }> = ({ modo }) => {
+export const RPDView: React.FC<{ modo?: Modo }> = ({ modo }) => {
   const { kpis, rpds, addRPD } = useAppStore();
-  const projectKpis = kpis.filter(k => k.projectId === modo.id);
-  const projectRpds = rpds.filter(r => r.projectId === modo.id);
+  const projectKpis = modo ? kpis.filter(k => k.projectId === modo.id) : kpis;
+  const projectRpds = modo ? rpds.filter(r => r.projectId === modo.id) : rpds;
 
   const [isAdding, setIsAdding] = useState(false);
   const [newRPD, setNewRPD] = useState<Partial<RPDConfig>>({
@@ -19,7 +19,7 @@ export const RPDView: React.FC<{ modo: Modo }> = ({ modo }) => {
   const handleSave = () => {
     if (newRPD.kpiId && newRPD.nombreReporte && newRPD.tomadorDecision) {
       addRPD({
-        projectId: modo.id,
+        projectId: modo?.id || 'global',
         kpiId: newRPD.kpiId,
         nombreReporte: newRPD.nombreReporte,
         frecuencia: newRPD.frecuencia || 'Semanal',

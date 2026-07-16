@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { Modo, TuberiaData } from '../types';
 
-export const TuberiaView: React.FC<{ modo: Modo }> = ({ modo }) => {
+export const TuberiaView: React.FC<{ modo?: Modo }> = ({ modo }) => {
   const { kpis, tuberias, addTuberia } = useAppStore();
-  const projectKpis = kpis.filter(k => k.projectId === modo.id);
-  const projectTuberias = tuberias.filter(t => t.projectId === modo.id);
+  const projectKpis = modo ? kpis.filter(k => k.projectId === modo.id) : kpis;
+  const projectTuberias = modo ? tuberias.filter(t => t.projectId === modo.id) : tuberias;
 
   const [isAdding, setIsAdding] = useState(false);
   const [newTuberia, setNewTuberia] = useState<Partial<TuberiaData>>({
@@ -19,7 +19,7 @@ export const TuberiaView: React.FC<{ modo: Modo }> = ({ modo }) => {
   const handleSave = () => {
     if (newTuberia.name && newTuberia.kpiIds?.length) {
       addTuberia({
-        projectId: modo.id,
+        projectId: modo?.id || 'global',
         name: newTuberia.name,
         fuentesDeOrigen: newTuberia.fuentesDeOrigen || [],
         kpiIds: newTuberia.kpiIds,
