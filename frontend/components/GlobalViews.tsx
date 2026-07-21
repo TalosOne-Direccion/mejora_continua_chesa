@@ -3,7 +3,7 @@ import { DocumentosProyecto } from './DocumentosProyecto';
 import { SolicitudesView } from './SolicitudesView';
 import { useAppStore } from '../store';
 import { SystemRole, ProjectKPI, KPITool } from '../types';
-import { cn } from '../utils';
+import { cn, compressImage } from '../utils';
 import { ToolBuilder } from './ToolBuilder';
 import { MermaidChart } from './MermaidChart';
 import { HKView } from './HKView';
@@ -845,14 +845,15 @@ export const MacroprocesosView = () => {
     updateMacroprocesosOrder(newOrder.map((m, i) => ({ id: m.id, order: i })));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) setter(event.target.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedBase64 = await compressImage(file);
+      setter(compressedBase64);
+    } catch (err) {
+      console.error("Error comprimiendo imagen:", err);
+    }
   };
 
   const handleAddMacro = () => {

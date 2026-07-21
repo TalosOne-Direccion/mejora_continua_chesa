@@ -8,7 +8,7 @@ import { OrganigramaView } from './components/OrganigramaView';
 import Login from './components/Login';
 import { onAuthStateChanged, signOut, updatePassword } from 'firebase/auth';
 import { auth } from './firebase';
-import { cn } from './utils';
+import { cn, compressImage } from './utils';
 
 type GlobalTab = 'Portafolio' | 'Solicitudes' | 'Documentos' | 'Catálogos' | 'KPIs' | 'Glosario' | 'Administración' | 'Macroprocesos' | 'Organigrama';
 
@@ -58,14 +58,15 @@ const MainLayout: React.FC = () => {
 
   const canEdit = currentUser.name === 'Carlos Barrientos' || currentUser.name === 'Ivonne' || currentUser.name === 'Armando';
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileAvatar(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        setProfileAvatar(compressedBase64);
+      } catch (err) {
+        console.error("Error comprimiendo imagen:", err);
+      }
     }
   };
 

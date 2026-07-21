@@ -5,7 +5,7 @@ import { generatePhaseData, generateTallerData } from '../api';
 import { useAppStore } from '../store';
 import { MermaidChart } from './MermaidChart';
 import { TALLER_INFO, CHECKLISTS } from '../constants';
-import { cn } from '../utils';
+import { cn, compressImage } from '../utils';
 
 const INVENTORY_CATEGORIES = [
   { id: 'perfiles', label: 'Perfiles de Puesto', icon: 'badge' },
@@ -2752,16 +2752,15 @@ const DiagramSection: React.FC<DiagramSectionProps> = ({
     setLinkInput(externalLink);
   }, [externalLink]);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          onImageUpload(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        onImageUpload(compressedBase64);
+      } catch (err) {
+        console.error("Error comprimiendo imagen:", err);
+      }
     }
   };
 
